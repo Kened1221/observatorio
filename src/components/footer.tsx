@@ -1,165 +1,122 @@
-import Image from "next/image";
-import Link from "next/link";
 import {
-  Facebook,
-  Twitter,
-  Instagram,
-  Mail,
-  Phone,
-  MapPin,
-} from "lucide-react";
+  FaFacebook,
+  FaTiktok,
+  FaYoutube,
+  FaClock,
+  FaMapMarkerAlt,
+} from "react-icons/fa";
+import { FaXTwitter } from "react-icons/fa6";
+import { BsInstagram } from "react-icons/bs";
+import Image from "next/image";
 
 export default function Footer() {
+  const currentYear = new Date().getFullYear();
+  const googleMapsUrl =
+    "https://www.google.com/maps?q=Jr.+Callao+122,+Ayacucho,+Huamanga,+Ayacucho";
+
   return (
-    <footer className="bg-gray-900 text-gray-300">
-      <div className="container py-12">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Logo y descripción */}
-          <div>
-            <div className="flex items-center space-x-2">
+    <footer className="bg-[#E30513] text-gray-300 relative">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 text-white gap-8">
+          {/* Brand Section */}
+          <div className="flex flex-col items-start text-center md:text-left space-y-4 p-4">
+            <div className="w-full flex justify-center">
               <Image
-                src="/public/imgs/img4.jpg"
-                alt="Logo Ayacucho"
-                width={50}
-                height={50}
-                className="h-12 w-auto"
+                src="/logos/logo_blanco.jpg"
+                alt="Logo del Gobierno Regional de Ayacucho"
+                width={100}
+                height={100}
+                className="object-contain"
+                priority
               />
-              <div>
-                <h3 className="text-lg font-bold text-white">
-                  INCLUIR PARA CRECER
-                </h3>
-                <p className="text-sm">AYACUCHO</p>
+            </div>
+            <h3 className="text-xl font-bold uppercase tracking-wide">
+              Gobierno Regional de Ayacucho - GORE Ayacucho
+            </h3>
+            <p className="text-sm leading-relaxed max-w-xs">
+              Página oficial del Gobierno Regional de Ayacucho. Información
+              sobre proyectos, noticias y gestiones del GORE Ayacucho.
+            </p>
+            <div className="flex space-x-4 pt-2">
+              {[
+                {
+                  href: "https://www.facebook.com/gobiernoregionalayacucho/?locale=es_LA",
+                  Icon: FaFacebook,
+                },
+                { href: "https://x.com/GoreAyacucho", Icon: FaXTwitter },
+                {
+                  href: "https://www.instagram.com/GoreAyacucho",
+                  Icon: BsInstagram,
+                },
+                {
+                  href: "https://www.youtube.com/@gobiernoregionaldeayacucho4491",
+                  Icon: FaYoutube,
+                },
+                {
+                  href: "https://www.tiktok.com/@gore_ayacucho",
+                  Icon: FaTiktok,
+                },
+              ].map(({ href, Icon }, index) => (
+                <a
+                  key={index}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors duration-200"
+                  aria-label={`Visítanos en ${href.split(".")[1]}`}
+                >
+                  <Icon size={20} />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Contact Section */}
+          <div className="flex flex-col items-center md:items-start text-center md:text-left text-white space-y-4 p-4">
+            <h3 className="text-xl font-bold uppercase tracking-wide">
+              Contáctanos
+            </h3>
+            <div className="space-y-4">
+              <div className="flex items-start space-x-3">
+                <FaMapMarkerAlt className="mt-1 flex-shrink-0" size={16} />
+                <a
+                  href={googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm hover:text-orange-100 transition-colors duration-200"
+                >
+                  Jr. Callao N° 122, Ayacucho, Huamanga, Ayacucho
+                </a>
+              </div>
+              <div className="flex items-start space-x-3">
+                <FaClock className="mt-1 flex-shrink-0" size={16} />
+                <p className="text-sm">
+                  Lunes a Viernes: 8:00 am - 1:00 pm / 2:30 pm - 4:30 pm
+                </p>
               </div>
             </div>
-            <p className="mt-4 text-sm">
-              Política regional para el desarrollo integral de niñas, niños y
-              adolescentes de Ayacucho.
-            </p>
-            <div className="mt-4 flex space-x-4">
-              <Link href="#" className="text-gray-400 hover:text-white">
-                <Facebook className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white">
-                <Twitter className="h-5 w-5" />
-              </Link>
-              <Link href="#" className="text-gray-400 hover:text-white">
-                <Instagram className="h-5 w-5" />
-              </Link>
-            </div>
           </div>
 
-          {/* Enlaces rápidos */}
-          <div>
-            <h3 className="mb-4 text-lg font-bold text-white">
-              Enlaces rápidos
-            </h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Inicio
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  ¿Quiénes somos?
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Objetivos
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Documentos
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Noticias
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Contacto
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Temáticas */}
-          <div>
-            <h3 className="mb-4 text-lg font-bold text-white">Temáticas</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Salud y nutrición
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Educación
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Protección social
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Desarrollo económico
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Normas e informes
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-400 hover:text-white">
-                  Participación ciudadana
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Contacto */}
-          <div>
-            <h3 className="mb-4 text-lg font-bold text-white">Contacto</h3>
-            <ul className="space-y-3">
-              <li className="flex items-start">
-                <MapPin className="mr-2 h-5 w-5 text-primary" />
-                <span>Jr. Callao 122, Ayacucho, Perú</span>
-              </li>
-              <li className="flex items-center">
-                <Phone className="mr-2 h-5 w-5 text-primary" />
-                <span>(066) 312-890</span>
-              </li>
-              <li className="flex items-center">
-                <Mail className="mr-2 h-5 w-5 text-primary" />
-                <span>contacto@incluirparacrecer.gob.pe</span>
-              </li>
-            </ul>
-            <div className="mt-4">
-              <Image
-                src="/public/imgs/img5.jpg"
-                alt="World Vision"
-                width={150}
-                height={50}
-                className="h-10 w-auto"
-              />
-              <p className="mt-1 text-xs">Con el apoyo de:</p>
-            </div>
+          {/* Map Section */}
+          <div className="flex justify-center p-4">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d879.0501200375841!2d-74.22699547567207!3d-13.159395031085609!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x91127df3b33762fb%3A0x4e67d8740fe84e27!2sGobierno%20Regional%20de%20Ayacucho%2C%20Jr.%20Cusco%2C%20Ayacucho%2005003!5e1!3m2!1ses-419!2spe!4v1741352681183!5m2!1ses-419!2spe"
+              width="100%"
+              height="100%"
+              className="rounded-lg border-0 max-w-sm"
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+              title="Ubicación del Gobierno Regional de Ayacucho"
+            />
           </div>
         </div>
-      </div>
 
-      <div className="border-t border-gray-800 py-4">
-        <div className="container text-center text-sm">
-          <p>
-            © {new Date().getFullYear()} INCLUIR PARA CRECER AYACUCHO. Todos los
-            derechos reservados.
+        {/* Footer Bottom */}
+        <div className="border-t border-gray-200 mt-8 pt-6">
+          <p className="text-center text-xs text-gray-200">
+            © {currentYear} Oficina de Tecnologías de la Información y
+            Comunicaciones. Todos los derechos reservados.
           </p>
         </div>
       </div>

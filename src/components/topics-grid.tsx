@@ -1,136 +1,144 @@
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+"use client";
 
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import Card from "./animation/card";
 
-const topics = [
+interface Topic {
+  id: number;
+  title: string;
+  imageUrl: string;
+  linkUrl: string;
+  description: string;
+  backend: string;
+  borderColor: string;
+  frontend: string;
+}
+
+const topics: Topic[] = [
   {
     id: 1,
     title: "Salud y nutrición",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "0 0",
-    color: "bg-red-50 hover:bg-red-100",
-    textColor: "text-primary",
-    link: "/salud",
+    imageUrl: "/modulos/mod1.png",
+    linkUrl: "/tematica//salud",
+    description:
+      "Descubre consejos y noticias sobre salud y nutrición para mejorar tu calidad de vida.",
+    backend: "#E6E6E6",      // Verde vibrante
+    borderColor: "#000000",  // Verde oscuro coordinado
+    frontend: "#E6E6E6",
   },
   {
     id: 2,
     title: "Educación",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "-100px 0",
-    color: "bg-orange-50 hover:bg-orange-100",
-    textColor: "text-secondary",
-    link: "/educacion",
+    imageUrl: "/modulos/mod2.png",
+    linkUrl: "/tematica/educacion",
+    description:
+      "Recursos y actualizaciones en el ámbito educativo para todos los niveles.",
+    backend: "#e67e22",      // Azul vibrante
+    borderColor: "#d35400",  // Azul oscuro coordinado
+    frontend: "#FBCB0E",
   },
   {
     id: 3,
     title: "Protección social",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "-200px 0",
-    color: "bg-blue-50 hover:bg-blue-100",
-    textColor: "text-accent",
-    link: "/proteccion",
+    imageUrl: "/modulos/mod3.png",
+    linkUrl: "/tematica/proteccion",
+    description:
+      "Información sobre programas y políticas de protección social.",
+    backend: "#9b59b6",      // Naranja vibrante
+    borderColor: "#8e44ad",  // Naranja oscuro coordinado
+    frontend: "#B39FBB",
   },
   {
     id: 4,
     title: "Accesos servicios básicos",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "-300px 0",
-    color: "bg-red-50 hover:bg-red-100",
-    textColor: "text-primary",
-    link: "/servicios",
+    imageUrl: "/modulos/mod4.png",
+    linkUrl: "/tematica/servicios",
+    description:
+      "Acceso a información de servicios básicos y su disponibilidad.",
+    backend: "#006995",      // Púrpura vibrante
+    borderColor: "#0000FE",  // Púrpura oscuro coordinado
+    frontend: "#B39FBB",
   },
   {
     id: 5,
     title: "Desarrollo Económico",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "0 -200px",
-    color: "bg-orange-50 hover:bg-orange-100",
-    textColor: "text-secondary",
-    link: "/desarrollo",
+    imageUrl: "/modulos/mod5.png",
+    linkUrl: "/tematica/desarrollo",
+    description:
+      "Análisis y noticias sobre el crecimiento y desarrollo económico.",
+    backend: "#e74c3c",      // Rojo vibrante
+    borderColor: "#c0392b",  // Rojo oscuro coordinado
+    frontend: "#E6E6E6",
   },
   {
     id: 6,
     title: "Política Incluir para crecer",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "-100px -200px",
-    color: "bg-blue-50 hover:bg-blue-100",
-    textColor: "text-accent",
-    link: "/politica",
+    imageUrl: "/modulos/mod6.png",
+    linkUrl: "/tematica/politica",
+    description:
+      "Debates y propuestas para una política inclusiva que fomente el crecimiento.",
+    backend: "#e91e63",      // Magenta vibrante
+    borderColor: "#d81b60",  // Magenta oscuro coordinado
+    frontend: "#E6E6E6",
   },
   {
     id: 7,
     title: "Normas e informes",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "-200px -200px",
-    color: "bg-red-50 hover:bg-red-100",
-    textColor: "text-primary",
-    link: "/normas",
+    imageUrl: "/modulos/mod7.png",
+    linkUrl: "/tematica/normas",
+    description:
+      "Normativas, informes y análisis críticos sobre el contexto actual.",
+    backend: "#1abc9c",      // Turquesa vibrante
+    borderColor: "#16a085",  // Turquesa oscuro coordinado
+    frontend: "#E6E6E6",
   },
   {
     id: 8,
     title: "Notas de actualidad",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "-300px -200px",
-    color: "bg-orange-50 hover:bg-orange-100",
-    textColor: "text-secondary",
-    link: "/notas",
+    imageUrl: "/modulos/mod8.png",
+    linkUrl: "/tematica/notas",
+    description:
+      "Últimas noticias y notas de actualidad para mantenerte informado.",
+    backend: "#3f51b5",      // Índigo vibrante
+    borderColor: "#303f9f",  // Índigo oscuro coordinado
+    frontend: "#E6E6E6",
   },
   {
     id: 9,
     title: "Participación ciudadana",
-    icon: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-pBJqyBrAa4WG6h3Mzq27tfROEIlI9h.png",
-    iconPosition: "0 -400px",
-    color: "bg-blue-50 hover:bg-blue-100",
-    textColor: "text-accent",
-    link: "/participacion",
+    imageUrl: "/modulos/mod9.png",
+    linkUrl: "/dashboard/participacion-ciudadana",
+    description:
+      "Espacio para la participación y el diálogo ciudadano sobre temas relevantes.",
+    backend: "#8bc34a",      // Verde lima vibrante
+    borderColor: "#689f38",  // Verde lima oscuro coordinado
+    frontend: "#E6E6E6",
   },
 ];
 
 export default function TopicsGrid() {
   return (
-    <section className="py-12">
-      <div className="container">
-        <h2 className="mb-8 text-center text-3xl font-bold">
-          <span className="relative inline-block">
-            Temáticas
-            <span className="absolute -bottom-2 left-0 h-1 w-full bg-primary"></span>
-          </span>
+    <div className="w-full h-full py-8">
+      <div className="flex flex-col space-y-4 max-w-7xl mx-auto">
+        <h2 className="mb-8 sm:mb-10 text-center text-3xl sm:text-4xl font-bold text-gray-800 dark:text-gray-200">
+          Temáticas
         </h2>
 
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6  justify-items-center">
           {topics.map((topic) => (
-            <Link key={topic.id} href={topic.link}>
+            <div key={topic.id} className="h-full w-full p-4">
               <Card
-                className={`h-full transition-all duration-300 ${topic.color} border-none shadow-sm hover:shadow-md`}
-              >
-                <CardContent className="flex flex-col items-center p-6 text-center">
-                  <div className="mb-4 flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-white p-4 shadow-sm">
-                    <div
-                      className="h-16 w-16 bg-contain bg-center bg-no-repeat"
-                      style={{
-                        backgroundImage: `url(${topic.icon})`,
-                        backgroundPosition: topic.iconPosition,
-                      }}
-                    />
-                  </div>
-                  <h3 className={`font-medium ${topic.textColor}`}>
-                    {topic.title}
-                  </h3>
-                </CardContent>
-                <CardFooter className="flex justify-center pb-4">
-                  <div
-                    className={`flex items-center text-sm ${topic.textColor}`}
-                  >
-                    <span className="mr-1">Ver más</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </div>
-                </CardFooter>
-              </Card>
-            </Link>
+                title={topic.title}
+                imageUrl={topic.imageUrl}
+                linkUrl={topic.linkUrl}
+                description={topic.description}
+                backend={topic.backend}
+                borderColor={topic.borderColor}
+                frontend={topic.frontend}
+              />
+            </div>
           ))}
         </div>
       </div>
-    </section>
+    </div>
   );
 }

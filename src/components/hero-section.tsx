@@ -5,26 +5,38 @@ import Image from "next/image";
 import { ChevronLeft, ChevronRight, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Users, MapPin, Heart, Info, Newspaper, Vote } from "lucide-react";
+import Link from "next/link";
 
-const objetivos = [
+interface Objective {
+  id: string;
+  titulo: string;
+  describe: string;
+  ulr: string;
+  images: { id: number; image: string }[];
+  logo: string;
+}
+
+const objetivos: Objective[] = [
   {
     id: "objetivo1",
     titulo: "Objetivo prioritario N° 1",
     describe:
       "Gestión Territorial Estilos de Vida y las Condiciones del Entorno",
+    ulr: "https://chatgpt.com/",
     images: [
       { id: 1, image: "/imgs/objetivo1/obj1.jpg" },
       { id: 2, image: "/imgs/objetivo1/obj2.jpg" },
       { id: 3, image: "/imgs/objetivo1/obj3.jpg" },
       { id: 4, image: "/imgs/objetivo1/obj4.jpg" },
     ],
+    logo: "/imgs/jaguar.png",
   },
   {
     id: "objetivo2",
     titulo: "Objetivo prioritario N° 2",
     describe:
       "Salud Materno Neonatal. Desarrollo Infantil Temprano para asegurar su Inclusión Social",
+    ulr: "https://claude.ai/chat",
     images: [
       { id: 1, image: "/imgs/objetivo2/obj5.jpg" },
       { id: 2, image: "/imgs/objetivo2/obj6.jpg" },
@@ -32,12 +44,15 @@ const objetivos = [
       { id: 4, image: "/imgs/objetivo2/obj8.jpg" },
       { id: 5, image: "/imgs/objetivo2/obj9.jpg" },
     ],
+    logo: "/imgs/vicuna.png",
   },
   {
     id: "objetivo3",
     titulo: "Objetivo prioritario N° 3",
     describe:
       "Garantizar el Desarrollo Físico Cognitivo y Socioemocional para la Protección y Participación de Niñas, Niños, Adolescentes y Jóvenes",
+    ulr: "https://chatgpt.com/",
+
     images: [
       { id: 1, image: "/imgs/objetivo3/obj10.jpg" },
       { id: 2, image: "/imgs/objetivo3/obj11.jpg" },
@@ -45,12 +60,15 @@ const objetivos = [
       { id: 4, image: "/imgs/objetivo3/obj13.jpg" },
       { id: 5, image: "/imgs/objetivo3/obj14.jpg" },
     ],
+    logo: "/imgs/perro.png",
   },
   {
     id: "objetivo4",
     titulo: "Objetivo prioritario N° 4",
     describe:
       "Inclusión Económica para Mejorar la Seguridad Alimentaria Nutricional y Calidad de Vida de las Familias",
+    ulr: "https://chatgpt.com/",
+
     images: [
       { id: 1, image: "/imgs/objetivo4/obj15.jpeg" },
       { id: 2, image: "/imgs/objetivo4/obj16.jpeg" },
@@ -58,12 +76,15 @@ const objetivos = [
       { id: 4, image: "/imgs/objetivo4/obj18.jpeg" },
       { id: 5, image: "/imgs/objetivo4/obj19.jpg" },
     ],
+    logo: "/imgs/condor.png",
   },
   {
     id: "objetivo5",
     titulo: "Objetivo prioritario N° 5",
     describe:
       "Protección Social a Poblaciones Vulnerables y la Prevención de la Violencia contra la Mujer y los Integrantes del Grupo Familiar",
+    ulr: "https://chatgpt.com/",
+
     images: [
       { id: 1, image: "/imgs/objetivo5/obj20.jpeg" },
       { id: 2, image: "/imgs/objetivo5/obj21.jpeg" },
@@ -73,6 +94,7 @@ const objetivos = [
       { id: 6, image: "/imgs/objetivo5/obj25.jpeg" },
       { id: 7, image: "/imgs/objetivo5/obj26.jpeg" },
     ],
+    logo: "/imgs/gallito.png",
   },
 ];
 
@@ -88,7 +110,7 @@ export default function HeroSection() {
       );
     }, 2000);
     return () => clearInterval(timer);
-  }, [currentObjective, currentSlide, currentObj.images.length]);
+  }, [currentObjective, currentObj.images.length]);
 
   const prevObjective = () => {
     setCurrentObjective((prev) =>
@@ -106,9 +128,9 @@ export default function HeroSection() {
 
   return (
     <div className="relative overflow-hidden w-full bg-red-600">
-      <div className="flex flex-col md:flex-col lg:flex-row w-full h-auto md:h-[600px] lg:h-[700px]">
+      <div className="flex flex-col md:flex-row w-full h-auto md:h-[600px] lg:h-[700px]">
         {/* Lado Izquierdo: Imágenes e Indicadores */}
-        <div className="relative w-full md:w-full lg:w-1/2 h-64 md:h-80 lg:h-full">
+        <div className="relative w-full md:w-1/2 h-64 md:h-80 lg:h-full">
           {currentObj.images.map((slide, index) => (
             <div
               key={slide.id}
@@ -125,7 +147,6 @@ export default function HeroSection() {
               />
             </div>
           ))}
-          {/* Indicadores de Slide */}
           <div className="absolute bottom-2 lg:bottom-4 left-1/2 z-10 flex -translate-x-1/2 space-x-2">
             {currentObj.images.map((_, index) => (
               <button
@@ -139,86 +160,38 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Lado Derecho: Contenedor para Tarjeta y Menú */}
-        <div className="w-full md:w-full lg:w-1/2 flex flex-col justify-center p-4 md:p-6 text-white gap-6">
-          {/* Tarjeta de Información - en dispositivos pequeños se muestra primero */}
-          <Card className="order-1 md:order-2 border-none bg-primary/80 backdrop-blur-sm w-full">
-            <CardContent className="p-4 lg:p-6">
-              <h2 className="mb-2 text-lg md:text-xl lg:text-3xl font-bold text-white">
+        {/* Lado Derecho: Tarjeta y Menú */}
+        <div className="relative w-full md:w-1/2 h-64 md:h-full flex justify-center items-center">
+          <Image
+            src={currentObj.logo}
+            alt="Imagen de fondo"
+            fill
+            className="top-0 left-0 object-cover opacity-25"
+          />
+          <Card className="absolute z-10 top-0 left-0 bg-transparent shadow-none border-none w-full sm:max-w-1/2 space-y-4">
+            <CardContent className="p-6">
+              <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-white mb-2">
                 {currentObj.titulo}
               </h2>
-              <p className="mb-4 text-xs md:text-sm lg:text-lg text-blue-100">
+              <p className="text-sm md:text-base lg:text-lg text-gray-200 text-justify mb-4">
                 {currentObj.describe}
               </p>
-              <div className="flex gap-4">
-                <Button
-                  variant="secondary"
-                  className="group bg-gray-200 hover:bg-white text-sm md:text-base"
+              <Button
+                variant="secondary"
+                className="group bg-gray-200 hover:bg-white text-sm md:text-base px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
+              >
+                <Link
+                  href={currentObj.ulr}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-row items-center"
                 >
                   Conocer más
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Button>
-              </div>
+                </Link>
+              </Button>
             </CardContent>
           </Card>
-
-          {/* Menú - en dispositivos pequeños se muestra debajo */}
-          <div className="order-2 md:order-1 flex flex-col md:flex-row bg-white rounded-2xl justify-center p-4 gap-4">
-            <div className="flex items-center justify-center md:justify-start mb-4 md:mb-0">
-              <Image
-                src="/logos/barra_claro.png"
-                alt="Logo Barra"
-                width={200}
-                height={26}
-                className="cursor-pointer dark:hidden"
-              />
-            </div>
-            <div className="flex flex-col md:flex-row w-full items-center justify-center space-y-4 md:space-y-0 md:space-x-4 gap-4">
-              {/* Primera Columna */}
-              <div className="flex w-full md:w-1/2 flex-col space-y-4">
-                <div className="flex items-center justify-center text-black w-full h-16 md:h-20 text-center bg-amber-200 rounded-3xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                  <Users className="w-5 h-5 md:w-6 md:h-6 mr-2 text-amber-700" />
-                  <span className="font-medium text-sm md:text-base">
-                    ¿Cuántos Somos?
-                  </span>
-                </div>
-                <div className="flex items-center justify-center text-black w-full h-16 md:h-20 text-center bg-emerald-200 rounded-3xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                  <MapPin className="w-5 h-5 md:w-6 md:h-6 mr-2 text-emerald-700" />
-                  <span className="font-medium text-sm md:text-base">
-                    ¿Dónde Estamos?
-                  </span>
-                </div>
-                <div className="flex items-center justify-center text-black w-full h-16 md:h-20 text-center bg-fuchsia-200 rounded-3xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                  <Heart className="w-5 h-5 md:w-6 md:h-6 mr-2 text-fuchsia-700" />
-                  <span className="font-medium text-sm md:text-base">
-                    ¿Cómo Estamos?
-                  </span>
-                </div>
-              </div>
-
-              {/* Segunda Columna */}
-              <div className="flex w-full md:w-1/2 flex-col space-y-4">
-                <div className="flex items-center justify-center text-black w-full h-16 md:h-20 text-center bg-blue-200 rounded-3xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                  <Info className="w-5 h-5 md:w-6 md:h-6 mr-2 text-blue-700" />
-                  <span className="font-medium text-sm md:text-base">
-                    Normas e Información
-                  </span>
-                </div>
-                <div className="flex items-center justify-center text-black w-full h-16 md:h-20 text-center bg-orange-200 rounded-3xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                  <Newspaper className="w-5 h-5 md:w-6 md:h-6 mr-2 text-orange-700" />
-                  <span className="font-medium text-sm md:text-base">
-                    Notas de Actualidad
-                  </span>
-                </div>
-                <div className="flex items-center justify-center text-black w-full h-16 md:h-20 text-center bg-pink-200 rounded-3xl p-4 transition-all duration-300 hover:scale-105 hover:shadow-lg">
-                  <Vote className="w-5 h-5 md:w-6 md:h-6 mr-2 text-pink-700" />
-                  <span className="font-medium text-sm md:text-base">
-                    Participación Ciudadana
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
 
