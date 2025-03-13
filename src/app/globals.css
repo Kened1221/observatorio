@@ -211,3 +211,7 @@
 .custom-scrollbar::-webkit-scrollbar-thumb:active {
   cursor: grabbing;
 }
+
+.gmnoprint {
+  display: none !important;
+}

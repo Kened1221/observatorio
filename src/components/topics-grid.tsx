@@ -84,7 +84,7 @@ const topics: Topic[] = [
     id: 7,
     title: "Normas e informes",
     imageUrl: "/modulos/mod7.png",
-    linkUrl: "/tematica/normas",
+    linkUrl: "/dashboard/normas-informes",
     description:
       "Normativas, informes y análisis críticos sobre el contexto actual.",
     backend: "#1abc9c",      // Turquesa vibrante
@@ -95,7 +95,7 @@ const topics: Topic[] = [
     id: 8,
     title: "Notas de actualidad",
     imageUrl: "/modulos/mod8.png",
-    linkUrl: "/tematica/notas",
+    linkUrl: "/dashboard/notas-actualidad",
     description:
       "Últimas noticias y notas de actualidad para mantenerte informado.",
     backend: "#3f51b5",      // Índigo vibrante

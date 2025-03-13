@@ -78,7 +78,7 @@ export default function Navbar() {
                 height={50}
                 className="h-10 md:h-12 w-auto"
               />
-              <div className="hidden xl:block text-center">
+              <div className="hidden 2xl:block text-center">
                 <p className="font-bold text-white text-sm md:text-lg">
                   Política Regional
                 </p>

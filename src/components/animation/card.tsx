@@ -64,7 +64,7 @@ const Card: React.FC<CardProps> = ({
                 <small className="badge">{title}</small>
                 <div className="description">
                   <div className="title">
-                    <p>
+                    <p className="text-gray-400">
                       <strong>{title}</strong>
                     </p>
                     <svg
@@ -247,7 +247,7 @@ const StyledWrapper = styled.div<StyledWrapperProps>`
   .card-footer {
     font-family: 'Arial', sans-serif;
     font-size: 14px;
-    color: #ffffffcc;
+    color: #777772;
     margin-top: 5px;
   }
 
