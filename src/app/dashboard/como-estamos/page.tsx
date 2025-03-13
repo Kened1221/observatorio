@@ -62,7 +62,7 @@ const dashboards = [
 
 export default function CarouselDemo() {
   return (
-    <div className="bg-gradient-to-b from-gray-50 via-gray-100 to-gray-200 py-16 px-4">
+    <div className="bg-white py-16 px-4">
       <div className="mx-auto mb-12 text-center px-4">
         <h2 className="text-4xl font-bold text-gray-800">Módulos Temáticos</h2>
         <p className="text-gray-600 mt-2 max-w-2xl mx-auto">
@@ -84,9 +84,9 @@ export default function CarouselDemo() {
               key={dashboard.id}
               className="sm:basis-1/2 md:basis-1/3 lg:basis-1/3 p-2"
             >
-              <Link href={dashboard.linkUrl} className="group block h-full">
+              <Link href={dashboard.linkUrl} className="h-full">
                 <Card
-                  className={`overflow-hidden shadow-xl transition-transform duration-300 group-hover:-translate-y-1 border-t-4 ${dashboard.borderColor}`}
+                  className={`overflow-hidden transition-transform duration-300 group-hover:-translate-y-1 border-t-4 ${dashboard.borderColor}`}
                 >
                   <div className="relative aspect-video w-full rounded-t-xl overflow-hidden">
                     <Image
