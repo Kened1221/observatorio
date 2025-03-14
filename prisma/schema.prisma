@@ -13,34 +13,37 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Modelo de Usuarios
-model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  cuiobra       String?
-  role          String
-  user          String    @unique
-  password      String
-
-  sessions Session[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Edad {
+  id       String @id @default(cuid())
+  rango    String @unique // Ejemplo: '6 a 11 años', '12 a 17 años'
+  cantidad Int
 }
 
-// Modelo de Sesiones
-model Session {
-  id           String   @id @default(uuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model Sexo {
+  id       String @id @default(cuid())
+  genero   String @unique // MASCULINO, FEMENINO, PREFIERO_NO_RESPONDER
+  cantidad Int
 }
 
+model Nacionalidad {
+  id       String @id @default(cuid())
+  nombre   String @unique // Ejemplo: 'Peruana', 'Venezolana'
+  cantidad Int
+}
+
+model Distrito {
+  id       String @id @default(cuid())
+  nombre   String @unique // Ejemplo: 'Ayacucho', 'Quinua'
+  cantidad Int
+}
+
+model TipoPoblacion {
+  id       String @id @default(cuid())
+  tipo     String @unique // Ejemplo: 'Estudiante de secundaria'
+  cantidad Int
+}
+
+model TotalEncuestados {
+  id    String @id @default(cuid())
+  total Int
+}
