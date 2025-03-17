@@ -86,7 +86,6 @@ export default function AppSidebar({
               )}
               <SidebarMenu>
                 {menubar.menu.map((item, i) => {
-                  // Determinar si el ítem o alguno de sus subítems está activo
                   const isActive =
                     item.url === pathname ||
                     (item.items &&
@@ -99,19 +98,16 @@ export default function AppSidebar({
                           asChild
                           className="group/collapsible hover:cursor-pointer"
                         >
-                          <SidebarMenuItem>
+                          <div>
                             <CollapsibleTrigger asChild>
                               <SidebarMenuButton
-                                // Mostrar tooltip solo si NO tiene subítems
                                 tooltip={item.items ? undefined : item.label}
                                 className={`hover:bg-indigo-500 hover:text-white ${
                                   isActive
                                     ? "bg-indigo-500 text-white"
                                     : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
                                 } hover:cursor-pointer`}
-                                onMouseEnter={() =>
-                                  handleMouseEnter(item.label)
-                                }
+                                onMouseEnter={() => handleMouseEnter(item.label)}
                                 onMouseLeave={handleMouseLeave}
                               >
                                 {item.icon && <item.icon width={16} />}
@@ -122,8 +118,7 @@ export default function AppSidebar({
                             <CollapsibleContent>
                               <SidebarMenuSub className="rounded-2xl">
                                 {item.items.map((subitem, j) => {
-                                  const isSubItemActive =
-                                    subitem.url === pathname;
+                                  const isSubItemActive = subitem.url === pathname;
                                   return (
                                     <Link
                                       href={subitem.url}
@@ -134,16 +129,14 @@ export default function AppSidebar({
                                           : "hover:bg-indigo-500 hover:text-white"
                                       }`}
                                     >
-                                      {subitem.icon && (
-                                        <subitem.icon width={16} />
-                                      )}
+                                      {subitem.icon && <subitem.icon width={16} />}
                                       <span>{subitem.label}</span>
                                     </Link>
                                   );
                                 })}
                               </SidebarMenuSub>
                             </CollapsibleContent>
-                          </SidebarMenuItem>
+                          </div>
                         </Collapsible>
                       ) : (
                         <Link href={item.url}>
@@ -157,8 +150,8 @@ export default function AppSidebar({
                             onMouseLeave={handleMouseLeave}
                             tooltip={item.items ? undefined : item.label}
                           >
-                              {item.icon && <item.icon width={16} />}
-                              {!isCollapsed && <span>{item.label}</span>}
+                            {item.icon && <item.icon width={16} />}
+                            {!isCollapsed && <span>{item.label}</span>}
                           </SidebarMenuButton>
                         </Link>
                       )}
