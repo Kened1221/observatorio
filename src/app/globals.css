@@ -158,8 +158,6 @@
   animation: accordion-up 0.7s ease;
 }
 
-
-
 @layer utilities {
   .animate-wave {
     animation: wave 5s ease-in-out infinite;
@@ -188,7 +186,6 @@
     transform: rotate(360deg);
   }
 }
-
 
 /* styles/globals.css */
 .custom-scrollbar::-webkit-scrollbar {
