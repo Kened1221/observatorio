@@ -5,12 +5,20 @@ import AppSidebar from "./sidebar";
 import Navbar from "./navbar";
 import React from "react";
 
+import { usePathname } from 'next/navigation'
+
 function Layout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname()
+
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
+
+  if (pathname.startsWith('/admin/auth')){
+    return <>{children}</>
+  }
 
   return (
     <SidebarProvider>
