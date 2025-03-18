@@ -53,9 +53,9 @@ const StyledWrapper = styled.div.withConfig({
     width: 300px;
     height: 400px;
     background-color: #fff;
-    border-radius: 20px;
+    border-radius: 40px;
     overflow: hidden;
-    border: solid 2px ${(props) => props.borderColor}; // Usamos el borderColor dinámico
+    border: solid 2px ${(props) => props.borderColor};
     transition: box-shadow 0.3s ease, border 0.3s ease;
   }
 
@@ -70,10 +70,10 @@ const StyledWrapper = styled.div.withConfig({
 
   .bottom-card {
     border-top-right-radius: 20px;
-    border-bottom-left-radius: 20px;
-    border-bottom-right-radius: 20px;
+    border-bottom-left-radius: 18px;
+    border-bottom-right-radius: 18px;
     height: 35%;
-    background-color: ${(props) => props.backend}; // Usamos el backend dinámico
+    background-color: ${(props) => props.backend};
     transition: height 0.3s ease;
   }
 
@@ -120,7 +120,7 @@ const StyledWrapper = styled.div.withConfig({
 
   .card:hover {
     box-shadow: 0px 2px 2px #fff; // Aplicamos el hover con el borderColor
-    border: solid 1px #fff; // Aplicamos el borderColor dinámico al hover
+    border: solid 1px ${(props) => props.borderColor}; // Aplicamos el borderColor dinámico al hover
   }
 
   .card:hover .top-card {

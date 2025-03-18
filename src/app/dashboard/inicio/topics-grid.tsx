@@ -114,7 +114,7 @@ const topics: Topic[] = [
   },
 ];
 
-export default function Page() {
+export default function TopicsGrid() {
   return (
     <div className="w-full h-full py-8">
       <div className="flex flex-col space-y-4 max-w-7xl mx-auto">
