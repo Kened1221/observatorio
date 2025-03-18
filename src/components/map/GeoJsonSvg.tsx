@@ -96,37 +96,44 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
 
   // Función para calcular el color basado en la puntuación
   const getColor = (puntuacion: number) => {
-    const minBrightness = 50; // Luminosidad mínima (para los valores más altos de puntuación)
-    const maxBrightness = 80; // Luminosidad máxima (para los valores más bajos de puntuación)
+    const maxBrightness = 80; // Brillo máximo
+    const minBrightness = 30; // Brillo mínimo
 
     if (puntuacion < 1000) {
       const maxPuntuacion = 1000; // Puntuación máxima para normalizar
-      const normalizedPuntuacion = Math.min(puntuacion / maxPuntuacion, 1);
       const brightness =
-        maxBrightness - normalizedPuntuacion * (maxBrightness - minBrightness);
+        maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
       return `hsl(100, 100%, ${brightness}%)`; // Color verde para puntuaciones bajas
     } else if (puntuacion >= 1000 && puntuacion < 2000) {
       const maxPuntuacion = 2000; // Puntuación máxima para normalizar
-      const normalizedPuntuacion = Math.min(puntuacion / maxPuntuacion, 1);
       const brightness =
-        maxBrightness - normalizedPuntuacion * (maxBrightness - minBrightness);
-      return `hsl(25, 100%, ${brightness}%)`; // Color naranja para puntuaciones medias
+        maxBrightness - ((puntuacion - 1000) / maxPuntuacion) * minBrightness;
+      return `hsl(50, 100%, ${brightness}%)`; // Color naranja para puntuaciones medias
     } else {
       const maxPuntuacion = 3000; // Puntuación máxima para normalizar
-      const normalizedPuntuacion = Math.min(puntuacion / maxPuntuacion, 1);
       const brightness =
-        maxBrightness - normalizedPuntuacion * (maxBrightness - minBrightness);
+        maxBrightness - ((puntuacion - 2000) / maxPuntuacion) * minBrightness;
       return `hsl(0, 100%, ${brightness}%)`; // Color rojo para puntuaciones altas
     }
   };
 
   return (
     <div className="flex flex-col w-full h-full items-center justify-center">
+      <div className="flex flex-row w-full justify-center gap-6">
+        {type !== "all" && (
+          <Button
+            className="bg-red-500 hover:bg-red-400"
+            onClick={() => setProvincias("all")}
+          >
+            Atras
+          </Button>
+        )}
 
-      <h1 className="text-xl font-bold mb-4">
-        Mapa de {type === "all" ? "Ayacucho" : type}
-      </h1>
-      <Button />
+        <h1 className="text-xl font-bold mb-4">
+          Mapa de {type === "all" ? "Ayacucho" : type}
+        </h1>
+      </div>
+
       <div className="w-[700px] h-[500px] border-border border-2">
         <svg
           viewBox="0 0 1000 1000" // El tamaño original del mapa
@@ -184,20 +191,24 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
       </div>
 
       {/* Mostrar el nombre del distrito solo cuando se haga clic */}
-      {selectedRegion !== null && filteredFeatures[selectedRegion] && (
-        <p className="text-lg text-blue-700">
-          Distrito seleccionado:{" "}
-          {filteredFeatures[selectedRegion].properties.nombdist} <br />
-          Provincia: {filteredFeatures[selectedRegion].properties.nombprov}{" "}
-          <br />
-          Puntuación:{" "}
-          {distritos?.find(
-            (distrito) =>
-              distrito.nombre ===
-              filteredFeatures[selectedRegion].properties.nombdist
-          )?.puntuacion || "No disponible"}
-        </p>
-      )}
+      {type !== "all" &&
+        selectedRegion !== null &&
+        filteredFeatures[selectedRegion] && (
+          <p className="text-lg text-blue-700">
+            Distrito seleccionado:{" "}
+            {filteredFeatures[selectedRegion].properties.nombdist} <br />
+            Provincia: {
+              filteredFeatures[selectedRegion].properties.nombprov
+            }{" "}
+            <br />
+            Puntuación:{" "}
+            {distritos?.find(
+              (distrito) =>
+                distrito.nombre ===
+                filteredFeatures[selectedRegion].properties.nombdist
+            )?.puntuacion || "No disponible"}
+          </p>
+        )}
     </div>
   );
 };
