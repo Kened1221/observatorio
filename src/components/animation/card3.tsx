@@ -72,7 +72,7 @@ const StyledWrapper = styled.div.withConfig({
     border-top-right-radius: 20px;
     border-bottom-left-radius: 18px;
     border-bottom-right-radius: 18px;
-    height: 35%;
+    height: 37%;
     background-color: ${(props) => props.backend};
     transition: height 0.3s ease;
   }
@@ -82,7 +82,7 @@ const StyledWrapper = styled.div.withConfig({
     position: absolute;
     background-color: transparent;
     bottom: 89px;
-    height: 50px;
+    height: 52px;
     width: 175px;
     transition: bottom 0.3s ease;
     border-bottom-left-radius: 20px;
@@ -124,7 +124,7 @@ const StyledWrapper = styled.div.withConfig({
   }
 
   .card:hover .top-card {
-    height: 35%;
+    height: 36%;
     transition: height 0.3s ease;
   }
 
