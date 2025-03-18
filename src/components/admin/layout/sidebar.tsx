@@ -21,6 +21,7 @@ import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useRef, useState } from "react";
 
 export default function AppSidebar({
   hoveredItem,
@@ -32,8 +33,10 @@ export default function AppSidebar({
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const pathname = usePathname();
+  const [hoverPosition, setHoverPosition] = useState<number>(0);
+  const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
-  const handleMouseEnter = (item: string) => {
+  const handleMouseEnter = (item: string, event: React.MouseEvent) => {
     if (
       isCollapsed &&
       sidebarMenus.some((group) =>
@@ -41,6 +44,9 @@ export default function AppSidebar({
       )
     ) {
       setHoveredItem(item);
+      const target = event.currentTarget as HTMLDivElement;
+      const rect = target.getBoundingClientRect();
+      setHoverPosition(rect.top);
     }
   };
 
@@ -76,11 +82,11 @@ export default function AppSidebar({
             </div>
           )}
         </SidebarHeader>
-        <SidebarContent className="bg-card text-primary rounded-b-lg">
+        <SidebarContent className="bg-card text-primary-foreground rounded-b-lg">
           {sidebarMenus.map((menubar, index) => (
             <SidebarGroup key={index}>
               {!isCollapsed && (
-                <SidebarGroupLabel className="px-6 text-xs font-semibold uppercase text-muted-foreground">
+                <SidebarGroupLabel className="px-6 text-xs font-semibold uppercase text-secondary-foreground">
                   {menubar.title}
                 </SidebarGroupLabel>
               )}
@@ -98,16 +104,20 @@ export default function AppSidebar({
                           asChild
                           className="group/collapsible hover:cursor-pointer"
                         >
-                          <div>
+                          <div
+                            ref={(el) => {
+                              if (el) menuRefs.current.set(item.label, el);
+                            }}
+                          >
                             <CollapsibleTrigger asChild>
                               <SidebarMenuButton
                                 tooltip={item.items ? undefined : item.label}
-                                className={`hover:bg-indigo-500 hover:text-white ${
+                                className={`hover:bg-primary hover:text-white ${
                                   isActive
-                                    ? "bg-indigo-500 text-white"
-                                    : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
+                                    ? "bg-primary text-white"
+                                    : "data-[active=true]:bg-primary data-[active=true]:text-white"
                                 } hover:cursor-pointer`}
-                                onMouseEnter={() => handleMouseEnter(item.label)}
+                                onMouseEnter={(e) => handleMouseEnter(item.label, e)}
                                 onMouseLeave={handleMouseLeave}
                               >
                                 {item.icon && <item.icon width={16} />}
@@ -116,7 +126,7 @@ export default function AppSidebar({
                               </SidebarMenuButton>
                             </CollapsibleTrigger>
                             <CollapsibleContent>
-                              <SidebarMenuSub className="rounded-2xl">
+                              <SidebarMenuSub>
                                 {item.items.map((subitem, j) => {
                                   const isSubItemActive = subitem.url === pathname;
                                   return (
@@ -125,8 +135,8 @@ export default function AppSidebar({
                                       key={j}
                                       className={`px-2 py-1 text-xs flex items-center gap-2 rounded-lg ${
                                         isSubItemActive
-                                          ? "bg-indigo-500 text-white"
-                                          : "hover:bg-indigo-500 hover:text-white"
+                                          ? "bg-primary text-white"
+                                          : "hover:bg-primary hover:text-white"
                                       }`}
                                     >
                                       {subitem.icon && <subitem.icon width={16} />}
@@ -141,12 +151,12 @@ export default function AppSidebar({
                       ) : (
                         <Link href={item.url}>
                           <SidebarMenuButton
-                            className={`hover:bg-indigo-500 hover:text-white ${
+                            className={`hover:bg-primary hover:text-white ${
                               isActive
-                                ? "bg-indigo-500 text-white"
+                                ? "bg-primary text-white"
                                 : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
                             } hover:cursor-pointer`}
-                            onMouseEnter={() => handleMouseEnter(item.label)}
+                            onMouseEnter={(e) => handleMouseEnter(item.label, e)}
                             onMouseLeave={handleMouseLeave}
                             tooltip={item.items ? undefined : item.label}
                           >
@@ -172,7 +182,8 @@ export default function AppSidebar({
           group.menu.some((item) => item.label === hoveredItem && item.items)
         ) && (
           <div
-            className="absolute left-[48px] top-[120px] z-50 w-48 rounded-md border bg-card py-1 shadow-lg"
+            className="absolute left-14 z-50 w-48 rounded-md border bg-card py-1 shadow-lg"
+            style={{ top: `${hoverPosition}px` }}
             onMouseEnter={() => {
               const item = sidebarMenus
                 .flatMap((group) => group.menu)
@@ -196,8 +207,8 @@ export default function AppSidebar({
                     key={index}
                     className={`flex items-center gap-2 m-2 px-3 py-2 text-sm rounded-lg ${
                       isSubItemActive
-                        ? "bg-indigo-500 text-white"
-                        : "hover:bg-indigo-500 hover:text-white"
+                        ? "bg-primary text-white"
+                        : "hover:bg-primary hover:text-white"
                     }`}
                   >
                     {subitem.icon && <subitem.icon className="h-4 w-4" />}

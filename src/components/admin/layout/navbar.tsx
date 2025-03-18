@@ -34,7 +34,7 @@ function Navbar() {
         <Input
           type="search"
           placeholder="Buscar..."
-          className="w-full bg-muted pl-8 focus-visible:ring-primary"
+          className="w-full pl-8 focus-visible:ring-primary"
         />
       </div>
       <div className="ml-auto flex items-center gap-4 text-muted-foreground">
