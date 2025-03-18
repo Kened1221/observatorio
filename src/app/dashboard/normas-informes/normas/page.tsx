@@ -141,7 +141,7 @@ export default function ContainerNormas() {
         </Button>
 
         <span className="px-4 py-2 bg-sky-600 text-white rounded-md">
-          {currentPage}
+          {currentPage} de {totalPages}
         </span>
 
         <Button
