@@ -86,7 +86,7 @@ export default function CarouselDemo() {
             >
               <Link href={dashboard.linkUrl} className="h-full">
                 <Card
-                  className={`overflow-hidden transition-transform duration-300 group-hover:-translate-y-1 border-t-4 ${dashboard.borderColor}`}
+                  className={`overflow-hidden transition-transform duration-300 group-hover:-translate-y-1 border-t-4 ${dashboard.borderColor} cursor-grabbing`}
                 >
                   <div className="relative aspect-video w-full rounded-t-xl overflow-hidden">
                     <Image

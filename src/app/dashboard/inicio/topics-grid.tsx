@@ -20,9 +20,9 @@ const topics: Topic[] = [
     linkUrl: "/tematica//salud",
     description:
       "Descubre consejos y noticias sobre salud y nutrición para mejorar tu calidad de vida.",
-    backend: "#EF4444", // Verde vibrante
-    borderColor: "#000000", // Verde oscuro coordinado
-    frontend: "#E6E6E6",
+    backend: "#EF4444",
+    borderColor: "#EF4444",
+    frontend: "#fff",
   },
   {
     id: 2,
@@ -31,9 +31,9 @@ const topics: Topic[] = [
     linkUrl: "/tematica/educacion",
     description:
       "Recursos y actualizaciones en el ámbito educativo para todos los niveles.",
-    backend: "#e67e22", // Azul vibrante
-    borderColor: "#d35400", // Azul oscuro coordinado
-    frontend: "#FBCB0E",
+    backend: "#e67e22",
+    borderColor: "#e67e22",
+    frontend: "#fff",
   },
   {
     id: 3,
@@ -42,9 +42,9 @@ const topics: Topic[] = [
     linkUrl: "/tematica/proteccion",
     description:
       "Información sobre programas y políticas de protección social.",
-    backend: "#9b59b6", // Naranja vibrante
-    borderColor: "#8e44ad", // Naranja oscuro coordinado
-    frontend: "#B39FBB",
+    backend: "#9b59b6",
+    borderColor: "#8e44ad",
+    frontend: "#fff",
   },
   {
     id: 4,
@@ -53,9 +53,9 @@ const topics: Topic[] = [
     linkUrl: "/tematica/servicios",
     description:
       "Acceso a información de servicios básicos y su disponibilidad.",
-    backend: "#006995", // Púrpura vibrante
-    borderColor: "#0000FE", // Púrpura oscuro coordinado
-    frontend: "#B39FBB",
+    backend: "#006995",
+    borderColor: "#006995",
+    frontend: "#fff",
   },
   {
     id: 5,
@@ -64,9 +64,9 @@ const topics: Topic[] = [
     linkUrl: "/tematica/desarrollo",
     description:
       "Análisis y noticias sobre el crecimiento y desarrollo económico.",
-    backend: "#e74c3c", // Rojo vibrante
-    borderColor: "#c0392b", // Rojo oscuro coordinado
-    frontend: "#E6E6E6",
+    backend: "#e74c3c",
+    borderColor: "#e74c3c",
+    frontend: "#fff",
   },
   {
     id: 6,
@@ -75,9 +75,9 @@ const topics: Topic[] = [
     linkUrl: "/tematica/politica",
     description:
       "Debates y propuestas para una política inclusiva que fomente el crecimiento.",
-    backend: "#e91e63", // Magenta vibrante
-    borderColor: "#d81b60", // Magenta oscuro coordinado
-    frontend: "#E6E6E6",
+    backend: "#e91e63",
+    borderColor: "#e91e63",
+    frontend: "#fff",
   },
   {
     id: 7,
@@ -86,9 +86,9 @@ const topics: Topic[] = [
     linkUrl: "/dashboard/normas-informes",
     description:
       "Normativas, informes y análisis críticos sobre el contexto actual.",
-    backend: "#1abc9c", // Turquesa vibrante
-    borderColor: "#16a085", // Turquesa oscuro coordinado
-    frontend: "#E6E6E6",
+    backend: "#1abc9c",
+    borderColor: "#1abc9c",
+    frontend: "#fff",
   },
   {
     id: 8,
@@ -97,9 +97,9 @@ const topics: Topic[] = [
     linkUrl: "/dashboard/notas-actualidad",
     description:
       "Últimas noticias y notas de actualidad para mantenerte informado.",
-    backend: "#3f51b5", // Índigo vibrante
-    borderColor: "#303f9f", // Índigo oscuro coordinado
-    frontend: "#E6E6E6",
+    backend: "#3f51b5",
+    borderColor: "#3f51b5",
+    frontend: "#fff",
   },
   {
     id: 9,
@@ -108,9 +108,9 @@ const topics: Topic[] = [
     linkUrl: "/dashboard/participacion-ciudadana",
     description:
       "Espacio para la participación y el diálogo ciudadano sobre temas relevantes.",
-    backend: "#8bc34a", // Verde lima vibrante
-    borderColor: "#689f38", // Verde lima oscuro coordinado
-    frontend: "#E6E6E6",
+    backend: "#8bc34a",
+    borderColor: "#8bc34a",
+    frontend: "#fff",
   },
 ];
 

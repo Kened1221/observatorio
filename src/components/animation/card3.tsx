@@ -52,7 +52,7 @@ const StyledWrapper = styled.div.withConfig({
     position: relative;
     width: 300px;
     height: 400px;
-    background-color: #fff;
+    background-color: ${(props) => props.frontend};
     border-radius: 40px;
     overflow: hidden;
     border: solid 2px ${(props) => props.borderColor};

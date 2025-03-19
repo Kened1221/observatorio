@@ -1,4 +1,4 @@
-import Card from "@/components/animation/card";
+import Card3 from "@/components/animation/card3";
 import Card2 from "@/components/animation/card2";
 import Image from "next/image";
 
@@ -20,10 +20,10 @@ const topics: Topic[] = [
     imageUrl: "/modulos/participacion/voces.png",
     linkUrl: "/dashboard/participacion-ciudadana/voces-ciudadanas",
     description:
-      "Expresa tu opinión y comparte tus historias para construir una comunidad inclusiva y dinámica. ¡Tu voz es el motor del cambio!",
-    backend: "#F926D4",
-    borderColor: "#8405AE",
-    frontend: "#E6E6E6",
+      "Comparte tus historias y opiniones para crear una comunidad inclusiva y participativa. Tu voz importa.",
+    backend: "#FF4081",
+    borderColor: "#FF4081", 
+    frontend: "#fff", 
   },
   {
     id: 2,
@@ -31,10 +31,10 @@ const topics: Topic[] = [
     imageUrl: "/modulos/participacion/consulta.png",
     linkUrl: "/dashboard/participacion-ciudadana/consultas-ciudadanas",
     description:
-      "Participa en foros y encuestas que definen políticas públicas. Tus preguntas y comentarios son la base para una sociedad informada y participativa.",
-    backend: "#00FE0A", // Azul vibrante
-    borderColor: "#097632", // Azul oscuro
-    frontend: "#85c1e9", // Azul claro
+      "Tus preguntas y comentarios son esenciales para una sociedad más informada y participativa.",
+    backend: "#2196F3",
+    borderColor: "#2196F3",
+    frontend: "#fff",
   },
   {
     id: 3,
@@ -42,10 +42,10 @@ const topics: Topic[] = [
     imageUrl: "/modulos/participacion/expresion.png",
     linkUrl: "/dashboard/participacion-ciudadana/expresion-ciudadanas",
     description:
-      "Comparte tu creatividad y visión a través del arte y la palabra. Deja que tu expresión inspire la transformación social y fortalezca a la comunidad.",
-    backend: "#00FFFF", // Púrpura vibrante
-    borderColor: "#8e44ad", // Púrpura oscuro
-    frontend: "#B39FBB", // Púrpura claro
+      "Comparte tu creatividad a través del arte y la palabra para inspirar cambios y transformación social.",
+    backend: "#FF9800",
+    borderColor: "#FF9800", 
+    frontend: "#fff", 
   },
 ];
 
@@ -78,19 +78,9 @@ export default function Page() {
       </div>
 
       {/* Sección de topics */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 justify-items-center">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 justify-items-center">
         {topics.map((topic) => (
-          <div key={topic.id} className="w-full p-4">
-            <Card
-              title={topic.title}
-              imageUrl={topic.imageUrl}
-              linkUrl={topic.linkUrl}
-              description={topic.description}
-              backend={topic.backend}
-              borderColor={topic.borderColor}
-              frontend={topic.frontend}
-            />
-          </div>
+          <Card3 key={topic.id} topic={topic} />
         ))}
       </div>
     </div>

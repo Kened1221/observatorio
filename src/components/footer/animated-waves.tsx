@@ -270,7 +270,7 @@ export default function AnimatedWaves() {
     <>
       <canvas
         ref={canvasRef}
-        className="top-0 left-0 w-full h-full cursor-pointer"
+        className="top-0 left-0 w-full h-full cursor-grab"
       />
     </>
   );

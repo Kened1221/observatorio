@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Button } from "../ui/button";
-
 import { IoChevronBack } from "react-icons/io5";
 
 // Ruta del archivo GeoJSON
@@ -33,9 +32,16 @@ interface GeoJSONFeature {
 }
 
 interface GeoJSONMap {
-  type: "all" | string;
-  distritos?: { provincia: string; distrito: string; puntuacion: number }[];
+  provincia: string;
+  distrito: string;
   setProvincia: (provincia: string) => void;
+  setDistrito: (distrito: string) => void;
+  data?: {
+    departamento: string;
+    provincia: string;
+    distrito: string;
+    puntuacion: number;
+  }[];
 }
 
 interface GeoJSONData {
@@ -47,25 +53,30 @@ interface TooltipInfo {
   visible: boolean;
   x: number;
   y: number;
+  departamento: string;
   distrito: string;
   provincia: string;
   puntuacion: number | string;
 }
 
 const GeoJsonSvg: React.FC<GeoJSONMap> = ({
-  type,
-  distritos,
+  provincia,
+  distrito,
   setProvincia,
+  setDistrito,
+  data,
 }) => {
   const [geoData, setGeoData] = useState<GeoJSONData | null>(null);
   const [tooltip, setTooltip] = useState<TooltipInfo>({
     visible: false,
     x: 0,
     y: 0,
+    departamento: "",
     distrito: "",
     provincia: "",
     puntuacion: "",
   });
+
   const svgRef = useRef<SVGSVGElement>(null);
 
   useEffect(() => {
@@ -77,7 +88,7 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
 
   if (!geoData) return <p>Cargando mapa...</p>;
 
-  // Filtrar las características según el tipo de región
+  // Filtrar las características según el nivel de navegación
   let filteredFeatures = geoData.features.filter(
     (feature) =>
       feature &&
@@ -85,19 +96,27 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
       feature.geometry &&
       feature.geometry.coordinates &&
       feature.geometry.coordinates.length > 0 &&
-      feature.geometry.coordinates[0].length > 0
+      feature.geometry.coordinates[0].length > 0 &&
+      feature.properties.nombdep === "AYACUCHO" // Solo mostrar Ayacucho en todos los niveles
   );
 
-  if (type !== "all") {
-    // Filtrar por la provincia indicada (ejemplo: "HUAMANGA")
+  if (provincia !== "") {
+    // Si hay una provincia seleccionada, filtrar por provincia
     filteredFeatures = filteredFeatures.filter(
-      (feature) => feature.properties.nombprov === type
+      (feature) => feature.properties.nombprov === provincia
     );
+
+    if (distrito !== "") {
+      // Si hay un distrito seleccionado, filtrar por distrito
+      filteredFeatures = filteredFeatures.filter(
+        (feature) => feature.properties.nombdist === distrito
+      );
+    }
   }
 
   // Si no hay características después del filtrado, mostrar un mensaje
   if (filteredFeatures.length === 0) {
-    return <p>No se encontraron distritos para la provincia seleccionada</p>;
+    return <p>No se encontraron datos para la selección actual</p>;
   }
 
   // Obtener los límites de las coordenadas para escalar el SVG
@@ -141,9 +160,12 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
     e: React.MouseEvent<SVGPathElement>,
     feature: GeoJSONFeature
   ) => {
-    const distrito = feature.properties.nombdist;
-    const provincia = feature.properties.nombprov;
-    const distritoInfo = distritos?.find((d) => d.distrito === distrito);
+    const depNombre = feature.properties.nombdep;
+    const distNombre = feature.properties.nombdist;
+    const provNombre = feature.properties.nombprov;
+    const distritoInfo = data?.find(
+      (d) => d.distrito === distNombre && d.provincia === provNombre
+    );
     const puntuacion = distritoInfo?.puntuacion || "No disponible";
 
     // Calcular la posición del tooltip relativa al SVG
@@ -156,8 +178,9 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
         visible: true,
         x: mouseX,
         y: mouseY,
-        distrito,
-        provincia,
+        departamento: depNombre,
+        distrito: distNombre,
+        provincia: provNombre,
         puntuacion,
       });
     }
@@ -168,25 +191,57 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
     setTooltip((prev) => ({ ...prev, visible: false }));
   };
 
+  // Manejar clic en una región del mapa
+  const handleMapClick = (feature: GeoJSONFeature) => {
+    if (provincia === "") {
+      // Si estamos en la vista general de Ayacucho, navegar a la provincia del distrito clicado
+      setProvincia(feature.properties.nombprov);
+    } else if (distrito === "") {
+      // Si estamos en una provincia, seleccionar el distrito
+      setDistrito(feature.properties.nombdist);
+    }
+    // Si ya estamos en un distrito, no hacer nada
+  };
+
+  // Función para manejar el botón Volver
+  const handleVolver = () => {
+    if (distrito !== "") {
+      // Si estamos en un distrito, volver a la provincia
+      setDistrito("");
+    } else if (provincia !== "") {
+      // Si estamos en una provincia, volver a la vista general de Ayacucho
+      setProvincia("");
+    }
+  };
+
+  // Determinar el título de la sección
+  const getTitulo = () => {
+    if (provincia === "") {
+      return "MAPA DE AYACUCHO";
+    } else if (distrito === "") {
+      return `PROVINCIA DE ${provincia}`;
+    } else {
+      return `DISTRITO DE ${distrito}`;
+    }
+  };
+
   return (
     <div className="flex flex-col w-full h-full items-center justify-center gap-4">
       <div className="flex flex-row w-full justify-center gap-6">
-        {type !== "all" && (
+        {(provincia !== "" || distrito !== "") && (
           <Button
             className="bg-red-500 hover:bg-red-400 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
-            onClick={() => setProvincia("all")}
+            onClick={handleVolver}
           >
             <IoChevronBack className="text-lg" />
             <span className="ml-2">Volver</span>
           </Button>
         )}
 
-        <h1 className="text-sm lg:text-xl font-bold mb-4">
-          {type === "all" ? "MAPA DE AYACUCHO" : "MAPA DE " + type}
-        </h1>
+        <h1 className="text-sm lg:text-xl font-bold mb-4">{getTitulo()}</h1>
       </div>
 
-      <div className="w-full h-full">
+      <div className="w-full h-full relative">
         <svg
           ref={svgRef}
           viewBox="0 0 1000 1000" // El tamaño original del mapa
@@ -220,24 +275,42 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
               .join(" L")} Z`;
 
             // Encontrar la puntuación del distrito actual
-            const distrito = distritos?.find(
-              (d) => d.distrito === feature.properties.nombdist
+            const distritoActual = data?.find(
+              (d) =>
+                d.distrito === feature.properties.nombdist &&
+                d.provincia === feature.properties.nombprov
             );
-            const fillColor = distrito ? getColor(distrito.puntuacion) : "#ddd"; // Color por defecto si no se encuentra el distrito
+
+            // Color por defecto si no se encuentra el distrito
+            const fillColor = distritoActual
+              ? getColor(distritoActual.puntuacion)
+              : "#ddd";
+
+            // Destacar el elemento seleccionado
+            let isSelected = false;
+            
+            if (distrito !== "") {
+              // Destacar el distrito seleccionado
+              isSelected = 
+                feature.properties.nombdist === distrito && 
+                feature.properties.nombprov === provincia;
+            } else if (provincia !== "") {
+              // Destacar todos los distritos de la provincia seleccionada
+              isSelected = feature.properties.nombprov === provincia;
+            }
+              
+            const strokeWidth = isSelected ? "3" : "1";
+            const strokeColor = isSelected ? "black" : "#333";
 
             return (
               <path
                 key={index}
                 d={pathData}
                 fill={fillColor}
-                stroke="black"
-                strokeWidth="2"
+                stroke={strokeColor}
+                strokeWidth={strokeWidth}
                 className="cursor-pointer transition-all duration-200 hover:fill-blue-300 hover:opacity-80"
-                onClick={() => {
-                  if (type === "all") {
-                    setProvincia(feature.properties.nombprov);
-                  }
-                }}
+                onClick={() => handleMapClick(feature)}
                 onMouseOver={(e) => handleMouseOver(e, feature)}
                 onMouseOut={handleMouseOut}
                 onMouseMove={(e) => {

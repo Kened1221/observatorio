@@ -33,7 +33,7 @@ export default function ObservatorySection() {
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Button
-              className="group"
+              className="bg-black hover:bg-neutral-800"
               aria-label="Conocer más sobre el observatorio"
             >
               <Link
