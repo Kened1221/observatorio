@@ -752,9 +752,9 @@ export default function MapAnemia() {
 
   // Función para obtener el color según el valor de puntuación
   const getColor = (puntuacion: number): string => {
-    if (puntuacion < 1000) return "#22c55e"; // Verde
-    if (puntuacion < 2000) return "#eab308"; // Amarillo
-    return "#ef4444"; // Rojo
+    if (puntuacion < 1000) return "#57D385 "; // Verde
+    if (puntuacion < 2000) return "#F2CE5E"; // Amarillo
+    return "#F26565"; // Rojo
   };
 
   // Función para manejar el clic en una barra
@@ -873,132 +873,137 @@ export default function MapAnemia() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row w-full h-full mx-auto overflow-hidden max-w-[95rem] gap-8 p-6 sm:py-10">
-      <div className="w-full h-full max-w-4xl">
-        <GeoJsonSvg
-          provincia={provincia}
-          distrito={distrito}
-          setProvincia={setProvincia}
-          setDistrito={setDistrito}
-          data={all}
-        />
-      </div>
-      <div className="w-full h-full">
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle className="text-lg sm:text-xl">
-              {getTituloGrafico()}
-            </CardTitle>
-            <CardDescription className="text-sm">
-              {getSubtituloGrafico()}
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="w-full overflow-x-auto">
-              {chartData.length > 0 ? (
-                <ChartContainer
-                  config={chartConfig}
-                  className="min-w-[400px] h-[300px] sm:h-auto"
-                >
-                  <BarChart
-                    accessibilityLayer
-                    data={chartData}
-                    layout="vertical"
-                    margin={{
-                      left: 8,
-                      right: 8,
-                      top: 8,
-                      bottom: 8,
-                    }}
-                    barSize={20}
-                    className="w-full"
-                    onClick={(data) => {
-                      if (
-                        data &&
-                        data.activePayload &&
-                        data.activePayload.length > 0
-                      ) {
-                        const clickedData = data.activePayload[0].payload;
-
-                        handleBarClick(clickedData);
-                      }
-                    }}
+    <div className="flex flex-col w-full h-full mx-auto overflow-hidden max-w-[95rem] gap-8 p-6 sm:py-10">
+      <h2 className="mb-8 sm:mb-10 text-center text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+        La Anemia en Ayacucho
+      </h2>
+      <div className="flex flex-col lg:flex-row w-full h-full mx-auto gap-8 p-6">
+        <div className="w-full h-full max-w-4xl">
+          <GeoJsonSvg
+            provincia={provincia}
+            distrito={distrito}
+            setProvincia={setProvincia}
+            setDistrito={setDistrito}
+            data={all}
+          />
+        </div>
+        <div className="w-full h-full my-auto">
+          <Card>
+            <CardHeader className="text-center">
+              <CardTitle className="text-lg sm:text-xl">
+                {getTituloGrafico()}
+              </CardTitle>
+              <CardDescription className="text-sm">
+                {getSubtituloGrafico()}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="w-full overflow-x-auto">
+                {chartData.length > 0 ? (
+                  <ChartContainer
+                    config={chartConfig}
+                    className="min-w-[400px] h-[300px] sm:h-auto"
                   >
-                    <YAxis
-                      dataKey="nombre"
-                      type="category"
-                      tickLine={false}
-                      tickMargin={10}
-                      axisLine={false}
-                      width={120}
-                      tick={{
-                        fontSize: 10,
-                        transform: "translate(-5, 0)",
+                    <BarChart
+                      accessibilityLayer
+                      data={chartData}
+                      layout="vertical"
+                      margin={{
+                        left: 8,
+                        right: 8,
+                        top: 8,
+                        bottom: 8,
                       }}
-                      interval={0}
-                      className="text-xs sm:text-sm"
-                    />
-                    <XAxis
-                      dataKey="puntuacion"
-                      type="number"
-                      axisLine={true}
-                      tickLine={true}
-                      className="text-xs sm:text-sm"
-                    />
-                    <ChartTooltip
-                      cursor={false}
-                      content={
-                        <ChartTooltipContent
-                          labelFormatter={(label) => label}
-                          formatter={(value) => ["Cantidad: ", value]}
-                          className="text-xs sm:text-sm"
-                        />
-                      }
-                    />
-                    <Bar
-                      dataKey="puntuacion"
-                      radius={[0, 4, 4, 0]}
-                      className={distrito === "" ? "cursor-pointer" : ""}
+                      barSize={20}
+                      className="w-full"
+                      onClick={(data) => {
+                        if (
+                          data &&
+                          data.activePayload &&
+                          data.activePayload.length > 0
+                        ) {
+                          const clickedData = data.activePayload[0].payload;
+
+                          handleBarClick(clickedData);
+                        }
+                      }}
                     >
-                      {chartData.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={entry.fill}
-                          style={{ cursor: entry.cursor }}
-                          onClick={() =>
-                            distrito === "" ? handleBarClick(entry) : null
-                          }
-                        />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ChartContainer>
-              ) : (
-                <div className="flex items-center justify-center h-[300px]">
-                  <p className="text-gray-500">No hay datos disponibles</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-          {(provincia !== "" || distrito !== "") && (
-            <CardFooter className="flex-col items-center gap-2 text-xs sm:text-sm">
-              <div className="flex flex-wrap items-center gap-2 font-medium leading-none">
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                  <span>Menor a 1000</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-yellow-500"></div>
-                  <span>Entre 1000 y 2000</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <div className="h-3 w-3 rounded-full bg-red-500"></div>
-                  <span>Mayor a 2000</span>
-                </div>
+                      <YAxis
+                        dataKey="nombre"
+                        type="category"
+                        tickLine={false}
+                        tickMargin={10}
+                        axisLine={false}
+                        width={120}
+                        tick={{
+                          fontSize: 10,
+                          transform: "translate(-5, 0)",
+                        }}
+                        interval={0}
+                        className="text-xs sm:text-sm"
+                      />
+                      <XAxis
+                        dataKey="puntuacion"
+                        type="number"
+                        axisLine={true}
+                        tickLine={true}
+                        className="text-xs sm:text-sm"
+                      />
+                      <ChartTooltip
+                        cursor={false}
+                        content={
+                          <ChartTooltipContent
+                            labelFormatter={(label) => label}
+                            formatter={(value) => ["Cantidad: ", value]}
+                            className="text-xs sm:text-sm"
+                          />
+                        }
+                      />
+                      <Bar
+                        dataKey="puntuacion"
+                        radius={[6, 6, 6, 6]}
+                        className={distrito === "" ? "cursor-pointer" : ""}
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={entry.fill}
+                            style={{ cursor: entry.cursor }}
+                            onClick={() =>
+                              distrito === "" ? handleBarClick(entry) : null
+                            }
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ChartContainer>
+                ) : (
+                  <div className="flex items-center justify-center h-[300px]">
+                    <p className="text-gray-500">No hay datos disponibles</p>
+                  </div>
+                )}
               </div>
-            </CardFooter>
-          )}
-        </Card>
+            </CardContent>
+            {(provincia !== "" || distrito !== "") && (
+              <CardFooter className="flex-col items-center gap-2 text-xs sm:text-sm">
+                <div className="flex flex-wrap items-center gap-2 font-medium leading-none">
+                  <div className="flex items-center gap-1">
+                    <div className="h-3 w-3 rounded-full bg-[#57D385]"></div>
+                    <span>Menor a 1000</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-3 w-3 rounded-full bg-[#F2CE5E]"></div>
+                    <span>Entre 1000 y 2000</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-3 w-3 rounded-full bg-[#F26565]"></div>
+                    <span>Mayor a 2000</span>
+                  </div>
+                </div>
+              </CardFooter>
+            )}
+          </Card>
+        </div>
       </div>
     </div>
   );

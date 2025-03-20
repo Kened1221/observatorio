@@ -7,10 +7,10 @@ export default function Home() {
   return (
     <div className="min-h-screen flex flex-col pt-12">
       <div className="w-full h-full mx-auto">
-        <MapAnemia />
+        <HeroSection />
       </div>
       <div className="w-full h-full mx-auto">
-        <HeroSection />
+        <MapAnemia />
       </div>
       <div className="w-full h-full mx-auto">
         <TopicsGrid />

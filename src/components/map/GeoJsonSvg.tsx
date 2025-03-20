@@ -1,8 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Button } from "../ui/button";
-import { IoChevronBack } from "react-icons/io5";
+import LogoutButton from "../animation/button-animation";
 
 // Ruta del archivo GeoJSON
 const GEOJSON_URL = "/data/distritos-peru.geojson";
@@ -42,6 +41,7 @@ interface GeoJSONMap {
     distrito: string;
     puntuacion: number;
   }[];
+  big?: boolean;
 }
 
 interface GeoJSONData {
@@ -65,6 +65,7 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
   setProvincia,
   setDistrito,
   data,
+  big = false,
 }) => {
   const [geoData, setGeoData] = useState<GeoJSONData | null>(null);
   const [tooltip, setTooltip] = useState<TooltipInfo>({
@@ -137,21 +138,40 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
     const maxBrightness = 80; // Brillo máximo
     const minBrightness = 30; // Brillo mínimo
 
-    if (puntuacion < 1000) {
-      const maxPuntuacion = 1000; // Puntuación máxima para normalizar
-      const brightness =
-        maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
-      return `hsl(100, 100%, ${brightness}%)`; // Color verde para puntuaciones bajas
-    } else if (puntuacion >= 1000 && puntuacion < 2000) {
-      const maxPuntuacion = 2000; // Puntuación máxima para normalizar
-      const brightness =
-        maxBrightness - ((puntuacion - 1000) / maxPuntuacion) * minBrightness;
-      return `hsl(50, 100%, ${brightness}%)`; // Color amarillo para puntuaciones medias
+    if (big) {
+      if (puntuacion < 5000) {
+        const maxPuntuacion = 5000; // Puntuación máxima para normalizar
+        const brightness =
+          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+        return `hsl(100, 100%, ${brightness}%)`; // Color verde para puntuaciones bajas
+      } else if (puntuacion >= 5000 && puntuacion < 20000) {
+        const maxPuntuacion = 20000; // Puntuación máxima para normalizar
+        const brightness =
+          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+        return `hsl(50, 100%, ${brightness}%)`; // Color amarillo para puntuaciones medias
+      } else {
+        const maxPuntuacion = 100000; // Puntuación máxima para normalizar
+        const brightness =
+          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+        return `hsl(0, 100%, ${brightness}%)`; // Color rojo para puntuaciones altas
+      }
     } else {
-      const maxPuntuacion = 3000; // Puntuación máxima para normalizar
-      const brightness =
-        maxBrightness - ((puntuacion - 2000) / maxPuntuacion) * minBrightness;
-      return `hsl(0, 100%, ${brightness}%)`; // Color rojo para puntuaciones altas
+      if (puntuacion < 1000) {
+        const maxPuntuacion = 1000; // Puntuación máxima para normalizar
+        const brightness =
+          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+        return `hsl(100, 100%, ${brightness}%)`; // Color verde para puntuaciones bajas
+      } else if (puntuacion >= 1000 && puntuacion < 2000) {
+        const maxPuntuacion = 2000; // Puntuación máxima para normalizar
+        const brightness =
+          maxBrightness - ((puntuacion - 1000) / maxPuntuacion) * minBrightness;
+        return `hsl(50, 100%, ${brightness}%)`; // Color amarillo para puntuaciones medias
+      } else {
+        const maxPuntuacion = 3000; // Puntuación máxima para normalizar
+        const brightness =
+          maxBrightness - ((puntuacion - 2000) / maxPuntuacion) * minBrightness;
+        return `hsl(0, 100%, ${brightness}%)`; // Color rojo para puntuaciones altas
+      }
     }
   };
 
@@ -227,18 +247,14 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
 
   return (
     <div className="flex flex-col w-full h-full items-center justify-center gap-4">
-      <div className="flex flex-row w-full justify-center gap-6">
+      <div className="flex flex-row w-full items-center justify-center gap-6">
         {(provincia !== "" || distrito !== "") && (
-          <Button
-            className="bg-red-500 hover:bg-red-400 text-white font-semibold py-2 px-4 rounded-lg shadow-md transition-all duration-300 transform hover:scale-105"
-            onClick={handleVolver}
-          >
-            <IoChevronBack className="text-lg" />
-            <span className="ml-2">Volver</span>
-          </Button>
+          <LogoutButton onClick={handleVolver} />
         )}
 
-        <h1 className="text-sm lg:text-xl font-bold mb-4">{getTitulo()}</h1>
+        <h1 className="text-sm lg:text-xl font-bold text-gray-700 dark:text-gray-200">
+          {getTitulo()}
+        </h1>
       </div>
 
       <div className="w-full h-full relative">
@@ -288,17 +304,17 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
 
             // Destacar el elemento seleccionado
             let isSelected = false;
-            
+
             if (distrito !== "") {
               // Destacar el distrito seleccionado
-              isSelected = 
-                feature.properties.nombdist === distrito && 
+              isSelected =
+                feature.properties.nombdist === distrito &&
                 feature.properties.nombprov === provincia;
             } else if (provincia !== "") {
               // Destacar todos los distritos de la provincia seleccionada
               isSelected = feature.properties.nombprov === provincia;
             }
-              
+
             const strokeWidth = isSelected ? "3" : "1";
             const strokeColor = isSelected ? "black" : "#333";
 

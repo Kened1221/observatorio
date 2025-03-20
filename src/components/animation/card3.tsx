@@ -1,16 +1,15 @@
 "use client";
 import React from "react";
-import styled from "styled-components";
 
 interface Topic {
-  id: number;
+  id?: number;
   title: string;
   imageUrl: string;
   linkUrl: string;
   description: string;
-  backend: string;
-  borderColor: string;
-  frontend: string;
+  backend?: string;
+  borderColor?: string;
+  frontend?: string;
 }
 
 interface CardProps {
@@ -18,131 +17,40 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ topic }) => {
+  const frontend = topic.frontend || "#FF6B6B";
+  const backend = topic.backend || "#4ECDC4";
+  const borderColor = topic.borderColor || "#45B7D1";
+
   return (
-    <StyledWrapper
-      borderColor={topic.borderColor}
-      backend={topic.backend}
-      frontend={topic.frontend}
+    <div
+      className="relative w-[300px] h-[400px] overflow-hidden rounded-[40px] border-2 transition-all duration-300 ease-in-out hover:shadow-[0px_2px_2px_#fff] group"
+      style={{
+        backgroundColor: frontend,
+        borderColor: borderColor,
+      }}
     >
-      <div className="card">
-        <div
-          className="top-card"
-          style={{ backgroundImage: `url(${topic.imageUrl})` }}
-        />
-        <div className="bottom-card">
-          <div className="card-content">
-            <span className="card-title">{topic.title}</span>
-            <p className="card-txt">{topic.description}</p>
-            <a href={topic.linkUrl} className="card-btn">
-              Detalles
-            </a>
-          </div>
+      <div
+        className="h-[65%] transition-all duration-300 ease-in-out group-hover:h-[36%] bg-cover bg-center rounded-t-[20px]"
+        style={{ backgroundImage: `url(${topic.imageUrl})` }}
+      />
+      <div
+        className="relative h-[37%] transition-all duration-300 ease-in-out group-hover:h-[65%] rounded-tr-[20px] rounded-bl-[18px] rounded-br-[18px]"
+        style={{ backgroundColor: backend }}
+      >
+        <div className="absolute bottom-[89px] group-hover:bottom-[164px] transition-all duration-300 ease-in-out w-[175px] h-[52px]" />
+        <div className="pt-[13%] flex flex-col justify-center items-center text-white">
+          <span className="font-bold text-[18px]">{topic.title}</span>
+          <p className="text-[14px] pl-[5%]">{topic.description}</p>
+          <a
+            href={topic.linkUrl}
+            className="text-[13px] mt-[15%] no-underline text-white border-2 border-white rounded-[15px] p-[5%] hover:bg-white hover:text-black transition-colors duration-400 ease-in-out"
+          >
+            Detalles
+          </a>
         </div>
       </div>
-    </StyledWrapper>
+    </div>
   );
 };
-
-// Styled Component que recibe las props dinámicas para los colores
-const StyledWrapper = styled.div.withConfig({
-  shouldForwardProp: (prop) =>
-    prop !== "borderColor" && prop !== "backend" && prop !== "frontend",
-})<{ borderColor: string; backend: string; frontend: string }>`
-  .card {
-    position: relative;
-    width: 300px;
-    height: 400px;
-    background-color: ${(props) => props.frontend};
-    border-radius: 40px;
-    overflow: hidden;
-    border: solid 2px ${(props) => props.borderColor};
-    transition: box-shadow 0.3s ease, border 0.3s ease;
-  }
-
-  .top-card {
-    border-top-left-radius: 20px;
-    border-top-right-radius: 20px;
-    height: 65%;
-    transition: height 0.3s ease;
-    background-size: cover;
-    background-position: center;
-  }
-
-  .bottom-card {
-    border-top-right-radius: 20px;
-    border-bottom-left-radius: 18px;
-    border-bottom-right-radius: 18px;
-    height: 37%;
-    background-color: ${(props) => props.backend};
-    transition: height 0.3s ease;
-  }
-
-  .bottom-card::before {
-    content: "";
-    position: absolute;
-    background-color: transparent;
-    bottom: 89px;
-    height: 52px;
-    width: 175px;
-    transition: bottom 0.3s ease;
-    border-bottom-left-radius: 20px;
-  }
-
-  .card-content {
-    padding-top: 13%;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: #fff; // Usamos el frontend dinámico
-  }
-
-  .card-title {
-    font-weight: 700;
-    font-size: 18px;
-  }
-
-  .card-txt {
-    font-size: 14px;
-    padding-left: 5%;
-  }
-
-  .card-btn {
-    font-size: 13px;
-    margin-top: 15%;
-    text-decoration: none;
-    color: #fff; // Usamos el frontend dinámico
-    background-color: transparent;
-    border: solid 2px #fff; // Usamos el frontend dinámico
-    border-radius: 15px;
-    padding: 5%;
-  }
-
-  .card:hover {
-    box-shadow: 0px 2px 2px #fff; // Aplicamos el hover con el borderColor
-    border: solid 1px ${(props) => props.borderColor}; // Aplicamos el borderColor dinámico al hover
-  }
-
-  .card:hover .top-card {
-    height: 36%;
-    transition: height 0.3s ease;
-  }
-
-  .card:hover .bottom-card {
-    height: 65%;
-    transition: height 0.3s ease;
-  }
-
-  .card:hover .bottom-card::before {
-    bottom: 164px;
-    transition: bottom 0.3s ease;
-  }
-
-  .card-btn:hover {
-    color: black;
-    background-color: #fff; // Color de fondo en hover dinámico
-    transition: background-color 0.4s ease;
-  }
-`;
 
 export default Card;
