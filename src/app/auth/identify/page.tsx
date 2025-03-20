@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { Key } from "lucide-react";
+import { Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -10,7 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function VerifyCodePage() {
+export default function ForgotPasswordPage() {
   return (
     <div className="flex h-screen bg-background">
       <div className="flex w-full h-full justify-center flex-col p-4 lg:w-1/2">
@@ -18,34 +18,34 @@ export default function VerifyCodePage() {
           <Card className="mx-auto w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm">
             <div className="mb-8">
               <h1 className="text-2xl font-semibold text-primary">
-                Verificar código
+                ¿Olvidaste tu contraseña?
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                Ingresa el código que recibiste en tu correo electrónico.
+                Ingresa tu correo electrónico para recibir un código de recuperación.
               </p>
             </div>
 
             <CardContent className="space-y-4 p-0">
               <div className="space-y-2">
-                <Label htmlFor="code">Código de verificación</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <div className="relative">
-                  <Key className="absolute left-3 top-4 h-5 w-5 text-muted-foreground" />
+                  <Mail className="absolute left-3 top-4 h-5 w-5 text-muted-foreground" />
                   <Input
-                    id="code"
-                    type="text"
-                    placeholder="Ingresa el código"
+                    id="email"
+                    type="email"
+                    placeholder="Ingresa tu correo"
                     className="pl-10 py-6"
                   />
                 </div>
               </div>
 
               <Button className="w-full bg-primary hover:bg-primary/90 hover:cursor-pointer py-5">
-                Verificar código
+                Enviar código
               </Button>
 
               <div className="mt-4 text-center">
-                <Link href="/admin/auth/identify" className="text-sm text-blue-500 hover:underline">
-                  Volver a enviar el código
+                <Link href="/auth/login" className="text-sm text-blue-500 hover:underline">
+                  Volver al inicio de sesión
                 </Link>
               </div>
             </CardContent>
@@ -68,7 +68,7 @@ export default function VerifyCodePage() {
           }}
         >
           <Image
-            src={"/admin/logos/login-background.jpg"}
+            src={"/adm/logos/login-background.jpg"}
             alt="back-admin"
             width={1000}
             height={1000}
@@ -82,7 +82,7 @@ export default function VerifyCodePage() {
           }}
         >
           <Image
-            src={"/admin/logos/logo.png"}
+            src={"/adm/logos/logo.png"}
             alt="logo"
             width={100}
             height={300}

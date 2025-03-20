@@ -51,7 +51,7 @@ export default function LoginWithImagePage() {
                 <div className="flex items-center justify-between">
                   <Label htmlFor="password">Contraseña</Label>
                   <Link
-                    href="/admin/auth/identify"
+                    href="/auth/identify"
                     className="text-xs text-blue-500 hover:underline"
                   >
                     ¿Olvidaste tu contraseña?
@@ -130,7 +130,7 @@ export default function LoginWithImagePage() {
           }}
         >
           <Image
-            src={"/admin/logos/login-background.jpg"}
+            src={"/adm/logos/login-background.jpg"}
             alt="back-admin"
             width={1000}
             height={1000}
@@ -144,7 +144,7 @@ export default function LoginWithImagePage() {
           }}
         >
           <Image
-            src={"/admin/logos/logo.png"}
+            src={"/adm/logos/logo.png"}
             alt="logo"
             width={100}
             height={300}

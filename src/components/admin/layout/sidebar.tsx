@@ -64,7 +64,7 @@ export default function AppSidebar({
           {!isCollapsed ? (
             <div className="flex items-center gap-4 font-semibold p-6">
               <Image
-                src={"/admin/logos/logo.png"}
+                src={"/adm/logos/logo.png"}
                 alt="logo"
                 width={40}
                 height={20}
@@ -74,7 +74,7 @@ export default function AppSidebar({
           ) : (
             <div className="p-2">
               <Image
-                src={"/admin/logos/logo.png"}
+                src={"/adm/logos/logo.png"}
                 alt="logo"
                 width={20}
                 height={20}

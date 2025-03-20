@@ -92,7 +92,7 @@ export default function ResetPasswordPage() {
               </Button>
 
               <div className="mt-4 text-center">
-                <Link href="/admin/auth/login" className="text-sm text-blue-500 hover:underline">
+                <Link href="/auth/login" className="text-sm text-blue-500 hover:underline">
                   Volver al inicio de sesión
                 </Link>
               </div>
@@ -116,7 +116,7 @@ export default function ResetPasswordPage() {
           }}
         >
           <Image
-            src={"/admin/logos/login-background.jpg"}
+            src={"/adm/logos/login-background.jpg"}
             alt="back-admin"
             width={1000}
             height={1000}
@@ -130,7 +130,7 @@ export default function ResetPasswordPage() {
           }}
         >
           <Image
-            src={"/admin/logos/logo.png"}
+            src={"/adm/logos/logo.png"}
             alt="logo"
             width={100}
             height={300}
