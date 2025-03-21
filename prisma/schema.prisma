@@ -9,6 +9,123 @@ generator client {
   provider = "prisma-client-js"
 }
 
+model Account {
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([provider, providerAccountId])
+}
+
+model Session {
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  status       String   @default("active")
+  deviceInfo   String?
+  ipAddress    String?
+  location     String?
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Authenticator {
+  credentialID         String  @unique
+  userId               String
+  providerAccountId    String
+  credentialPublicKey  String
+  counter              Int
+  credentialDeviceType String
+  credentialBackedUp   Boolean
+  transports           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, credentialID])
+}
+
+// Modelo de Rol
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique // Ej: "Admin", "Editor", "Custom"
+  description String? // Descripción opcional del rol
+  isCustom    Boolean          @default(false) // Indica si es un rol personalizado
+  users       User[] // Relación muchos-a-muchos con User
+  permissions RolePermission[] // Permisos asociados al rol
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+// Modelo de Módulo (para representar módulos y submódulos)
+model Module {
+  id          String           @id @default(cuid())
+  name        String           @unique // Ej: "Salud y Nutrición", "Protección Social"
+  url         String?
+  parentId    String? // Si es submódulo, referencia al módulo padre
+  parent      Module?          @relation("Submodules", fields: [parentId], references: [id])
+  submodules  Module[]         @relation("Submodules") // Relación jerárquica
+  permissions RolePermission[] // Permisos asociados al módulo
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+// Modelo de Permisos por Rol y Módulo
+model RolePermission {
+  id        String  @id @default(cuid())
+  roleId    String
+  moduleId  String
+  canRead   Boolean @default(false) // Permiso de lectura
+  canWrite  Boolean @default(false)
+  canEdit   Boolean @default(false) // Permiso de edición
+  canDelete Boolean @default(false) // Permiso de eliminación
+
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, moduleId]) // Un rol no puede tener múltiples permisos para el mismo módulo
+}
+
+// Modificación al modelo User para incluir roles
+model User {
+  id            String          @id @default(cuid())
+  name          String?
+  email         String          @unique
+  passwordHash  String?
+  emailVerified DateTime?
+  image         String?
+  accounts      Account[]
+  sessions      Session[]
+  Authenticator Authenticator[]
+  roles         Role[] // Relación muchos-a-muchos con Role
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+
 // Modelo: Departamento
 model Departamento {
   id         Int         @id @default(autoincrement())
