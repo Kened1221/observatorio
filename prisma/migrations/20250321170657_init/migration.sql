@@ -38,14 +38,39 @@ CREATE TABLE "Encuesta" (
 -- CreateTable
 CREATE TABLE "Rango" (
     "id" SERIAL NOT NULL,
-    "distrito_id" INTEGER NOT NULL,
-    "rango" INTEGER NOT NULL,
-    "hombres" INTEGER NOT NULL,
-    "mujeres" INTEGER NOT NULL,
-    "rural" INTEGER NOT NULL,
-    "urbano" INTEGER NOT NULL,
+    "edad_id" INTEGER NOT NULL,
+    "poblacion_id" INTEGER NOT NULL,
+    "ambito_ident" INTEGER NOT NULL,
 
     CONSTRAINT "Rango_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Edad" (
+    "id" SERIAL NOT NULL,
+    "edadIntervalo" TEXT NOT NULL,
+
+    CONSTRAINT "Edad_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Poblacion" (
+    "id" SERIAL NOT NULL,
+    "hombres" INTEGER NOT NULL,
+    "mujeres" INTEGER NOT NULL,
+    "rango_id" INTEGER NOT NULL,
+
+    CONSTRAINT "Poblacion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Ambito" (
+    "id" SERIAL NOT NULL,
+    "rural" INTEGER NOT NULL,
+    "urbano" INTEGER NOT NULL,
+    "rango_id" INTEGER NOT NULL,
+
+    CONSTRAINT "Ambito_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -70,4 +95,10 @@ ALTER TABLE "Encuesta" ADD CONSTRAINT "Encuesta_distrito_id_fkey" FOREIGN KEY ("
 ALTER TABLE "Encuesta" ADD CONSTRAINT "Encuesta_rango_id_fkey" FOREIGN KEY ("rango_id") REFERENCES "Rango"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Rango" ADD CONSTRAINT "Rango_distrito_id_fkey" FOREIGN KEY ("distrito_id") REFERENCES "Distrito"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Rango" ADD CONSTRAINT "Rango_edad_id_fkey" FOREIGN KEY ("edad_id") REFERENCES "Edad"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Poblacion" ADD CONSTRAINT "Poblacion_rango_id_fkey" FOREIGN KEY ("rango_id") REFERENCES "Rango"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Ambito" ADD CONSTRAINT "Ambito_rango_id_fkey" FOREIGN KEY ("rango_id") REFERENCES "Rango"("id") ON DELETE CASCADE ON UPDATE CASCADE;

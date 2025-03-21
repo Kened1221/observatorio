@@ -34,7 +34,6 @@ model Distrito {
   provinciaId Int        @map("provincia_id")
   provincia   Provincia  @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
   encuestas   Encuesta[] // Relación uno a muchos con Encuesta
-  Rango       Rango[]
 }
 
 // Modelo: Encuesta
@@ -52,13 +51,38 @@ model Encuesta {
 
 // Modelo: Rango
 model Rango {
-  id         Int        @id @default(autoincrement())
-  distritoId Int        @map("distrito_id")
-  rango      Int
-  hombres    Int
-  mujeres    Int
-  rural      Int
-  urbano     Int
-  encuestas  Encuesta[] // Relación uno a muchos con Encuesta
-  distrito   Distrito   @relation(fields: [distritoId], references: [id], onDelete: Cascade)
+  id          Int @id @default(autoincrement())
+  edadId      Int @map("edad_id")
+  poblacionId Int @map("poblacion_id")
+  ambitoId    Int @map("ambito_ident")
+
+  encuestas Encuesta[] // Relación uno a muchos con Encuesta
+  poblacion Poblacion[] // Relación uno a muchos con Encuesta
+  Ambito    Ambito[] // Relación uno a muchos con Encuesta
+  Edad      Edad        @relation(fields: [edadId], references: [id])
+}
+
+// Modelo: Edad
+model Edad {
+  id            Int     @id @default(autoincrement())
+  edadIntervalo String
+  rangos        Rango[]
+}
+
+// Modelo: Poblacion
+model Poblacion {
+  id      Int   @id @default(autoincrement())
+  hombres Int
+  mujeres Int
+  rangoId Int   @map("rango_id")
+  rango   Rango @relation(fields: [rangoId], references: [id], onDelete: Cascade)
+}
+
+// Modelo: Ambito
+model Ambito {
+  id      Int   @id @default(autoincrement())
+  rural   Int
+  urbano  Int
+  rangoId Int   @map("rango_id")
+  rango   Rango @relation(fields: [rangoId], references: [id], onDelete: Cascade)
 }

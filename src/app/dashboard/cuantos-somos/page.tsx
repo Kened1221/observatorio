@@ -85,10 +85,10 @@ export default function Page() {
           />
         </div>
 
-        <div className="flex flex-col items-center space-y-8">
+        <div className="flex flex-col items-center space-y-8 justify-center">
           <div className="flex flex-col items-center">
             <Button setPAselect={setPAselect} />
-            <MdPeopleAlt className="text-9xl" />
+            <MdPeopleAlt className="text-9xl text-stone-600" />
             <p className="text-7xl font-bold">{selectedDistrict.puntuacion}</p>
           </div>
           <div className="flex w-full justify-center">
