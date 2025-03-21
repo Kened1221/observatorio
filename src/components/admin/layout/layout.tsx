@@ -6,12 +6,14 @@ import Navbar from "./navbar";
 import React from "react";
 
 import { usePathname } from 'next/navigation'
+import { Session } from "next-auth";
 
-function Layout({
-  children,
-}: Readonly<{
+interface AdminLayoutProps {
+  session: Session
   children: React.ReactNode;
-}>) {
+}
+
+function Layout({ children, session }: AdminLayoutProps) {
   const pathname = usePathname()
 
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
@@ -23,9 +25,9 @@ function Layout({
   return (
     <SidebarProvider>
       <div className="flex h-screen bg-background p-4 w-full gap-4">
-        <AppSidebar hoveredItem={hoveredItem} setHoveredItem={setHoveredItem} />
+        <AppSidebar session={session} hoveredItem={hoveredItem} setHoveredItem={setHoveredItem} />
         <SidebarInset className="flex-1 rounded-lg border border-border bg-card shadow-sm overflow-y-auto">
-          <Navbar />
+          <Navbar session={session}/>
           {children}
         </SidebarInset>
       </div>

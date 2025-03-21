@@ -7,6 +7,7 @@ import {
 import {
   Sidebar,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
   SidebarHeader,
@@ -23,12 +24,20 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 
+import { Button } from "@/components/ui/button";
+import { signOut } from "next-auth/react";
+import { Session } from "next-auth";
+import { signOutSession } from "@/actions/auth";
+
+
 export default function AppSidebar({
   hoveredItem,
   setHoveredItem,
+  session
 }: {
   hoveredItem: string | null;
   setHoveredItem: (item: string | null) => void;
+  session: Session
 }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -53,6 +62,13 @@ export default function AppSidebar({
   const handleMouseLeave = () => {
     setHoveredItem(null);
   };
+
+  const handleCloseSession = async () => {
+
+    const idUser = session.user.id;
+    await signOutSession(idUser);
+    await signOut()
+  }
 
   return (
     <>
@@ -117,7 +133,9 @@ export default function AppSidebar({
                                     ? "bg-primary text-white"
                                     : "data-[active=true]:bg-primary data-[active=true]:text-white"
                                 } hover:cursor-pointer`}
-                                onMouseEnter={(e) => handleMouseEnter(item.label, e)}
+                                onMouseEnter={(e) =>
+                                  handleMouseEnter(item.label, e)
+                                }
                                 onMouseLeave={handleMouseLeave}
                               >
                                 {item.icon && <item.icon width={16} />}
@@ -128,7 +146,8 @@ export default function AppSidebar({
                             <CollapsibleContent>
                               <SidebarMenuSub>
                                 {item.items.map((subitem, j) => {
-                                  const isSubItemActive = subitem.url === pathname;
+                                  const isSubItemActive =
+                                    subitem.url === pathname;
                                   return (
                                     <Link
                                       href={subitem.url}
@@ -139,7 +158,9 @@ export default function AppSidebar({
                                           : "hover:bg-primary hover:text-white"
                                       }`}
                                     >
-                                      {subitem.icon && <subitem.icon width={16} />}
+                                      {subitem.icon && (
+                                        <subitem.icon width={16} />
+                                      )}
                                       <span>{subitem.label}</span>
                                     </Link>
                                   );
@@ -156,7 +177,9 @@ export default function AppSidebar({
                                 ? "bg-primary text-white"
                                 : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
                             } hover:cursor-pointer`}
-                            onMouseEnter={(e) => handleMouseEnter(item.label, e)}
+                            onMouseEnter={(e) =>
+                              handleMouseEnter(item.label, e)
+                            }
                             onMouseLeave={handleMouseLeave}
                             tooltip={item.items ? undefined : item.label}
                           >
@@ -172,6 +195,11 @@ export default function AppSidebar({
             </SidebarGroup>
           ))}
         </SidebarContent>
+        <SidebarFooter>
+          <Button variant={"destructive"} onClick={handleCloseSession}>
+            Cerrar sesión
+          </Button>
+        </SidebarFooter>
         <SidebarRail />
       </Sidebar>
 

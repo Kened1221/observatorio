@@ -7,10 +7,14 @@ import {
   Bell,
   Fullscreen,
   Search,
-  Settings,
 } from "lucide-react";
+import { Session } from "next-auth";
 
-function Navbar() {
+interface NavbarProps {
+  session: Session;
+}
+
+function Navbar({session}: NavbarProps) {
 
   const handleToggleFullscreen = () => {
     // Si no estamos en fullscreen, lo activamos
@@ -26,10 +30,12 @@ function Navbar() {
     }
   };
 
+  console.log(session);
+
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card/40 p-6 rounded-t-lg backdrop-blur-sm">
       <SidebarTrigger className="hover:cursor-pointer" />
-      <div className="relative w-full max-w-sm">
+      <div className="relative w-full max-w-sm hidden md:block">
         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
@@ -50,10 +56,6 @@ function Navbar() {
           <Bell className="h-5 w-5" />
           <span className="sr-only">Notificaciones</span>
         </Button>
-        <Button variant="ghost" size="icon" className="hover:cursor-pointer">
-          <Settings className="h-5 w-5" />
-          <span className="sr-only">Configuraciones</span>
-        </Button>
         <div className="flex items-center gap-2">
           <img
             src="https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png"
@@ -63,8 +65,8 @@ function Navbar() {
             className="rounded-full"
           />
           <div className="hidden text-sm md:block">
-            <div className="font-medium text-primary">Miguel Ramirez</div>
-            <div className="text-xs text-muted-foreground">Administrador</div>
+            <div className="font-medium text-primary">{session.user.name}</div>
+            <div className="text-xs text-muted-foreground">{session.user.role}</div>
           </div>
         </div>
       </div>
