@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
+import { AiFillCaretDown } from "react-icons/ai";
+import { AiFillCaretUp } from "react-icons/ai";
 
 interface ButtonProps {
   setPAselect: (value: string) => void; // Prop para actualizar el estado del padre
@@ -28,8 +30,9 @@ const Button = ({ setPAselect }: ButtonProps) => {
                    px-4 py-3 bg-blue-500 transition-transform duration-500 
                  ${isClicked ? "-translate-y-[50px]" : "translate-y-0"}`}
       >
-        <span className="text-white text-center text-[17px] font-bold">
+        <span className="flex flex-row text-white text-center text-[17px] font-bold items-center gap-4">
           Población
+          <AiFillCaretDown />
         </span>
       </div>
 
@@ -39,8 +42,9 @@ const Button = ({ setPAselect }: ButtonProps) => {
                    px-4 py-3 bg-green-500 transition-transform duration-500 
                  ${isClicked ? "translate-y-0" : "translate-y-[50px]"}`}
       >
-        <span className="text-white text-center text-[17px] font-bold">
+        <span className="flex flex-row text-white text-center text-[17px] font-bold items-center gap-4">
           Ámbito
+          <AiFillCaretUp />
         </span>
       </div>
     </button>

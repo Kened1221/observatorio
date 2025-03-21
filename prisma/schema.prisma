@@ -1,49 +1,64 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
-generator client {
-  provider = "prisma-client-js"
-}
-
+// Configuración del datasource (base de datos)
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-model Edad {
-  id       String @id @default(cuid())
-  rango    String @unique // Ejemplo: '6 a 11 años', '12 a 17 años'
-  cantidad Int
+// Generador para el cliente de Prisma
+generator client {
+  provider = "prisma-client-js"
 }
 
-model Sexo {
-  id       String @id @default(cuid())
-  genero   String @unique // MASCULINO, FEMENINO, PREFIERO_NO_RESPONDER
-  cantidad Int
+// Modelo: Departamento
+model Departamento {
+  id         Int         @id @default(autoincrement())
+  nombre     String      @unique @db.VarChar(100)
+  provincias Provincia[] // Relación uno a muchos con Provincia
+  encuestas  Encuesta[] // Relación uno a muchos con Encuesta
 }
 
-model Nacionalidad {
-  id       String @id @default(cuid())
-  nombre   String @unique // Ejemplo: 'Peruana', 'Venezolana'
-  cantidad Int
+// Modelo: Provincia
+model Provincia {
+  id             Int          @id @default(autoincrement())
+  nombre         String       @db.VarChar(100)
+  departamentoId Int          @map("departamento_id")
+  departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
+  distritos      Distrito[] // Relación uno a muchos con Distrito
+  encuestas      Encuesta[] // Relación uno a muchos con Encuesta
 }
 
+// Modelo: Distrito
 model Distrito {
-  id       String @id @default(cuid())
-  nombre   String @unique // Ejemplo: 'Ayacucho', 'Quinua'
-  cantidad Int
+  id          Int        @id @default(autoincrement())
+  nombre      String     @db.VarChar(100)
+  provinciaId Int        @map("provincia_id")
+  provincia   Provincia  @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
+  encuestas   Encuesta[] // Relación uno a muchos con Encuesta
+  Rango       Rango[]
 }
 
-model TipoPoblacion {
-  id       String @id @default(cuid())
-  tipo     String @unique // Ejemplo: 'Estudiante de secundaria'
-  cantidad Int
+// Modelo: Encuesta
+model Encuesta {
+  id             Int          @id @default(autoincrement())
+  departamentoId Int          @map("departamento_id")
+  provinciaId    Int          @map("provincia_id")
+  distritoId     Int          @map("distrito_id")
+  rangoId        Int          @map("rango_id")
+  departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
+  provincia      Provincia    @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
+  distrito       Distrito     @relation(fields: [distritoId], references: [id], onDelete: Cascade)
+  rango          Rango        @relation(fields: [rangoId], references: [id], onDelete: Cascade)
 }
 
-model TotalEncuestados {
-  id    String @id @default(cuid())
-  total Int
+// Modelo: Rango
+model Rango {
+  id         Int        @id @default(autoincrement())
+  distritoId Int        @map("distrito_id")
+  rango      Int
+  hombres    Int
+  mujeres    Int
+  rural      Int
+  urbano     Int
+  encuestas  Encuesta[] // Relación uno a muchos con Encuesta
+  distrito   Distrito   @relation(fields: [distritoId], references: [id], onDelete: Cascade)
 }
