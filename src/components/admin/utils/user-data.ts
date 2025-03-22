@@ -20,6 +20,7 @@ interface UserData {
   deviceInfo: string | null; // Ahora es un string (JSON.stringify)
   ipAddress: string | null; // Ya es un string, no necesita cambio
   location: string | null; // Ahora es un string (JSON.stringify)
+  isReady: boolean; // Nuevo campo para indicar que los datos están listos
 }
 
 // Tipos originales para parsear los datos de vuelta
@@ -34,25 +35,26 @@ export const useUserData = (): UserData => {
   const [deviceInfo, setDeviceInfo] = useState<string | null>(null);
   const [ipAddress, setIpAddress] = useState<string | null>(null);
   const [location, setLocation] = useState<string | null>(null);
+  const [isReady, setIsReady] = useState(false); // Nuevo estado
 
   useEffect(() => {
-    // Obtener deviceInfo
-    const info: DeviceInfo = {
-      userAgent: navigator.userAgent,
-      platform: navigator.platform,
-      language: navigator.language,
-    };
-    setDeviceInfo(JSON.stringify(info)); // Convertimos a texto plano
-
-    // Obtener IP pública
-    const fetchIp = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch("https://api.ipify.org?format=json");
-        const data = await response.json();
-        setIpAddress(data.ip); // ipAddress ya es un string
+        // Obtener deviceInfo (síncrono)
+        const info: DeviceInfo = {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language,
+        };
+        setDeviceInfo(JSON.stringify(info));
+
+        // Obtener IP pública
+        const ipResponse = await fetch("https://api.ipify.org?format=json");
+        const ipData = await ipResponse.json();
+        setIpAddress(ipData.ip);
 
         // Obtener ubicación basada en la IP
-        const locationResponse = await fetch(`http://ip-api.com/json/${data.ip}`);
+        const locationResponse = await fetch(`http://ip-api.com/json/${ipData.ip}`);
         const locationData = await locationResponse.json();
         const locationInfo: LocationData = {
           city: locationData.city,
@@ -60,16 +62,29 @@ export const useUserData = (): UserData => {
           lat: locationData.lat,
           lon: locationData.lon,
         };
-        setLocation(JSON.stringify(locationInfo)); // Convertimos a texto plano
+        setLocation(JSON.stringify(locationInfo));
       } catch (error) {
         console.error("Error al obtener datos:", error);
+        // Establecer valores por defecto en caso de error
+        if (!deviceInfo) {
+          const info: DeviceInfo = {
+            userAgent: navigator.userAgent,
+            platform: navigator.platform,
+            language: navigator.language,
+          };
+          setDeviceInfo(JSON.stringify(info));
+        }
+        if (!ipAddress) setIpAddress("unknown");
+        if (!location) setLocation("unknown");
+      } finally {
+        setIsReady(true); // Marcar como listo, incluso si hay errores
       }
     };
 
-    fetchIp();
-  }, []);
+    fetchData();
+  }, []); // Solo se ejecuta una vez al montar
 
-  return { deviceInfo, ipAddress, location };
+  return { deviceInfo, ipAddress, location, isReady };
 };
 
 // Función para parsear los datos de texto plano a su formato original

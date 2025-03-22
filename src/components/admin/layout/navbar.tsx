@@ -30,8 +30,6 @@ function Navbar({session}: NavbarProps) {
     }
   };
 
-  console.log(session);
-
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-card/40 p-6 rounded-t-lg backdrop-blur-sm">
       <SidebarTrigger className="hover:cursor-pointer" />
