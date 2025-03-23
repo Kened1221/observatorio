@@ -61,8 +61,8 @@ const Sessions = ({ userId }: SessionsProps) => {
       <h2 className="text-lg font-medium">Sesiones Activas</h2>
       <p className="mt-1 text-sm">Dispositivos donde tu cuenta está actualmente conectada.</p>
       <ul className="mt-5 divide-y">
-        {activeSessions.map((session) => (
-          <li key={session.id} className="py-4 flex items-center justify-between">
+        {activeSessions.map((session, i) => (
+          <li key={i} className="py-4 flex items-center justify-between">
             <div className="flex items-center">
               <Smartphone className="w-10 h-10" />
               <div className="ml-3">

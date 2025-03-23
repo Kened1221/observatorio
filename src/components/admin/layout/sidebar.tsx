@@ -18,26 +18,24 @@ import {
   SidebarRail,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
 import { Session } from "next-auth";
 import { signOutSession } from "@/actions/auth";
 
-
 export default function AppSidebar({
   hoveredItem,
   setHoveredItem,
-  session
+  session,
 }: {
   hoveredItem: string | null;
   setHoveredItem: (item: string | null) => void;
-  session: Session
+  session: Session;
 }) {
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
@@ -64,11 +62,10 @@ export default function AppSidebar({
   };
 
   const handleCloseSession = async () => {
-
     const idUser = session.user.id;
     await signOutSession(idUser);
-    await signOut()
-  }
+    await signOut();
+  };
 
   return (
     <>
@@ -196,9 +193,14 @@ export default function AppSidebar({
           ))}
         </SidebarContent>
         <SidebarFooter>
-          <Button variant={"destructive"} onClick={handleCloseSession}>
-            Cerrar sesión
-          </Button>
+          <SidebarMenuButton
+            tooltip={"Cerrar sesión"}
+            className="bg-destructive text-white hover:bg-destructive/90 hover:text-white flex items-center gap-2 justify-center hover:cursor-pointer"
+            onClick={handleCloseSession}
+          >
+            <LogOut width={16} className={`transition-all duration-150 ${isCollapsed ? 'rotate-180' : ''}`}/>
+            {!isCollapsed && <span>Cerrar sesión</span>}
+          </SidebarMenuButton>
         </SidebarFooter>
         <SidebarRail />
       </Sidebar>

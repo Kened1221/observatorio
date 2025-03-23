@@ -70,3 +70,45 @@ export async function activeSessionsVerify({ id }: { id: string }) {
     return [];
   }
 }
+
+export async function historySessions({ id }: { id: string }) {
+  try {
+    const sessions = await prisma.session.findMany({
+      where: {
+        userId: id,
+      },
+    });
+
+    const mappedSessions = sessions.map((session) => {
+      let deviceData: DeviceInfo = {};
+      let locationData: LocationInfo = {};
+
+      try {
+        deviceData = session.deviceInfo ? JSON.parse(session.deviceInfo) as DeviceInfo : {};
+      } catch (error) {
+        console.log("Error al parsear deviceInfo:", error);
+        deviceData = {};
+      }
+      try {
+        locationData = session.location ? JSON.parse(session.location) as LocationInfo : {};
+      } catch (error) {
+        console.log("Error al parsear location:", error);
+        locationData = {};
+      }
+
+      return {
+        id: String(session.userId),
+        device: deviceData.platform || "Desconocido",
+        browser: deviceData.userAgent || "Desconocido",
+        location: locationData.city + " - " + locationData.country || "Desconocido",
+        timestamp: session.updatedAt.toISOString(),
+        status: session.status,
+      };
+    });
+
+    return mappedSessions;
+  } catch (error) {
+    console.error("Error al verificar sesiones activas:", error);
+    return [];
+  }
+}
