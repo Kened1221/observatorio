@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Layout from "@/components/admin/layout/layout";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { SessionProvider } from "next-auth/react";
 import { redirect } from "next/navigation";
 
 export default async function AdminLayout({
@@ -8,23 +9,17 @@ export default async function AdminLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-
-  
-  const session = await auth()
+  const session = await auth();
 
   if (!session) {
-    redirect('/auth/login')
+    redirect("/auth/login");
   }
-  
 
   return (
-    <ThemeProvider
-      attribute="class"
-      defaultTheme="system"
-      enableSystem
-      disableTransitionOnChange
-    >
-      <Layout session={session}>{children}</Layout>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <SessionProvider>
+        <Layout session={session}>{children}</Layout>
+      </SessionProvider>
     </ThemeProvider>
   );
 }

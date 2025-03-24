@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FaGoogle } from "react-icons/fa6";
-import { googleSessionAction, loginAction } from "@/actions/auth";
+import { loginAction } from "@/actions/auth";
 import { useUserData } from "@/components/admin/utils/user-data";
 import { signIn } from "next-auth/react";
 
@@ -27,7 +27,6 @@ export default function LoginWithImagePage() {
   const callbackUrl = searchParams.get("callbackUrl") || "/admin";
 
   const { deviceInfo, ipAddress, location } = useUserData();
-  console.log({ deviceInfo, ipAddress, location });
 
   const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -54,22 +53,8 @@ export default function LoginWithImagePage() {
     setLoading(true);
     setError("");
 
-    await signIn("google", {
-      callbackUrl: callbackUrl,
-    });
-
-    const result = await googleSessionAction({
-      deviceInfo,
-      ipAddress,
-      location,
-    })
-
-    if (result.success) {
-      router.push(callbackUrl);
-    } else {
-      setError(result.message || "Error al iniciar sesión con google");
-      setLoading(false);
-    }
+    await signIn("google", { redirect: false, callbackUrl });
+    setLoading(false);
   };
 
   return (

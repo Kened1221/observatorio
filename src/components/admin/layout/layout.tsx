@@ -5,8 +5,9 @@ import AppSidebar from "./sidebar";
 import Navbar from "./navbar";
 import React from "react";
 
-import { usePathname } from 'next/navigation'
 import { Session } from "next-auth";
+import { useUserData } from "../utils/user-data";
+import { updateSession } from "@/actions/auth";
 
 interface AdminLayoutProps {
   session: Session
@@ -14,13 +15,29 @@ interface AdminLayoutProps {
 }
 
 function Layout({ children, session }: AdminLayoutProps) {
-  const pathname = usePathname()
 
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
+  const [hasUpdatedSession, setHasUpdatedSession] = React.useState(false);
+  const { deviceInfo, ipAddress, location, isReady } = useUserData();
 
-  if (pathname.startsWith('/admin/auth')){
-    return <>{children}</>
-  }
+  React.useEffect(() => {
+    if (session?.user?.email && isReady && !hasUpdatedSession) {
+      const updateSessionData = async () => {
+        const result = await updateSession({
+          email: session.user.email || "",
+          deviceInfo: deviceInfo || "unknown",
+          ipAddress: ipAddress || "unknown",
+          location: location || "unknown",
+        });
+        if (result.success) {
+          setHasUpdatedSession(true); // Marcar como actualizado
+        } else {
+          console.error("Error al actualizar la sesión:", result.message);
+        }
+      };
+      updateSessionData();
+    }
+  }, [session?.user?.email, isReady, hasUpdatedSession, deviceInfo, ipAddress, location]); // Dependencias
 
   return (
     <SidebarProvider>
