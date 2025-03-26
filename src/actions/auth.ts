@@ -4,14 +4,12 @@ import { z } from "zod";
 import { AuthError } from "next-auth";
 import { signIn as nextAuthSignIn } from "@/auth";
 import { prisma } from "@/config/prisma";
+import { notifySessionClosed } from "@/config/websocket";
 
 // Esquema de validación con Zod (ajustado para incluir los nuevos campos)
 const signInSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
-  deviceInfo: z.string().nullable().optional(), // Texto plano (JSON.stringify)
-  ipAddress: z.string().nullable().optional(), // Texto plano
-  location: z.string().nullable().optional(), // Texto plano (JSON.stringify)
 });
 
 type LoginResult = {
@@ -20,88 +18,107 @@ type LoginResult = {
   redirectTo?: string;
 };
 
-
 const sessionUpdateSchema = z.object({
   email: z.string().email("Correo electrónico inválido"),
-  deviceInfo: z.string().nullable().optional(),
+  sessionToken: z.string().optional(),
+  browser: z.string().nullable().optional(),
+  browserVersion: z.string().nullable().optional(),
+  os: z.string().nullable().optional(),
+  osVersion: z.string().nullable().optional(),
+  deviceType: z.string().nullable().optional(),
+  deviceModel: z.string().nullable().optional(),
+  language: z.string().nullable().optional(),
+  browserId: z.string().nullable().optional(),
   ipAddress: z.string().nullable().optional(),
-  location: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  latitude: z.number().nullable().optional(),
+  longitude: z.number().nullable().optional(),
 });
 
 type SessionUpdateResult = {
   success: boolean;
   message?: string;
+  sessionToken?: string;
 };
 
-// Función reutilizable para actualizar o crear una sesión
 export async function updateSession(
   values: z.infer<typeof sessionUpdateSchema>
 ): Promise<SessionUpdateResult> {
   try {
-    // Validar los datos con Zod
     const validated = sessionUpdateSchema.parse(values);
-
-    // Buscar al usuario en la base de datos por email
     const user = await prisma.user.findUnique({
       where: { email: validated.email },
     });
 
     if (!user) {
-      return {
-        success: false,
-        message: "Usuario no encontrado",
-      };
+      return { success: false, message: "Usuario no encontrado" };
     }
 
-    // Buscar una sesión existente con los mismos datos de dispositivo
+    // Buscar una sesión existente basada en browserId (principal identificador)
     const existingSession = await prisma.session.findFirst({
       where: {
         userId: user.id,
-        deviceInfo: validated.deviceInfo || null,
-        ipAddress: validated.ipAddress || null,
-        location: validated.location || null,
-        expires: { gt: new Date() }, // Sesión no expirada
+        browserId: validated.browserId || null,
+        status: "active",
+        expires: { gt: new Date() },
       },
     });
 
     if (existingSession) {
-      // Si ya existe una sesión para este dispositivo, no hacemos nada
-      return {
-        success: true,
-        message: "Sesión ya existe para este dispositivo",
-      };
+      // Actualizar la sesión existente
+      const updatedSession = await prisma.session.update({
+        where: { sessionToken: existingSession.sessionToken },
+        data: {
+          browser: validated.browser || null,
+          browserVersion: validated.browserVersion || null,
+          os: validated.os || null,
+          osVersion: validated.osVersion || null,
+          deviceType: validated.deviceType || null,
+          deviceModel: validated.deviceModel || null,
+          language: validated.language || null,
+          ipAddress: validated.ipAddress || null,
+          city: validated.city || null,
+          country: validated.country || null,
+          latitude: validated.latitude || null,
+          longitude: validated.longitude || null,
+          expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+          updatedAt: new Date(),
+        },
+      });
+      return { success: true, sessionToken: updatedSession.sessionToken };
     }
 
-    // Si no existe, crear una nueva sesión
-    await prisma.session.create({
+    // Crear una nueva sesión si no existe
+    const sessionToken = crypto.randomUUID();
+    const newSession = await prisma.session.create({
       data: {
-        sessionToken: crypto.randomUUID(), // Generar un token único
+        sessionToken,
         userId: user.id,
-        expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000), // 2 días
-        deviceInfo: validated.deviceInfo || null,
+        browser: validated.browser || null,
+        browserVersion: validated.browserVersion || null,
+        os: validated.os || null,
+        osVersion: validated.osVersion || null,
+        deviceType: validated.deviceType || null,
+        deviceModel: validated.deviceModel || null,
+        language: validated.language || null,
+        browserId: validated.browserId || null,
         ipAddress: validated.ipAddress || null,
-        location: validated.location || null,
+        city: validated.city || null,
+        country: validated.country || null,
+        latitude: validated.latitude || null,
+        longitude: validated.longitude || null,
+        expires: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
+        status: "active",
       },
     });
 
-    return {
-      success: true,
-    };
+    return { success: true, sessionToken: newSession.sessionToken };
   } catch (error) {
-    if (error instanceof z.ZodError) {
-      return {
-        success: false,
-        message: error.errors[0].message,
-      };
-    }
     console.error("Error al actualizar la sesión:", error);
-    return {
-      success: false,
-      message: "Error del servidor",
-    };
+    return { success: false, message: "Error del servidor" };
   }
 }
-
 // Acción del servidor para iniciar sesión
 export async function loginAction(
   values: z.infer<typeof signInSchema>
@@ -148,8 +165,10 @@ export async function loginAction(
   }
 }
 
-
-export async function signOutSession(userId: string) {
+export async function signOutSession(userId: string): Promise<{
+  success: boolean;
+  message?: string;
+}> {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -171,11 +190,52 @@ export async function signOutSession(userId: string) {
     });
 
     console.log(`${result.count} sesiones actualizadas a inactive`);
+    return {
+      success: true,
+      message: `${result.count} sesiones cerradas exitosamente`,
+    };
   } catch (error) {
     console.error("Error en signOutSession:", error);
     return {
       success: false,
       message: error instanceof Error ? error.message : "Error desconocido",
     };
+  }
+}
+
+export async function closeSession({
+  userId,
+  sessionToken,
+}: {
+  userId: string;
+  sessionToken: string;
+}): Promise<{ success: boolean; message?: string; affectedBrowserId?: string }> {
+  try {
+    const session = await prisma.session.findUnique({
+      where: { sessionToken, userId },
+    });
+
+    if (!session) {
+      return { success: false, message: "Sesión no encontrada" };
+    }
+
+    await prisma.session.update({
+      where: { sessionToken },
+      data: { status: "inactive", expires: new Date() },
+    });
+
+    // Notificar al cliente afectado
+    if (session.browserId) {
+      notifySessionClosed(session.browserId);
+    }
+
+    return {
+      success: true,
+      message: "Sesión cerrada exitosamente",
+      affectedBrowserId: session.browserId || undefined,
+    };
+  } catch (error) {
+    console.error("Error al cerrar sesión:", error);
+    return { success: false, message: "Error del servidor" };
   }
 }

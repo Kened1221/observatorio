@@ -30,14 +30,24 @@ model Account {
 }
 
 model Session {
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  status       String   @default("active")
-  deviceInfo   String?
-  ipAddress    String?
-  location     String?
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionToken    String   @unique
+  userId          String
+  expires         DateTime
+  status          String   @default("active")
+  browser         String?  // Ej: "Chrome"
+  browserVersion  String?  // Ej: "120.0.0"
+  os              String?  // Ej: "Windows 11"
+  osVersion       String?  // Ej: "10.0"
+  deviceType      String?  // Ej: "desktop", "mobile"
+  deviceModel     String?  // Ej: "iPhone 14"
+  language        String?  // Ej: "es-ES"
+  browserId       String?  // Identificador único
+  ipAddress       String?  // IP pública
+  city            String?  // Ciudad
+  country         String?  // País
+  latitude        Float?   // Latitud
+  longitude       Float?   // Longitud
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

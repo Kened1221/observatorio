@@ -10,6 +10,7 @@ declare module "next-auth" {
       role?: string;
       image?: string;
       sessions?: PrismaSession[];
+      sessionToken?: string;
     };
   }
 
@@ -20,6 +21,7 @@ declare module "next-auth" {
     name?: string;
     image?: string;
     role?: string;
+    sessionToken?: string;
   }
 }
 
@@ -28,5 +30,6 @@ declare module "next-auth/jwt" {
   interface JWT {
     sub?: string;
     role?: string;
+    sessionToken?: string;
   }
 }
