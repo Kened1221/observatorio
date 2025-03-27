@@ -1,7 +1,8 @@
 import HeroSection from "@/app/dashboard/inicio/hero-section";
 import ObservatorySection from "@/app/dashboard/inicio/observatory-section";
 import TopicsGrid from "@/app/dashboard/inicio/topics-grid";
-import MapAnemia from "./dashboard/inicio/map-anemia";
+import MapPoblacion from "./dashboard/inicio/map-poblacion";
+
 
 export default function Home() {
   return (
@@ -10,7 +11,7 @@ export default function Home() {
         <HeroSection />
       </div>
       <div className="w-full h-full mx-auto">
-        <MapAnemia />
+        <MapPoblacion />
       </div>
       <div className="w-full h-full mx-auto">
         <TopicsGrid />

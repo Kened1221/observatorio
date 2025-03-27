@@ -58,6 +58,15 @@ const dashboards = [
       "Análisis y datos sobre crecimiento económico y sostenibilidad.",
     borderColor: "border-amber-500",
   },
+  {
+    id: 6,
+    title: "Política Incluir para crecer",
+    imageUrl: "/modulos/mod6.png",
+    linkUrl: "/tematica/politica",
+    description:
+      "Debates y propuestas para una política inclusiva que fomente el crecimiento.",
+    borderColor: "border-red-500",
+  }
 ];
 
 export default function CarouselDemo() {
