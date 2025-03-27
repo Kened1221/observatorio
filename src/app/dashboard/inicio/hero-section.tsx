@@ -199,18 +199,18 @@ export default function HeroSection() {
       <Button
         variant="outline"
         size="largeIcon"
-        className="absolute left-2 md:left-3 lg:left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border-none bg-primary/70 hover:bg-primary/90 text-primary"
+        className="absolute left-2 md:left-3 lg:left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border-none bg-background/70 hover:bg-background/90"
         onClick={prevObjective}
       >
-        <ChevronLeft className="text-white" />
+        <ChevronLeft className="text-sidebar-primary" />
       </Button>
       <Button
         variant="outline"
         size="largeIcon"
-        className="absolute right-2 md:right-3 lg:right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border-none bg-primary/70 hover:bg-primary/90 text-primary"
+        className="absolute right-2 md:right-3 lg:right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border-none bg-background/70 hover:bg-background/90"
         onClick={nextObjective}
       >
-        <ChevronRight className="text-white" />
+        <ChevronRight className="text-sidebar-primary" />
       </Button>
     </div>
   );

@@ -251,6 +251,12 @@ export default function MapAnemia() {
       {
         departamento: "Ayacucho",
         provincia: "HUANTA",
+        distrito: "PUTIS",
+        puntuacion: 2447,
+      },
+      {
+        departamento: "Ayacucho",
+        provincia: "HUANTA",
         distrito: "SIVIA",
         puntuacion: 2895,
       },
@@ -271,6 +277,12 @@ export default function MapAnemia() {
         provincia: "LA MAR",
         distrito: "ANCO",
         puntuacion: 2935,
+      },
+      {
+        departamento: "Ayacucho",
+        provincia: "LA MAR",
+        distrito: "UNION PROGRESO",
+        puntuacion: 295,
       },
       {
         departamento: "Ayacucho",
@@ -313,6 +325,18 @@ export default function MapAnemia() {
         provincia: "LA MAR",
         distrito: "SAN MIGUEL",
         puntuacion: 3018,
+      },
+      {
+        departamento: "Ayacucho",
+        provincia: "LA MAR",
+        distrito: "PATIBAMBA",
+        puntuacion: 4121,
+      },
+      {
+        departamento: "Ayacucho",
+        provincia: "LA MAR",
+        distrito: "NINABAMBA",
+        puntuacion: 142
       },
       {
         departamento: "Ayacucho",
@@ -467,7 +491,7 @@ export default function MapAnemia() {
       {
         departamento: "Ayacucho",
         provincia: "PARINACOCHAS",
-        distrito: "CORONEL CASTAÑEDA",
+        distrito: "CORONEL CASTAÑEDA",
         puntuacion: 671,
       },
       {
@@ -581,7 +605,7 @@ export default function MapAnemia() {
       {
         departamento: "Ayacucho",
         provincia: "SUCRE",
-        distrito: "HUACAÑA",
+        distrito: "HUACAÑA",
         puntuacion: 2432,
       },
       {

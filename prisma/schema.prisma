@@ -119,87 +119,936 @@ model User {
   accounts      Account[]
   sessions      Session[]
   Authenticator Authenticator[]
-  roles         Role[] // Relación muchos-a-muchos con Role
+  roles         Role[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
-
 // Modelo: Departamento
 model Departamento {
-  id         Int         @id @default(autoincrement())
-  nombre     String      @unique @db.VarChar(100)
-  provincias Provincia[] // Relación uno a muchos con Provincia
-  encuestas  Encuesta[] // Relación uno a muchos con Encuesta
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @unique @db.VarChar(100)
+  ubicaciones         Ubicacion[]
+  Provincia           Provincia[]
+  DesarrolloEconomico DesarrolloEconomico[]
 }
 
 // Modelo: Provincia
 model Provincia {
   id             Int          @id @default(autoincrement())
   nombre         String       @db.VarChar(100)
-  departamentoId Int          @map("departamento_id")
+  departamentoId Int
   departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
-  distritos      Distrito[] // Relación uno a muchos con Distrito
-  encuestas      Encuesta[] // Relación uno a muchos con Encuesta
+  ubicaciones    Ubicacion[]
+  Distrito       Distrito[]
 }
 
 // Modelo: Distrito
 model Distrito {
-  id          Int        @id @default(autoincrement())
-  nombre      String     @db.VarChar(100)
-  provinciaId Int        @map("provincia_id")
-  provincia   Provincia  @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
-  encuestas   Encuesta[] // Relación uno a muchos con Encuesta
+  id          Int         @id @default(autoincrement())
+  nombre      String      @db.VarChar(100)
+  provinciaId Int
+  provincia   Provincia   @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
+  ubicaciones Ubicacion[]
 }
 
-// Modelo: Encuesta
-model Encuesta {
-  id             Int          @id @default(autoincrement())
-  departamentoId Int          @map("departamento_id")
-  provinciaId    Int          @map("provincia_id")
-  distritoId     Int          @map("distrito_id")
-  rangoId        Int          @map("rango_id")
-  departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
-  provincia      Provincia    @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
-  distrito       Distrito     @relation(fields: [distritoId], references: [id], onDelete: Cascade)
-  rango          Rango        @relation(fields: [rangoId], references: [id], onDelete: Cascade)
-}
+// Modelo: Ubicacion (nueva tabla para centralizar geografía)
+model Ubicacion {
+  id                   Int                    @id @default(autoincrement())
+  departamentoId       Int
+  provinciaId          Int
+  distritoId           Int
+  departamento         Departamento           @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
+  provincia            Provincia              @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
+  distrito             Distrito               @relation(fields: [distritoId], references: [id], onDelete: Cascade)
+  poblaciones          Poblacion[]
+  viviendas            Vivienda[]
+  dificultades         DificultadFisica[]
+  AfiliacionSalud      AfiliacionSalud[]
+  CaracteristicasHogar CaracteristicasHogar[]
+  EducacionNivel       EducacionNivel[]
+  EducacionIdioma      EducacionIdioma[]
+  EducacionAlfabetismo EducacionAlfabetismo[]
+  EducacionDesercion   EducacionDesercion[]
+  CentroPoblado        CentroPoblado[]
+  EducacionConclusion  EducacionConclusion[]
+  EducacionMatriculas  EducacionMatriculas[]
+  ServiciosBasicos     ServiciosBasicos[]
+  SaludPrenatal        SaludPrenatal[]
+  NinosNutricion       NinosNutricion[]
+  NinosAnemiaNutricion NinosAnemiaNutricion[]
+  Ninos                Ninos[]
+  Jovenes              Jovenes[]
+  GestantesAnemia      GestantesAnemia[]
+  AdultoMayor          AdultoMayor[]
+  Adulto               Adulto[]
+  Adolescentes         Adolescentes[]
+  CentrosAcogida       CentrosAcogida[]
+  Reniec               Reniec[]
+  PersonasDiscapacidad PersonasDiscapacidad[]
+  ViolenciaMujer       ViolenciaMujer[]
 
-// Modelo: Rango
-model Rango {
-  id          Int @id @default(autoincrement())
-  edadId      Int @map("edad_id")
-  poblacionId Int @map("poblacion_id")
-  ambitoId    Int @map("ambito_ident")
-
-  encuestas Encuesta[] // Relación uno a muchos con Encuesta
-  poblacion Poblacion[] // Relación uno a muchos con Encuesta
-  Ambito    Ambito[] // Relación uno a muchos con Encuesta
-  Edad      Edad        @relation(fields: [edadId], references: [id])
-}
-
-// Modelo: Edad
-model Edad {
-  id            Int     @id @default(autoincrement())
-  edadIntervalo String
-  rangos        Rango[]
-}
-
-// Modelo: Poblacion
-model Poblacion {
-  id      Int   @id @default(autoincrement())
-  hombres Int
-  mujeres Int
-  rangoId Int   @map("rango_id")
-  rango   Rango @relation(fields: [rangoId], references: [id], onDelete: Cascade)
+  @@unique([departamentoId, provinciaId, distritoId]) // Evita duplicados
 }
 
 // Modelo: Ambito
 model Ambito {
-  id      Int   @id @default(autoincrement())
-  rural   Int
-  urbano  Int
-  rangoId Int   @map("rango_id")
-  rango   Rango @relation(fields: [rangoId], references: [id], onDelete: Cascade)
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(100)
+  poblaciones          Poblacion[]
+  viviendas            Vivienda[]
+  dificultades         DificultadFisica[]
+  AfiliacionSalud      AfiliacionSalud[]
+  CaracteristicasHogar CaracteristicasHogar[]
+  EducacionNivel       EducacionNivel[]
+  EducacionIdioma      EducacionIdioma[]
+  EducacionAlfabetismo EducacionAlfabetismo[]
+}
+
+// Modelo: Genero
+model Genero {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(100)
+  poblaciones          Poblacion[]
+  dificultades         DificultadFisica[]
+  AfiliacionSalud      AfiliacionSalud[]
+  EducacionNivel       EducacionNivel[]
+  EducacionIdioma      EducacionIdioma[]
+  EducacionAlfabetismo EducacionAlfabetismo[]
+  EducacionMatriculas  EducacionMatriculas[]
+  Edad                 Edad[]
+}
+
+// Modelo: EdadIntervalo (corregido de EdadIbtervalo)
+model EdadIntervalo {
+  id                   Int                    @id @default(autoincrement())
+  intervalo            String // Ej: "0-18", "19-30"
+  poblaciones          Poblacion[]
+  dificultades         DificultadFisica[]
+  AfiliacionSalud      AfiliacionSalud[]
+  EducacionNivel       EducacionNivel[]
+  EducacionIdioma      EducacionIdioma[]
+  EducacionAlfabetismo EducacionAlfabetismo[]
+  EducacionConclusion  EducacionConclusion[]
+  EducacionMatriculas  EducacionMatriculas[]
+}
+
+// Modelo: TipoVivienda
+model TipoVivienda {
+  id                   Int                    @id @default(autoincrement())
+  tipoVivienda         String // Ej: "Censado", "Particular"
+  viviendas            Vivienda[]
+  CaracteristicasHogar CaracteristicasHogar[]
+}
+
+// Modelo: Poblacion
+model Poblacion {
+  id              Int @id @default(autoincrement())
+  anio            Int
+  cantidad        Int
+  ubicacionId     Int
+  ambitoId        Int
+  edadIntervaloId Int // Cambiado a edadIntervaloId para consistencia
+  generoId        Int
+
+  ubicacion     Ubicacion     @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito        Ambito        @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  edadIntervalo EdadIntervalo @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  genero        Genero        @relation(fields: [generoId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+// Modelo: Vivienda
+model Vivienda {
+  id             Int    @id @default(autoincrement())
+  anio           Int
+  cantidad       Int
+  tipo           String // Podría eliminarse si tipoViviendaId es suficiente
+  ubicacionId    Int
+  ambitoId       Int
+  tipoViviendaId Int
+
+  ubicacion    Ubicacion    @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito       Ambito       @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  tipoVivienda TipoVivienda @relation(fields: [tipoViviendaId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+// Modelo: DificultadFisica
+model DificultadFisica {
+  id              Int    @id @default(autoincrement())
+  anio            Int
+  cantidad        Int
+  dificultad      String @db.VarChar(100)
+  ubicacionId     Int
+  ambitoId        Int
+  edadIntervaloId Int
+  generoId        Int
+
+  ubicacion     Ubicacion     @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito        Ambito        @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  edadIntervalo EdadIntervalo @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  genero        Genero        @relation(fields: [generoId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model TipoAfiliacion {
+  id           Int               @id @default(autoincrement())
+  nombre       String            @db.VarChar(100)
+  afiliaciones AfiliacionSalud[]
+}
+
+model AfiliacionSalud {
+  id               Int @id @default(autoincrement())
+  anio             Int // Año de los datos
+  cantidad         Int // Cantidad de personas
+  ubicacionId      Int
+  ambitoId         Int
+  edadIntervaloId  Int
+  generoId         Int
+  tipoAfiliacionId Int
+
+  ubicacion      Ubicacion      @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito         Ambito         @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  edadIntervalo  EdadIntervalo  @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  genero         Genero         @relation(fields: [generoId], references: [id], onDelete: Restrict)
+  tipoAfiliacion TipoAfiliacion @relation(fields: [tipoAfiliacionId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+// Modelo: TipoCaracteristica (nuevo modelo para el campo Tipo)
+model TipoCaracteristica {
+  id              Int                    @id @default(autoincrement())
+  nombre          String                 @db.VarChar(100) // Ej: "Hogares", "Ocupantes presentes"
+  caracteristicas CaracteristicasHogar[]
+}
+
+// Modelo: Artefacto (nuevo modelo para el campo Artefacto)
+model Artefacto {
+  id              Int                    @id @default(autoincrement())
+  nombre          String                 @db.VarChar(100) // Ej: "Lavadora de ropa", "Cocina a gas"
+  caracteristicas CaracteristicasHogar[]
+}
+
+// Modelo: CaracteristicasHogar (nuevo modelo para la tabla)
+model CaracteristicasHogar {
+  id                   Int @id @default(autoincrement())
+  anio                 Int // Año de los datos
+  cantidad             Int // Cantidad de hogares u ocupantes
+  ubicacionId          Int
+  ambitoId             Int
+  tipoViviendaId       Int
+  tipoCaracteristicaId Int
+  artefactoId          Int
+
+  ubicacion          Ubicacion          @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito             Ambito             @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  tipoVivienda       TipoVivienda       @relation(fields: [tipoViviendaId], references: [id], onDelete: Restrict)
+  tipoCaracteristica TipoCaracteristica @relation(fields: [tipoCaracteristicaId], references: [id], onDelete: Restrict)
+  artefacto          Artefacto          @relation(fields: [artefactoId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model NivelEducativo {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100) // Ej: "Secundaria", "Primaria"
+  educaciones         EducacionNivel[]
+  EducacionConclusion EducacionConclusion[]
+  EducacionMatriculas EducacionMatriculas[]
+}
+
+// Modelo: EducacionNivel (nuevo modelo para la tabla)
+model EducacionNivel {
+  id               Int @id @default(autoincrement())
+  anio             Int // Año de los datos
+  cantidad         Int // Cantidad de personas
+  ubicacionId      Int
+  ambitoId         Int
+  edadIntervaloId  Int
+  generoId         Int
+  nivelEducativoId Int
+
+  ubicacion      Ubicacion      @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito         Ambito         @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  edadIntervalo  EdadIntervalo  @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  genero         Genero         @relation(fields: [generoId], references: [id], onDelete: Restrict)
+  nivelEducativo NivelEducativo @relation(fields: [nivelEducativoId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model ConocimientoIdioma {
+  id      Int               @id @default(autoincrement())
+  nombre  String            @db.VarChar(100) // Ej: "No sabe / No responde"
+  idiomas EducacionIdioma[]
+}
+
+// Modelo: EducacionIdioma (nuevo modelo para la tabla)
+model EducacionIdioma {
+  id                   Int @id @default(autoincrement())
+  anio                 Int // Año de los datos
+  cantidad             Int // Cantidad de personas
+  ubicacionId          Int
+  ambitoId             Int
+  edadIntervaloId      Int
+  generoId             Int
+  conocimientoIdiomaId Int
+
+  ubicacion          Ubicacion          @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito             Ambito             @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  edadIntervalo      EdadIntervalo      @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  genero             Genero             @relation(fields: [generoId], references: [id], onDelete: Restrict)
+  conocimientoIdioma ConocimientoIdioma @relation(fields: [conocimientoIdiomaId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model NivelAlfabetismo {
+  id           Int                    @id @default(autoincrement())
+  nombre       String                 @db.VarChar(100) // Ej: "Sabe leer y escribir"
+  alfabetismos EducacionAlfabetismo[]
+}
+
+// Modelo: EducacionAlfabetismo (nuevo modelo para la tabla)
+model EducacionAlfabetismo {
+  id                 Int @id @default(autoincrement())
+  anio               Int // Año de los datos
+  cantidad           Int // Cantidad de personas
+  ubicacionId        Int
+  ambitoId           Int
+  edadIntervaloId    Int
+  generoId           Int
+  nivelAlfabetismoId Int
+
+  ubicacion        Ubicacion        @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  ambito           Ambito           @relation(fields: [ambitoId], references: [id], onDelete: Restrict)
+  edadIntervalo    EdadIntervalo    @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  genero           Genero           @relation(fields: [generoId], references: [id], onDelete: Restrict)
+  nivelAlfabetismo NivelAlfabetismo @relation(fields: [nivelAlfabetismoId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model RangoAnio {
+  id          Int                  @id @default(autoincrement())
+  rango       String               @db.VarChar(100) // Ej: "2020 - 2021"
+  deserciones EducacionDesercion[]
+}
+
+// Modelo: EducacionDesercion (modelo unificado para las tablas)
+model EducacionDesercion {
+  id          Int   @id @default(autoincrement())
+  cantidad    Float // Cantidad de casos de deserción (Ej: 0.0, 4.3, 1.2)
+  ubicacionId Int
+  rangoId     Int
+
+  ubicacion   Ubicacion  @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  RangoAnio   RangoAnio? @relation(fields: [rangoAnioId], references: [id])
+  rangoAnioId Int?
+}
+
+model Ugel {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100) // Ej: "Huamanga"
+  conclusiones        EducacionConclusion[]
+  EducacionMatriculas EducacionMatriculas[]
+}
+
+model Nivel {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100) // Ej: "Inicial - Jardín", "Secundaria", "Primaria"
+  educacionConclusion EducacionConclusion[]
+}
+
+model TipoInstitucion {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100) // Ej: "Pública - Sector Educación"
+  conclusiones        EducacionConclusion[]
+  EducacionMatriculas EducacionMatriculas[]
+}
+
+model EstadoEvaluacion {
+  id           Int                   @id @default(autoincrement())
+  nombre       String                @db.VarChar(100) // Ej: "Retirados"
+  conclusiones EducacionConclusion[]
+}
+
+model ModalidadEducativa {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100) // Ej: "Educación Básica Regular"
+  conclusiones        EducacionConclusion[]
+  EducacionMatriculas EducacionMatriculas[]
+}
+
+model Grado {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100) // Ej: "Segundo", "Tercero", "Quinto"
+  educacionConclusion EducacionConclusion[]
+  EducacionMatriculas EducacionMatriculas[]
+}
+
+model CentroPoblado {
+  id                  Int                   @id @default(autoincrement())
+  nombre              String                @db.VarChar(100) // Ej: "Ayacucho"
+  ubicacionId         Int
+  ubicacion           Ubicacion             @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  conclusiones        EducacionConclusion[]
+  EducacionMatriculas EducacionMatriculas[]
+  ServiciosBasicos    ServiciosBasicos[]
+
+  @@index([ubicacionId]) // Índice para consultas por ubicación
+}
+
+model EducacionConclusion {
+  id                   Int  @id @default(autoincrement())
+  anio                 Int // Año de los datos (Ej: 2023)
+  cantidad             Int // Cantidad de estudiantes
+  ubicacionId          Int
+  centroPobladoId      Int
+  edadIntervaloId      Int
+  ugelId               Int
+  nivelEducativoId     Int
+  tipoInstitucionId    Int
+  estadoEvaluacionId   Int
+  modalidadEducativaId Int
+  gradoId              Int? // Relación con Grado (opcional)
+
+  ubicacion          Ubicacion          @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  centroPoblado      CentroPoblado      @relation(fields: [centroPobladoId], references: [id], onDelete: Cascade)
+  edadIntervalo      EdadIntervalo      @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  ugel               Ugel               @relation(fields: [ugelId], references: [id], onDelete: Restrict)
+  nivelEducativo     NivelEducativo     @relation(fields: [nivelEducativoId], references: [id], onDelete: Restrict)
+  tipoInstitucion    TipoInstitucion    @relation(fields: [tipoInstitucionId], references: [id], onDelete: Restrict)
+  estadoEvaluacion   EstadoEvaluacion   @relation(fields: [estadoEvaluacionId], references: [id], onDelete: Restrict)
+  modalidadEducativa ModalidadEducativa @relation(fields: [modalidadEducativaId], references: [id], onDelete: Restrict)
+  grado              Grado?             @relation(fields: [gradoId], references: [id], onDelete: Restrict)
+  Nivel              Nivel?             @relation(fields: [nivelId], references: [id])
+  nivelId            Int?
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+// Modelo: EducacionMatriculas (modelo ajustado)
+model EducacionMatriculas {
+  id                   Int  @id @default(autoincrement())
+  anio                 Int // Año de los datos (Ej: 2024)
+  cantidad             Int // Cantidad de estudiantes matriculados
+  orden                Int? // Orden del grado (Ej: 9, 1, 4) - Opcional
+  ubicacionId          Int
+  centroPobladoId      Int
+  edadIntervaloId      Int
+  generoId             Int
+  ugelId               Int
+  gradoId              Int? // Nueva relación con Grado
+  nivelEducativoId     Int
+  tipoInstitucionId    Int
+  modalidadEducativaId Int
+
+  ubicacion          Ubicacion          @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  centroPoblado      CentroPoblado      @relation(fields: [centroPobladoId], references: [id], onDelete: Cascade)
+  edadIntervalo      EdadIntervalo      @relation(fields: [edadIntervaloId], references: [id], onDelete: Restrict)
+  genero             Genero             @relation(fields: [generoId], references: [id], onDelete: Restrict)
+  ugel               Ugel               @relation(fields: [ugelId], references: [id], onDelete: Restrict)
+  grado              Grado?             @relation(fields: [gradoId], references: [id], onDelete: Restrict) // Nueva relación
+  nivelEducativo     NivelEducativo     @relation(fields: [nivelEducativoId], references: [id], onDelete: Restrict)
+  tipoInstitucion    TipoInstitucion    @relation(fields: [tipoInstitucionId], references: [id], onDelete: Restrict)
+  modalidadEducativa ModalidadEducativa @relation(fields: [modalidadEducativaId], references: [id], onDelete: Restrict)
+
+  @@index([anio, ubicacionId]) // Índice para consultas por año
+}
+
+model DesarrolloEconomico {
+  id                  Int   @id @default(autoincrement())
+  anio                Int // Año de los datos (Ej: 2019)
+  indicadorIntermedio Float // Indicador intermedio (Ej: 34.4)
+  indicadorSuperior   Float // Indicador superior (Ej: 39.4)
+  departamentoId      Int
+
+  departamento Departamento @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model TipoCobertura {
+  id               Int                @id @default(autoincrement())
+  nombre           String             @db.VarChar(100) // Ej: "Población Con Cobertura"
+  serviciosBasicos ServiciosBasicos[]
+}
+
+model ServiciosBasicos {
+  id              Int  @id @default(autoincrement())
+  mes             Int // Mes de los datos (Ej: 9 para septiembre)
+  anio            Int // Año de los datos (Ej: 2024)
+  cantidad        Int // Cantidad de población con cobertura
+  ubicacionId     Int
+  centroPobladoId Int
+  tipoCoberturaId Int
+  mesId           Int? // Campo que referencia la relación con Mes
+
+  ubicacion     Ubicacion     @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  centroPoblado CentroPoblado @relation(fields: [centroPobladoId], references: [id], onDelete: Cascade)
+  tipoCobertura TipoCobertura @relation(fields: [tipoCoberturaId], references: [id], onDelete: Restrict)
+  mesRelacion   Mes?          @relation(fields: [mesId], references: [id]) // Renombramos la relación para evitar conflicto
+
+  @@index([anio, ubicacionId]) // Índice para consultas por año
+  @@index([mes]) // Índice para el campo escalar mes
+  @@index([mesId]) // Índice para la relación con Mes (opcional, si lo necesitas)
+}
+
+model RedSalud {
+  id            Int             @id @default(autoincrement())
+  nombre        String          @db.VarChar(100) // Ej: "AYACUCHO CENTRO"
+  saludPrenatal SaludPrenatal[]
+  Ninos         Ninos[]
+  Jovenes       Jovenes[]
+  AdultoMayor   AdultoMayor[]
+  Adulto        Adulto[]
+  Adolescentes  Adolescentes[]
+}
+
+model EstablecimientoSalud {
+  id            Int             @id @default(autoincrement())
+  nombre        String          @db.VarChar(100) // Ej: "PATARA"
+  saludPrenatal SaludPrenatal[]
+  Ninos         Ninos[]
+  Jovenes       Jovenes[]
+  AdultoMayor   AdultoMayor[]
+  Adulto        Adulto[]
+  Adolescentes  Adolescentes[]
+}
+
+model IndicadorSalud {
+  id            Int             @id @default(autoincrement())
+  nombre        String          @db.VarChar(255) // Ej: "AG-34 - Porcentaje de varones y mujeres con tamizaje para cáncer de colon y recto"
+  saludPrenatal SaludPrenatal[]
+  Ninos         Ninos[]
+  Jovenes       Jovenes[]
+  AdultoMayor   AdultoMayor[]
+  Adulto        Adulto[]
+  Adolescentes  Adolescentes[]
+}
+
+model SaludPrenatal {
+  id                Int   @id @default(autoincrement())
+  porcentaje        Float // Porcentaje (Ej: 0.0)
+  poblacion         Int // Población (Ej: 0)
+  mes               Int // Mes de los datos (Ej: 3 para marzo)
+  numeroCasos       Int // Número de casos (Ej: 0)
+  anio              Int // Año de los datos (Ej: 2024)
+  ubicacionId       Int
+  redSaludId        Int
+  establecimientoId Int
+  indicadorSaludId  Int
+  mesId             Int?
+
+  ubicacion       Ubicacion            @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  redSalud        RedSalud             @relation(fields: [redSaludId], references: [id], onDelete: Restrict)
+  establecimiento EstablecimientoSalud @relation(fields: [establecimientoId], references: [id], onDelete: Restrict)
+  indicadorSalud  IndicadorSalud       @relation(fields: [indicadorSaludId], references: [id], onDelete: Restrict)
+  mesRelacion     Mes?                 @relation(fields: [mesId], references: [id])
+
+  @@index([anio]) // Índice para consultas por año
+  @@index([mes]) // Índice para consultas por mes
+  @@index([mesId]) // Índice para la relación con Mes
+}
+
+model TipoDesnutricion {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(100) // Ej: "ANEMIA SEVERA"
+  ninosNutricion NinosNutricion[]
+}
+
+model IndicadorNutricion {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(255) // Ej: "ANEMIA EN NIÑOS ENTRE 6 A 59 MESES"
+  ninosNutricion NinosNutricion[]
+}
+
+model NinosNutricion {
+  id                   Int   @id @default(autoincrement())
+  numeroCasos          Int // Número de casos (Ej: 0)
+  evaluados            Int // Número de niños evaluados (Ej: 27)
+  porcentaje           Float // Porcentaje (Ej: 0.0)
+  anio                 Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId          Int
+  tipoDesnutricionId   Int
+  indicadorNutricionId Int
+
+  ubicacion          Ubicacion          @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  tipoDesnutricion   TipoDesnutricion   @relation(fields: [tipoDesnutricionId], references: [id], onDelete: Restrict)
+  indicadorNutricion IndicadorNutricion @relation(fields: [indicadorNutricionId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model TipoAnemia {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(100) // Ej: "ANEMIA SEVERA"
+  ninosAnemiaNutricion NinosAnemiaNutricion[]
+  GestantesAnemia      GestantesAnemia[]
+}
+
+// Modelo: IndicadorAnemia (nuevo modelo para el campo Indicador)
+model IndicadorAnemia {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(255) // Ej: "anemia en niños entre 6 a 35 meses que accedieron a los establecimientos de"
+  ninosAnemiaNutricion NinosAnemiaNutricion[]
+}
+
+model NinosAnemiaNutricion {
+  id                Int   @id @default(autoincrement())
+  numeroCasos       Int // Número de casos (Ej: 0)
+  evaluados         Int // Número de niños evaluados (Ej: 169)
+  porcentaje        Float // Porcentaje (Ej: 0.0)
+  brecha            Int // Brecha (Ej: 169)
+  anio              Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId       Int
+  tipoAnemiaId      Int
+  indicadorAnemiaId Int
+
+  ubicacion       Ubicacion       @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  tipoAnemia      TipoAnemia      @relation(fields: [tipoAnemiaId], references: [id], onDelete: Restrict)
+  indicadorAnemia IndicadorAnemia @relation(fields: [indicadorAnemiaId], references: [id], onDelete: Restrict)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+// Modelo: Ninos (nuevo modelo para la tabla)
+model Ninos {
+  id                Int     @id @default(autoincrement())
+  poblacion         Int // Población (Ej: 1)
+  mes               Int // Mes de los datos (Ej: 3 para marzo)
+  numeroCasos       Int // Número de casos (Ej: 0)
+  nombreMes         String? @db.VarChar(100) // Nombre del mes (opcional, Ej: "MARZO")
+  porcentaje        Float // Porcentaje (Ej: 0.0)
+  brecha            Int // Brecha (Ej: 1)
+  anio              Int // Año de los datos (Ej: 2024)
+  ubicacionId       Int
+  redSaludId        Int
+  establecimientoId Int
+  indicadorSaludId  Int
+
+  ubicacion       Ubicacion            @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  redSalud        RedSalud             @relation(fields: [redSaludId], references: [id], onDelete: Restrict)
+  establecimiento EstablecimientoSalud @relation(fields: [establecimientoId], references: [id], onDelete: Restrict)
+  indicadorSalud  IndicadorSalud       @relation(fields: [indicadorSaludId], references: [id], onDelete: Restrict)
+  Mes             Mes?                 @relation(fields: [mesId], references: [id])
+  mesId           Int?
+
+  @@index([anio]) // Índice para consultas por año
+  @@index([mes]) // Índice para consultas por mes
+}
+
+model Mes {
+  id                   Int                    @id // Usamos los valores de id directamente (1, 2, etc.)
+  nombre               String                 @db.VarChar(100) // Ej: "Enero"
+  orden                Int                    @unique // Orden del mes (1 para Enero, 2 para Febrero, etc.)
+  serviciosBasicos     ServiciosBasicos[]
+  saludPrenatal        SaludPrenatal[]
+  ninos                Ninos[]
+  Jovenes              Jovenes[]
+  AdultoMayor          AdultoMayor[]
+  Adulto               Adulto[]
+  Adolescentes         Adolescentes[]
+  CentrosAcogida       CentrosAcogida[]
+  PersonasDiscapacidad PersonasDiscapacidad[]
+
+  @@index([orden])
+}
+
+model Jovenes {
+  id                Int   @id @default(autoincrement())
+  poblacion         Int // Población (Ej: 10)
+  numeroCasos       Int // Número de casos (Ej: 0)
+  cobertura         Float // Cobertura (Ej: 0.0)
+  anio              Int // Año de los datos (Ej: 2024)
+  ubicacionId       Int
+  redSaludId        Int
+  establecimientoId Int
+  indicadorSaludId  Int
+  mesId             Int
+
+  ubicacion       Ubicacion            @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  redSalud        RedSalud             @relation(fields: [redSaludId], references: [id], onDelete: Restrict)
+  establecimiento EstablecimientoSalud @relation(fields: [establecimientoId], references: [id], onDelete: Restrict)
+  indicadorSalud  IndicadorSalud       @relation(fields: [indicadorSaludId], references: [id], onDelete: Restrict)
+  mes             Mes                  @relation(fields: [mesId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
+  @@index([mesId])
+}
+
+model IndicadorAnemiaGestantes {
+  id              Int               @id @default(autoincrement())
+  nombre          String            @db.VarChar(255) // Ej: "ANEMIA EN GESTANTES QUE ACCEDIERON A LOS ESTABLECIMIENTOS DE SALUD, SEGÚN PROVINCIA Y DISTRITO DEL ESTABLECIMIENTO DE SALUD"
+  gestantesAnemia GestantesAnemia[]
+}
+
+// Modelo: GestantesAnemia (nuevo modelo para la tabla)
+model GestantesAnemia {
+  id                         Int   @id @default(autoincrement())
+  numeroCasos                Int // Número de casos (Ej: 0)
+  evaluados                  Int // Número de gestantes evaluadas (Ej: 7)
+  porcentaje                 Float // Porcentaje (Ej: 0.0)
+  brecha                     Int // Brecha (Ej: 7)
+  anio                       Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId                Int
+  tipoAnemiaId               Int
+  indicadorAnemiaGestantesId Int
+
+  ubicacion                Ubicacion                @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  tipoAnemia               TipoAnemia               @relation(fields: [tipoAnemiaId], references: [id], onDelete: Restrict)
+  indicadorAnemiaGestantes IndicadorAnemiaGestantes @relation(fields: [indicadorAnemiaGestantesId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
+}
+
+// Modelo: AdultoMayor (nuevo modelo para la tabla)
+model AdultoMayor {
+  id                Int   @id @default(autoincrement())
+  poblacion         Int // Población (Ej: 1)
+  numeroCasos       Int // Número de casos (Ej: 0)
+  cobertura         Float // Cobertura (Ej: 0.0)
+  anio              Int // Año de los datos (Ej: 2024)
+  ubicacionId       Int
+  redSaludId        Int
+  establecimientoId Int
+  indicadorSaludId  Int
+  mesId             Int
+
+  ubicacion       Ubicacion            @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  redSalud        RedSalud             @relation(fields: [redSaludId], references: [id], onDelete: Restrict)
+  establecimiento EstablecimientoSalud @relation(fields: [establecimientoId], references: [id], onDelete: Restrict)
+  indicadorSalud  IndicadorSalud       @relation(fields: [indicadorSaludId], references: [id], onDelete: Restrict)
+  mes             Mes                  @relation(fields: [mesId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
+  @@index([mesId])
+}
+
+// Modelo: Adulto (nuevo modelo para la tabla)
+model Adulto {
+  id                Int   @id @default(autoincrement())
+  poblacion         Int // Población (Ej: 0)
+  numeroCasos       Int // Número de casos (Ej: 0)
+  cobertura         Float // Cobertura (Ej: 0.0)
+  anio              Int // Año de los datos (Ej: 2024)
+  ubicacionId       Int
+  redSaludId        Int
+  establecimientoId Int
+  indicadorSaludId  Int
+  mesId             Int
+
+  ubicacion       Ubicacion            @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  redSalud        RedSalud             @relation(fields: [redSaludId], references: [id], onDelete: Restrict)
+  establecimiento EstablecimientoSalud @relation(fields: [establecimientoId], references: [id], onDelete: Restrict)
+  indicadorSalud  IndicadorSalud       @relation(fields: [indicadorSaludId], references: [id], onDelete: Restrict)
+  mes             Mes                  @relation(fields: [mesId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
+  @@index([mesId])
+}
+
+// Modelo: Adolescentes (nuevo modelo para la tabla)
+model Adolescentes {
+  id                Int   @id @default(autoincrement())
+  poblacion         Int // Población (Ej: 33)
+  numeroCasos       Int // Número de casos (Ej: 0)
+  cobertura         Float // Cobertura (Ej: 0.0)
+  anio              Int // Año de los datos (Ej: 2024)
+  ubicacionId       Int
+  redSaludId        Int
+  establecimientoId Int
+  indicadorSaludId  Int
+  mesId             Int
+
+  ubicacion       Ubicacion            @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  redSalud        RedSalud             @relation(fields: [redSaludId], references: [id], onDelete: Restrict)
+  establecimiento EstablecimientoSalud @relation(fields: [establecimientoId], references: [id], onDelete: Restrict)
+  indicadorSalud  IndicadorSalud       @relation(fields: [indicadorSaludId], references: [id], onDelete: Restrict)
+  mes             Mes                  @relation(fields: [mesId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
+  @@index([mesId])
+}
+
+// Modelo: SubCorte (nuevo modelo para "sub_corte" y "desagregado")
+model SubCorte {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(100) // Ej: "De 12 a 17 Años", "Hombres", "Mujeres", "Total"
+  centrosAcogida CentrosAcogida[]
+}
+
+// Modelo: TipoCar (nuevo modelo para "tipo_de_car")
+model TipoCar {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(255) // Ej: "CENTROS DE ACOGIDA RESIDENCIAL DE NIÑAS, NIÑOS Y ADOLESCENTES"
+  centrosAcogida CentrosAcogida[]
+}
+
+// Modelo: CentrosAcogida (nuevo modelo para la tabla)
+model CentrosAcogida {
+  id          Int    @id @default(autoincrement())
+  car         String @db.VarChar(100) // Ej: "CAR DIA"
+  anio        Int // Año de los datos (Ej: 2024)
+  nSubCorte   Int // Cantidad (Ej: 9)
+  ubicacionId Int
+  mesId       Int
+  subCorteId  Int
+  tipoCarId   Int
+
+  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  mes       Mes       @relation(fields: [mesId], references: [id], onDelete: Restrict)
+  subCorte  SubCorte  @relation(fields: [subCorteId], references: [id], onDelete: Restrict)
+  tipoCar   TipoCar   @relation(fields: [tipoCarId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
+  @@index([mesId])
+}
+
+// Modelo: Edad (nuevo modelo para "edad" y "sexo")
+model Edad {
+  id                   Int                    @id @default(autoincrement())
+  rangoEdad            String                 @db.VarChar(100) // Ej: "Menores de edad (De 0 a 17 años)"
+  generoId             Int? // Nueva relación con Genero
+  reniec               Reniec[]
+  DetallesDiscapacidad DetallesDiscapacidad[]
+  ViolenciaMujer       ViolenciaMujer[]
+
+  genero Genero? @relation(fields: [generoId], references: [id], onDelete: Restrict)
+}
+
+// Modelo: Discapacidad (nuevo modelo para "discapacidad")
+model Discapacidad {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(100) // Ej: "Mental"
+  reniec               Reniec[]
+  DetallesDiscapacidad DetallesDiscapacidad[]
+}
+
+// Modelo: Trimestre (nuevo modelo para "trimestre")
+model Trimestre {
+  id                   Int                    @id @default(autoincrement())
+  nombre               String                 @db.VarChar(100) // Ej: "I Trimestre", "II Trimestre"
+  reniec               Reniec[]
+  DetallesDiscapacidad DetallesDiscapacidad[]
+}
+
+// Modelo: Reniec (nuevo modelo para la tabla)
+model Reniec {
+  id             Int @id @default(autoincrement())
+  cantidad       Int // Cantidad (Ej: 0)
+  anio           Int // Año de los datos (Ej: 2024)
+  ubicacionId    Int
+  edadId         Int
+  discapacidadId Int
+  trimestreId    Int
+
+  ubicacion    Ubicacion    @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  edad         Edad         @relation(fields: [edadId], references: [id], onDelete: Restrict)
+  discapacidad Discapacidad @relation(fields: [discapacidadId], references: [id], onDelete: Restrict)
+  trimestre    Trimestre    @relation(fields: [trimestreId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
+}
+
+// Modelo: PersonasDiscapacidad (tabla principal para datos básicos)
+model PersonasDiscapacidad {
+  id          Int  @id @default(autoincrement())
+  cantidad    Int // Cantidad de personas con discapacidad (Ej: 26, 0, 64)
+  anio        Int // Año de los datos (Ej: 2023, 2024)
+  ubicacionId Int
+  mesId       Int?
+
+  ubicacion Ubicacion              @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  mes       Mes?                   @relation(fields: [mesId], references: [id], onDelete: Restrict)
+  metricas  MetricasDiscapacidad[] // Relación con métricas
+  detalles  DetallesDiscapacidad[] // Relación con detalles
+
+  @@index([anio])
+  @@index([mesId])
+}
+
+// Modelo: MetricasDiscapacidad (tabla para métricas calculadas)
+model MetricasDiscapacidad {
+  id                     Int   @id @default(autoincrement())
+  personasDiscapacidadId Int // Relación con la tabla principal
+  numeroCasos            Int // Número de casos (Ej: 12, 0, 6)
+  porcentaje             Float // Porcentaje (Ej: 0.0, 0.04, 1.33)
+  brecha                 Int // Brecha (Ej: 4355, 27441, 4016)
+
+  personasDiscapacidad PersonasDiscapacidad @relation(fields: [personasDiscapacidadId], references: [id], onDelete: Cascade)
+
+  @@index([personasDiscapacidadId])
+}
+
+// Modelo: DetallesDiscapacidad (tabla para detalles opcionales)
+model DetallesDiscapacidad {
+  id                     Int  @id @default(autoincrement())
+  personasDiscapacidadId Int // Relación con la tabla principal
+  edadId                 Int? // Rango de edad y sexo
+  discapacidadId         Int? // Tipo de discapacidad
+  trimestreId            Int? // Trimestre o bimestre
+
+  personasDiscapacidad PersonasDiscapacidad @relation(fields: [personasDiscapacidadId], references: [id], onDelete: Cascade)
+  edad                 Edad?                @relation(fields: [edadId], references: [id], onDelete: Restrict)
+  discapacidad         Discapacidad?        @relation(fields: [discapacidadId], references: [id], onDelete: Restrict)
+  trimestre            Trimestre?           @relation(fields: [trimestreId], references: [id], onDelete: Restrict)
+
+  @@index([personasDiscapacidadId])
+}
+
+// Modelo: EstadoCivil (nuevo modelo para "Estado civil")
+model EstadoCivil {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(100) // Ej: "Soltero", "Viudo", "Casado"
+  violenciaMujer ViolenciaMujer[]
+}
+
+// Modelo: TipoViolencia (nuevo modelo para "Tipo violencia")
+model TipoViolencia {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(100) // Ej: "Física", "Abandono", "Psicológica", "Sexual"
+  violenciaMujer ViolenciaMujer[]
+}
+
+model TipoPeriodo {
+  id       Int       @id @default(autoincrement())
+  nombre   String    @db.VarChar(100) // Ej: "Mensual", "Trimestral", "Semestral"
+  periodos Periodo[]
+}
+
+model Periodo {
+  id             Int              @id @default(autoincrement())
+  nombre         String           @db.VarChar(100) // Ej: "Enero - agosto", "I Trimestre"
+  tipoPeriodoId  Int
+  violenciaMujer ViolenciaMujer[]
+
+  tipoPeriodo TipoPeriodo @relation(fields: [tipoPeriodoId], references: [id], onDelete: Restrict)
+}
+
+// Modelo: ViolenciaMujer (modelo unificado para las tablas)
+model ViolenciaMujer {
+  id              Int  @id @default(autoincrement())
+  cantidad        Int // Cantidad de casos de violencia (Ej: 557, 961, 671)
+  anio            Int // Año de los datos (Ej: 2023, 2024)
+  ubicacionId     Int?
+  edadId          Int?
+  estadoCivilId   Int?
+  tipoViolenciaId Int?
+  periodoId       Int
+
+  ubicacion     Ubicacion?     @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  edad          Edad?          @relation(fields: [edadId], references: [id], onDelete: Restrict)
+  estadoCivil   EstadoCivil?   @relation(fields: [estadoCivilId], references: [id], onDelete: Restrict)
+  tipoViolencia TipoViolencia? @relation(fields: [tipoViolenciaId], references: [id], onDelete: Restrict)
+  periodo       Periodo        @relation(fields: [periodoId], references: [id], onDelete: Restrict)
+
+  @@index([anio])
 }

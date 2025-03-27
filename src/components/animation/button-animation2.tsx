@@ -13,7 +13,7 @@ const Button = ({ setPAselect }: ButtonProps) => {
 
   const handleClick = () => {
     setIsClicked((prev) => !prev); // Alterna el estado local para la animación
-    setPAselect(isClicked ? "Población" : "Ámbito"); // Actualiza el estado del padre
+    setPAselect(isClicked ? "poblacion" : "ambito"); // Actualiza el estado del padre
   };
 
   return (
@@ -39,7 +39,7 @@ const Button = ({ setPAselect }: ButtonProps) => {
       {/* Capa "Ámbito" */}
       <div
         className={`absolute w-full h-full flex items-center justify-center 
-                   px-4 py-3 bg-green-500 transition-transform duration-500 
+                   px-4 py-3 bg-emerald-500 transition-transform duration-500 
                  ${isClicked ? "translate-y-0" : "translate-y-[50px]"}`}
       >
         <span className="flex flex-row text-white text-center text-[17px] font-bold items-center gap-4">

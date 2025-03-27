@@ -14,7 +14,7 @@ export default function Navbar() {
   const pathname = usePathname();
 
   const getActiveClass = (href: string) =>
-    pathname === href ? "bg-gray-200 text-primary" : "";
+    pathname === href ? "bg-gray-200 text-[#23272E]" : "";
 
   const toggleMenu = () => {
     if (isMenuOpen) {
@@ -92,7 +92,7 @@ export default function Navbar() {
           {/* Menú de navegación de escritorio */}
           <div className="hidden lg:flex items-center space-x-2 font-bold">
             <div
-              className={`hover:bg-white hover:text-primary rounded-md p-1 ${getActiveClass(
+              className={`hover:bg-white hover:text-[#EF4444] rounded-md p-1 ${getActiveClass(
                 "/"
               )}`}
             >
@@ -102,7 +102,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div
-              className={`hover:bg-white hover:text-primary rounded-md p-1 ${getActiveClass(
+              className={`hover:bg-white hover:text-[#EF4444] rounded-md p-1 ${getActiveClass(
                 "/dashboard/cuantos-somos"
               )}`}
             >
@@ -114,7 +114,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div
-              className={`hover:bg-white hover:text-primary rounded-md p-1 ${getActiveClass(
+              className={`hover:bg-white hover:text-[#EF4444] rounded-md p-1 ${getActiveClass(
                 "/dashboard/donde-estamos"
               )}`}
             >
@@ -126,7 +126,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div
-              className={`hover:bg-white hover:text-primary rounded-md p-1 ${getActiveClass(
+              className={`hover:bg-white hover:text-[#EF4444] rounded-md p-1 ${getActiveClass(
                 "/dashboard/como-estamos"
               )}`}
             >
@@ -138,7 +138,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div
-              className={`hover:bg-white hover:text-primary rounded-md p-1 ${getActiveClass(
+              className={`hover:bg-white hover:text-[#EF4444] rounded-md p-1 ${getActiveClass(
                 "/dashboard/normas-informes"
               )}`}
             >
@@ -150,7 +150,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div
-              className={`hover:bg-white hover:text-primary rounded-md p-1 ${getActiveClass(
+              className={`hover:bg-white hover:text-[#EF4444] rounded-md p-1 ${getActiveClass(
                 "/dashboard/notas-actualidad"
               )}`}
             >
@@ -162,7 +162,7 @@ export default function Navbar() {
               </Link>
             </div>
             <div
-              className={`hover:bg-white hover:text-primary rounded-md p-1 ${getActiveClass(
+              className={`hover:bg-white hover:text-[#EF4444] rounded-md p-1 ${getActiveClass(
                 "/dashboard/participacion-ciudadana"
               )}`}
             >
