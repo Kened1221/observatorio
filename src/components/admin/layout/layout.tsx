@@ -8,6 +8,8 @@ import { Session } from "next-auth";
 import { useUserData } from "../utils/user-data";
 import { updateSession } from "@/actions/auth";
 import { signOut } from "next-auth/react";
+import io from "socket.io-client";
+import { ProfileProvider } from "@/admin/context/ProfileContext";
 
 interface AdminLayoutProps {
   session: Session;
@@ -17,6 +19,7 @@ interface AdminLayoutProps {
 function Layout({ children, session }: AdminLayoutProps) {
   const [hoveredItem, setHoveredItem] = React.useState<string | null>(null);
   const [hasUpdatedSession, setHasUpdatedSession] = React.useState(false);
+  const [sessionToken, setSessionToken] = React.useState<string | null>(null);
   const {
     browser,
     browserVersion,
@@ -61,6 +64,7 @@ function Layout({ children, session }: AdminLayoutProps) {
         });
         if (result.success) {
           setHasUpdatedSession(true);
+          setSessionToken(result.sessionToken || null);
           localStorage.setItem(`session-updated-${session.user.id}`, "true");
         } else {
           console.error("Error al actualizar la sesión:", result.message);
@@ -89,40 +93,43 @@ function Layout({ children, session }: AdminLayoutProps) {
     longitude,
   ]);
 
-  // WebSocket para escuchar cierres de sesión
   React.useEffect(() => {
-    if (!browserId || !session?.user?.id) return;
+    if (!browserId || !session?.user?.id || !isReady || !sessionToken) return;
 
-    const ws = new WebSocket(`ws://localhost:8080?browserId=${browserId}`);
+    const socket = io("http://localhost:8080", {
+      query: { browserId, userId: session.user.id },
+      auth: { token: sessionToken },
+      reconnection: true,
+    });
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.action === "sessionClosed" && data.browserId === browserId) {
+    socket.on("sessionClosed", (data: { browserId: string }) => {
+      if (data.browserId === browserId) {
         localStorage.removeItem(`session-updated-${session.user.id}`);
-        signOut({ callbackUrl: "/login" });
+        signOut();
       }
+    });
+
+    return () => {
+      socket.disconnect();
     };
-
-    ws.onerror = (error) => console.error("WebSocket error:", error);
-    ws.onclose = () => console.log("WebSocket cerrado");
-
-    return () => ws.close();
-  }, [browserId, session?.user?.id]);
+  }, [browserId, session?.user?.id, isReady, sessionToken]);
 
   return (
-    <SidebarProvider>
-      <div className="flex h-screen bg-background p-4 w-full gap-4">
-        <AppSidebar
-          session={session}
-          hoveredItem={hoveredItem}
-          setHoveredItem={setHoveredItem}
-        />
-        <SidebarInset className="flex-1 rounded-lg border border-border bg-card shadow-sm overflow-y-auto">
-          <Navbar session={session} />
-          {children}
-        </SidebarInset>
-      </div>
-    </SidebarProvider>
+    <ProfileProvider>
+      <SidebarProvider>
+        <div className="flex h-screen bg-background p-4 w-full gap-4">
+          <AppSidebar
+            session={session}
+            hoveredItem={hoveredItem}
+            setHoveredItem={setHoveredItem}
+          />
+          <SidebarInset className="flex-1 rounded-lg border border-border bg-card shadow-sm overflow-y-auto">
+            <Navbar />
+            {children}
+          </SidebarInset>
+        </div>
+      </SidebarProvider>
+    </ProfileProvider>
   );
 }
 

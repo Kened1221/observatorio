@@ -4,7 +4,7 @@ import { z } from "zod";
 import { AuthError } from "next-auth";
 import { signIn as nextAuthSignIn } from "@/auth";
 import { prisma } from "@/config/prisma";
-import { notifySessionClosed } from "@/config/websocket";
+import { notifySessionClosed } from "@/config/socket";
 
 // Esquema de validación con Zod (ajustado para incluir los nuevos campos)
 const signInSchema = z.object({
@@ -16,6 +16,12 @@ type LoginResult = {
   success: boolean;
   message?: string;
   redirectTo?: string;
+};
+
+type SessionUpdateResult = {
+  success: boolean;
+  message?: string;
+  sessionToken?: string;
 };
 
 const sessionUpdateSchema = z.object({
@@ -35,12 +41,6 @@ const sessionUpdateSchema = z.object({
   latitude: z.number().nullable().optional(),
   longitude: z.number().nullable().optional(),
 });
-
-type SessionUpdateResult = {
-  success: boolean;
-  message?: string;
-  sessionToken?: string;
-};
 
 export async function updateSession(
   values: z.infer<typeof sessionUpdateSchema>
@@ -224,9 +224,9 @@ export async function closeSession({
       data: { status: "inactive", expires: new Date() },
     });
 
-    // Notificar al cliente afectado
+    // Notificar a todos los dispositivos del usuario
     if (session.browserId) {
-      notifySessionClosed(session.browserId);
+      notifySessionClosed(userId, session.browserId);
     }
 
     return {

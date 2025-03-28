@@ -44,6 +44,7 @@ export default function AppSidebar({
   const pathname = usePathname();
   const [hoverPosition, setHoverPosition] = useState<number>(0);
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
   const { browserId, isReady } = useUserData();
 
   const handleMouseEnter = (item: string, event: React.MouseEvent) => {
@@ -66,31 +67,29 @@ export default function AppSidebar({
 
   const handleCloseSession = async () => {
     const idUser = session.user.id;
-  
-    if (!isReady || !browserId) {
-      console.error("No se puede cerrar sesión: isReady o browserId no están listos");
+
+    if (!isReady || !browserId) return;
+    const sessionTokenU = await sessionTokenUser({
+      id: session.user.id,
+      browserId,
+    });
+    setSessionToken(sessionTokenU ?? null);
+
+    if (!sessionToken) {
+      console.error("No se puede cerrar sesión: sessionToken no disponible");
       return;
     }
-  
+
     try {
-      const sessionToken = await sessionTokenUser({
-        id: idUser,
-        browserId,
+      const result = await closeSession({
+        userId: idUser,
+        sessionToken,
       });
-  
-      if (sessionToken) {
-        const result = await closeSession({
-          userId: idUser,
-          sessionToken,
-        });
-        if (result.success) {
-          localStorage.removeItem(`session-updated-${idUser}`);
-          await signOut();
-        } else {
-          console.error("Error al cerrar sesión:", result.message);
-        }
+      if (result.success) {
+        localStorage.removeItem(`session-updated-${idUser}`);
+        await signOut();
       } else {
-        console.error("No se encontró sessionToken para el browserId actual");
+        console.error("Error al cerrar sesión:", result.message);
       }
     } catch (error) {
       console.error("Error en handleCloseSession:", error);

@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { Smartphone, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { closeSession } from "@/actions/auth"; // Ajusta la importación según tu estructura
+import { closeSession } from "@/actions/auth";
 import { activeSessionsVerify } from "@/actions/user-actions";
 import { useUserData } from "../utils/user-data";
+import { signOut } from "next-auth/react";
+import io from "socket.io-client";
 
 interface Session {
   sessionToken: string;
@@ -21,17 +23,17 @@ interface Session {
 
 interface SessionsProps {
   userId: string;
+  sessionToken: string | null;
 }
 
-const Sessions = ({ userId }: SessionsProps) => {
+const Sessions = ({ userId, sessionToken }: SessionsProps) => {
   const [activeSessions, setActiveSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { browserId, isReady } = useUserData();
 
   useEffect(() => {
     const fetchSessions = async () => {
-      if (!isReady) return;
-      if (browserId) 
+      if (!isReady || !browserId) return;
       try {
         const sessions = await activeSessionsVerify({ id: userId, browserId });
         setActiveSessions(
@@ -50,26 +52,43 @@ const Sessions = ({ userId }: SessionsProps) => {
     fetchSessions();
   }, [userId, browserId, isReady]);
 
-  // Configurar WebSocket para actualizaciones en tiempo real
   useEffect(() => {
-    if (!isReady || !browserId || !userId) return;
+    if (!isReady || !browserId || !userId || !sessionToken) return;
 
-    const ws = new WebSocket(`ws://localhost:8080?browserId=${browserId}`); // Ajusta el puerto si usas otro (ej. 3002)
+    const socket = io("http://localhost:8080", {
+      query: { browserId, userId },
+      auth: { token: sessionToken },
+      reconnection: true,
+      reconnectionAttempts: Infinity,
+      reconnectionDelay: 1000,
+    });
 
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.action === "sessionClosed") {
+    socket.on("connect", () => {
+      console.log(`Socket.IO conectado: browserId=${browserId}`);
+    });
+
+    socket.on("sessionClosed", (data: { browserId: string }) => {
+      if (data.browserId === browserId) {
+        signOut({ callbackUrl: "/login" });
+      } else {
         setActiveSessions((prev) =>
           prev.filter((session) => session.browserId !== data.browserId)
         );
       }
+    });
+
+    socket.on("disconnect", () => {
+      console.log(`Socket.IO desconectado: browserId=${browserId}`);
+    });
+
+    socket.on("reconnect", () => {
+      console.log(`Socket.IO reconectado: browserId=${browserId}`);
+    });
+
+    return () => {
+      socket.disconnect();
     };
-
-    ws.onerror = (error) => console.error("WebSocket error:", error);
-    ws.onclose = () => console.log("WebSocket cerrado");
-
-    return () => ws.close();
-  }, [browserId, userId, isReady]);
+  }, [browserId, userId, isReady, sessionToken]);
 
   const handleLogoutDevice = async (sessionToken: string) => {
     setIsLoading(true);
