@@ -336,7 +336,7 @@ export default function MapAnemia() {
         departamento: "Ayacucho",
         provincia: "LA MAR",
         distrito: "NINABAMBA",
-        puntuacion: 142
+        puntuacion: 142,
       },
       {
         departamento: "Ayacucho",
@@ -1008,24 +1008,23 @@ export default function MapAnemia() {
                 )}
               </div>
             </CardContent>
-            {(provincia !== "" || distrito !== "") && (
-              <CardFooter className="flex-col items-center gap-2 text-xs sm:text-sm">
-                <div className="flex flex-wrap items-center gap-2 font-medium leading-none">
-                  <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded-full bg-[#57D385]"></div>
-                    <span>Menor a 1000</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded-full bg-[#F2CE5E]"></div>
-                    <span>Entre 1000 y 2000</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded-full bg-[#F26565]"></div>
-                    <span>Mayor a 2000</span>
-                  </div>
+
+            <CardFooter className="flex-col items-center gap-2 text-xs sm:text-sm">
+              <div className="flex flex-wrap items-center gap-2 font-medium leading-none">
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-[#57D385]"></div>
+                  <span>Menor a 1000</span>
                 </div>
-              </CardFooter>
-            )}
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-[#F2CE5E]"></div>
+                  <span>Entre 1000 y 2000</span>
+                </div>
+                <div className="flex items-center gap-1">
+                  <div className="h-3 w-3 rounded-full bg-[#F26565]"></div>
+                  <span>Mayor a 2000</span>
+                </div>
+              </div>
+            </CardFooter>
           </Card>
         </div>
       </div>
