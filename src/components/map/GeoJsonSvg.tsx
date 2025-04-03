@@ -42,6 +42,7 @@ interface GeoJSONMap {
     puntuacion: number;
   }[];
   big?: boolean;
+  singleColor?: string; // Color base para la escala monocromática
 }
 
 interface GeoJSONData {
@@ -56,7 +57,7 @@ interface TooltipInfo {
   departamento: string;
   distrito: string;
   provincia: string;
-  puntuacion: number | string;
+  puntuacion: number;
 }
 
 const GeoJsonSvg: React.FC<GeoJSONMap> = ({
@@ -66,6 +67,7 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
   setDistrito,
   data,
   big = false,
+  singleColor,
 }) => {
   const [geoData, setGeoData] = useState<GeoJSONData | null>(null);
   const [tooltip, setTooltip] = useState<TooltipInfo>({
@@ -75,7 +77,7 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
     departamento: "",
     distrito: "",
     provincia: "",
-    puntuacion: "",
+    puntuacion: 0,
   });
 
   const svgRef = useRef<SVGSVGElement>(null);
@@ -98,24 +100,21 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
       feature.geometry.coordinates &&
       feature.geometry.coordinates.length > 0 &&
       feature.geometry.coordinates[0].length > 0 &&
-      feature.properties.nombdep === "AYACUCHO" // Solo mostrar Ayacucho en todos los niveles
+      feature.properties.nombdep === "AYACUCHO"
   );
 
   if (provincia !== "") {
-    // Si hay una provincia seleccionada, filtrar por provincia
     filteredFeatures = filteredFeatures.filter(
       (feature) => feature.properties.nombprov === provincia
     );
 
     if (distrito !== "") {
-      // Si hay un distrito seleccionado, filtrar por distrito
       filteredFeatures = filteredFeatures.filter(
         (feature) => feature.properties.nombdist === distrito
       );
     }
   }
 
-  // Si no hay características después del filtrado, mostrar un mensaje
   if (filteredFeatures.length === 0) {
     return <p>No se encontraron datos para la selección actual</p>;
   }
@@ -130,52 +129,86 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
   const maxX = Math.max(...allCoordinates.map(([x]) => x));
   const maxY = Math.max(...allCoordinates.map(([, y]) => y));
 
-  // Escalado para ajustar al SVG
   const scale = 1000 / Math.max(maxX - minX, maxY - minY);
 
   // Función para calcular el color basado en la puntuación
   const getColor = (puntuacion: number) => {
-    const maxBrightness = 80; // Brillo máximo
+    const maxBrightness = 90; // Brillo máximo
     const minBrightness = 30; // Brillo mínimo
 
-    if (big) {
-      if (puntuacion < 5000) {
-        const maxPuntuacion = 5000; // Puntuación máxima para normalizar
-        const brightness =
-          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
-        return `hsl(100, 100%, ${brightness}%)`; // Color verde para puntuaciones bajas
-      } else if (puntuacion >= 5000 && puntuacion < 20000) {
-        const maxPuntuacion = 20000; // Puntuación máxima para normalizar
-        const brightness =
-          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
-        return `hsl(50, 100%, ${brightness}%)`; // Color amarillo para puntuaciones medias
-      } else {
-        const maxPuntuacion = 100000; // Puntuación máxima para normalizar
-        const brightness =
-          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
-        return `hsl(0, 100%, ${brightness}%)`; // Color rojo para puntuaciones altas
-      }
+    if (singleColor) {
+      // Escala monocromática basada en singleColor
+      const baseHue = getHueFromColor(singleColor); // Obtener el tono base
+      const maxPuntuacion = big ? 150000 : 3000; // Máxima puntuación según big
+      const brightness =
+        maxBrightness -
+        (puntuacion / maxPuntuacion) * (maxBrightness - minBrightness);
+      return `hsl(${baseHue}, 100%, ${brightness}%)`;
     } else {
-      if (puntuacion < 1000) {
-        const maxPuntuacion = 1000; // Puntuación máxima para normalizar
-        const brightness =
-          maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
-        return `hsl(100, 100%, ${brightness}%)`; // Color verde para puntuaciones bajas
-      } else if (puntuacion >= 1000 && puntuacion < 2000) {
-        const maxPuntuacion = 2000; // Puntuación máxima para normalizar
-        const brightness =
-          maxBrightness - ((puntuacion - 1000) / maxPuntuacion) * minBrightness;
-        return `hsl(50, 100%, ${brightness}%)`; // Color amarillo para puntuaciones medias
+      // Lógica original con colores múltiples
+      if (big) {
+        if (puntuacion < 5000) {
+          const maxPuntuacion = 5000;
+          const brightness =
+            maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+          return `hsl(100, 100%, ${brightness}%)`; // Verde
+        } else if (puntuacion >= 5000 && puntuacion < 20000) {
+          const maxPuntuacion = 20000;
+          const brightness =
+            maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+          return `hsl(50, 100%, ${brightness}%)`; // Amarillo
+        } else {
+          const maxPuntuacion = 150000;
+          const brightness =
+            maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+          return `hsl(0, 100%, ${brightness}%)`; // Rojo
+        }
       } else {
-        const maxPuntuacion = 3000; // Puntuación máxima para normalizar
-        const brightness =
-          maxBrightness - ((puntuacion - 2000) / maxPuntuacion) * minBrightness;
-        return `hsl(0, 100%, ${brightness}%)`; // Color rojo para puntuaciones altas
+        if (puntuacion < 1000) {
+          const maxPuntuacion = 1000;
+          const brightness =
+            maxBrightness - (puntuacion / maxPuntuacion) * minBrightness;
+          return `hsl(100, 100%, ${brightness}%)`; // Verde
+        } else if (puntuacion >= 1000 && puntuacion < 2000) {
+          const maxPuntuacion = 2000;
+          const brightness =
+            maxBrightness -
+            ((puntuacion - 1000) / maxPuntuacion) * minBrightness;
+          return `hsl(50, 100%, ${brightness}%)`; // Amarillo
+        } else {
+          const maxPuntuacion = 3000;
+          const brightness =
+            maxBrightness -
+            ((puntuacion - 2000) / maxPuntuacion) * minBrightness;
+          return `hsl(0, 100%, ${brightness}%)`; // Rojo
+        }
       }
     }
   };
 
-  // Función para manejar el evento de hover en un distrito
+  // Función auxiliar para obtener el tono (hue) de un color CSS
+  const getHueFromColor = (color: string): number => {
+    if (color === "red") return 0; // Rojo
+    if (color === "green") return 120; // Verde
+    if (color === "blue") return 240; // Azul
+    if (color.startsWith("#")) {
+      // Convertir hex a RGB y luego a HSL para obtener el hue
+      const hex = color.replace("#", "");
+      const r = parseInt(hex.slice(0, 2), 16) / 255;
+      const g = parseInt(hex.slice(2, 4), 16) / 255;
+      const b = parseInt(hex.slice(4, 6), 16) / 255;
+      const max = Math.max(r, g, b);
+      const min = Math.min(r, g, b);
+      let h = 0;
+      if (max === min) return 0; // Gris, sin tono definido
+      if (max === r) h = (60 * (g - b)) / (max - min);
+      else if (max === g) h = (60 * (2 + (b - r))) / (max - min);
+      else if (max === b) h = (60 * (4 + (r - g))) / (max - min);
+      return h < 0 ? h + 360 : h;
+    }
+    return 0; // Default a rojo si no se reconoce el color
+  };
+
   const handleMouseOver = (
     e: React.MouseEvent<SVGPathElement>,
     feature: GeoJSONFeature
@@ -186,9 +219,8 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
     const distritoInfo = data?.find(
       (d) => d.distrito === distNombre && d.provincia === provNombre
     );
-    const puntuacion = distritoInfo?.puntuacion || "No disponible";
+    const puntuacion = distritoInfo?.puntuacion || 0; // Valor por defecto 0
 
-    // Calcular la posición del tooltip relativa al SVG
     if (svgRef.current) {
       const svgRect = svgRef.current.getBoundingClientRect();
       const mouseX = e.clientX - svgRect.left;
@@ -206,35 +238,26 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
     }
   };
 
-  // Función para ocultar el tooltip
   const handleMouseOut = () => {
     setTooltip((prev) => ({ ...prev, visible: false }));
   };
 
-  // Manejar clic en una región del mapa
   const handleMapClick = (feature: GeoJSONFeature) => {
     if (provincia === "") {
-      // Si estamos en la vista general de Ayacucho, navegar a la provincia del distrito clicado
       setProvincia(feature.properties.nombprov);
     } else if (distrito === "") {
-      // Si estamos en una provincia, seleccionar el distrito
       setDistrito(feature.properties.nombdist);
     }
-    // Si ya estamos en un distrito, no hacer nada
   };
 
-  // Función para manejar el botón Volver
   const handleVolver = () => {
     if (distrito !== "") {
-      // Si estamos en un distrito, volver a la provincia
       setDistrito("");
     } else if (provincia !== "") {
-      // Si estamos en una provincia, volver a la vista general de Ayacucho
       setProvincia("");
     }
   };
 
-  // Determinar el título de la sección
   const getTitulo = () => {
     if (provincia === "") {
       return "MAPA DE AYACUCHO";
@@ -251,7 +274,6 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
         {(provincia !== "" || distrito !== "") && (
           <LogoutButton onClick={handleVolver} />
         )}
-
         <h1 className="text-sm lg:text-xl font-bold text-gray-700 dark:text-gray-200">
           {getTitulo()}
         </h1>
@@ -260,12 +282,11 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
       <div className="w-full h-full relative">
         <svg
           ref={svgRef}
-          viewBox="0 0 1000 1000" // El tamaño original del mapa
-          preserveAspectRatio="xMidYMid meet" // Escalar para mantener la proporción
+          viewBox="0 0 1000 1000"
+          preserveAspectRatio="xMidYMid meet"
           className="w-full h-full"
         >
           {filteredFeatures.map((feature, index) => {
-            // Validar que el feature tenga coordenadas válidas
             if (
               !feature.geometry ||
               !feature.geometry.coordinates ||
@@ -274,8 +295,7 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
               return null;
             }
 
-            const coordinates = feature.geometry.coordinates[0]; // Tomamos solo el primer polígono
-
+            const coordinates = feature.geometry.coordinates[0];
             if (!coordinates || coordinates.length === 0) {
               return null;
             }
@@ -290,30 +310,20 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
               )
               .join(" L")} Z`;
 
-            // Encontrar la puntuación del distrito actual
             const distritoActual = data?.find(
               (d) =>
                 d.distrito === feature.properties.nombdist &&
                 d.provincia === feature.properties.nombprov
             );
-
-            // Color por defecto si no se encuentra el distrito
             const fillColor = distritoActual
               ? getColor(distritoActual.puntuacion)
               : "#ddd";
 
-            // Destacar el elemento seleccionado
-            let isSelected = false;
-
-            if (distrito !== "") {
-              // Destacar el distrito seleccionado
-              isSelected =
-                feature.properties.nombdist === distrito &&
-                feature.properties.nombprov === provincia;
-            } else if (provincia !== "") {
-              // Destacar todos los distritos de la provincia seleccionada
-              isSelected = feature.properties.nombprov === provincia;
-            }
+            const isSelected =
+              distrito !== ""
+                ? feature.properties.nombdist === distrito &&
+                  feature.properties.nombprov === provincia
+                : feature.properties.nombprov === provincia;
 
             const strokeWidth = isSelected ? "3" : "1";
             const strokeColor = isSelected ? "black" : "#333";
@@ -342,7 +352,6 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
           })}
         </svg>
 
-        {/* Tooltip */}
         {tooltip.visible && (
           <div
             className="absolute pointer-events-none bg-white p-2 rounded-md shadow-lg border border-gray-300 z-10 text-sm"

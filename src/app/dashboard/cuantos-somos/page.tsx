@@ -13,9 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getData, getMap } from "@/actions/cuantos-somos-actions";
+import { getPoblacion, getMap } from "@/actions/inicio-actions"; // Importar getMap
 
-interface PoblacionProps {
+interface PoAmProps {
   hombres?: number;
   mujeres?: number;
   rural?: number;
@@ -24,45 +24,47 @@ interface PoblacionProps {
 }
 
 export default function Page() {
-  const [all, setAll] = useState<PoblacionProps>({
+  const [map, setMap] = useState<any>(null);
+  const [poblacionA, setPoblacionA] = useState<PoAmProps>({
     hombres: 0,
     mujeres: 0,
     rural: 0,
     urbano: 0,
     total: 0,
   });
-  const [map, setMap] = useState<any>(null);
+
+  const [pAselect, setPAselect] = useState<string>("poblacion");
   const [provincia, setProvincia] = useState<string>("");
   const [distrito, setDistrito] = useState<string>("");
-  const [pAselect, setPAselect] = useState<string>("poblacion");
   const [rangoEdad, setRangoEdad] = useState<string>("Menores de 1 año");
 
   // Fetch de datos al montar el componente
   const fetchData = async () => {
-    const data = await getData(
+    const data = await getPoblacion(
       "Ayacucho",
       provincia,
       pAselect,
       distrito,
       rangoEdad
     );
-    setAll(data);
+    setPoblacionA(data);
+  };
+
+  const fetchMapa = async () => {
+    const data = await getMap();
+    setMap(data);
   };
 
   useEffect(() => {
     fetchData();
-  }, [provincia, distrito, pAselect, rangoEdad]);
+  }, [pAselect, provincia, distrito, rangoEdad]); // Eliminé pAselect duplicado
 
   useEffect(() => {
-    const fetchMapData = async () => {
-      const map = await getMap("Ayacucho", pAselect);
-      setMap(map);
-    };
-
-    fetchMapData();
-  }, [pAselect]);
+    fetchMapa();
+  }, []); // Solo se ejecuta al montar, ya que pAselect ya no afecta el mapa
 
   const value = [
+    "Todos",
     "Menores de 1 año",
     "De 1 a 4 años",
     "De 5 a 9 años",
@@ -93,7 +95,7 @@ export default function Page() {
             setProvincia={setProvincia}
             setDistrito={setDistrito}
             data={map} // Pasamos todo el array al componente
-            big={true}
+            
           />
         </div>
 
@@ -101,7 +103,7 @@ export default function Page() {
           <div className="flex flex-col items-center">
             <Button setPAselect={setPAselect} />
             <MdPeopleAlt className="text-9xl text-stone-600" />
-            <p className="text-7xl font-bold">{all.total}</p>
+            <p className="text-7xl font-bold">{poblacionA.total}</p>
           </div>
           <div className="flex w-full justify-center">
             <Select value={rangoEdad} onValueChange={setRangoEdad}>
@@ -123,13 +125,13 @@ export default function Page() {
               <div className="flex flex-col items-center">
                 <p className="text-xl font-bold">Hombres</p>
                 <FaChild className="text-9xl text-blue-500" />
-                <p className="text-6xl font-bold">{all.hombres}</p>
+                <p className="text-6xl font-bold">{poblacionA.hombres}</p>
               </div>
               {/* Mujeres */}
               <div className="flex flex-col items-center">
                 <p className="text-xl font-bold">Mujeres</p>
                 <FaChildDress className="text-9xl text-red-500" />
-                <p className="text-6xl font-bold">{all.mujeres}</p>
+                <p className="text-6xl font-bold">{poblacionA.mujeres}</p>
               </div>
             </div>
           ) : (
@@ -138,13 +140,13 @@ export default function Page() {
               <div className="flex flex-col items-center">
                 <p className="text-xl font-bold">Rural</p>
                 <FaChild className="text-9xl text-emerald-500" />
-                <p className="text-6xl font-bold">{all.rural}</p>
+                <p className="text-6xl font-bold">{poblacionA.rural}</p>
               </div>
               {/* Urbano */}
               <div className="flex flex-col items-center">
                 <p className="text-xl font-bold">Urbano</p>
                 <FaChild className="text-9xl text-violet-500" />
-                <p className="text-6xl font-bold">{all.urbano}</p>
+                <p className="text-6xl font-bold">{poblacionA.urbano}</p>
               </div>
             </div>
           )}
