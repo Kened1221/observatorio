@@ -1,6 +1,7 @@
 import { auth } from "@/auth";
 import Layout from "@/components/admin/layout/layout";
 import { ThemeProvider } from "@/components/theme/theme-provider";
+import { Toaster } from "@/components/ui/sonner";
 import { SessionProvider } from "next-auth/react";
 import { redirect } from "next/navigation";
 
@@ -20,6 +21,7 @@ export default async function AdminLayout({
       <SessionProvider>
         <Layout session={session}>{children}</Layout>
       </SessionProvider>
+      <Toaster position="top-center" richColors/>
     </ThemeProvider>
   );
 }

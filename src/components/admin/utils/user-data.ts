@@ -1,97 +1,119 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { UAParser } from "ua-parser-js";
 
-// Definimos los tipos para los datos
-interface DeviceInfo {
-  userAgent: string;
-  platform: string;
-  language: string;
-}
-
-interface LocationData {
-  city: string;
-  country: string;
-  lat: number;
-  lon: number;
-}
-
-interface UserData {
-  deviceInfo: string | null; // Ahora es un string (JSON.stringify)
-  ipAddress: string | null; // Ya es un string, no necesita cambio
-  location: string | null; // Ahora es un string (JSON.stringify)
-  isReady: boolean; // Nuevo campo para indicar que los datos están listos
-}
-
-// Tipos originales para parsear los datos de vuelta
-interface ParsedUserData {
-  deviceInfo: DeviceInfo | null;
+interface SessionData {
+  browser: string | null;
+  browserVersion: string | null;
+  os: string | null;
+  osVersion: string | null;
+  deviceType: string | null;
+  deviceModel: string | null;
+  language: string | null;
+  browserId: string | null; // Nuevo identificador persistente por navegador
   ipAddress: string | null;
-  location: LocationData | null;
+  city: string | null;
+  country: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  isReady: boolean;
 }
 
-// Hook personalizado para obtener los datos
-export const useUserData = (): UserData => {
-  const [deviceInfo, setDeviceInfo] = useState<string | null>(null);
+export const useUserData = (): SessionData => {
+  const [browser, setBrowser] = useState<string | null>(null);
+  const [browserVersion, setBrowserVersion] = useState<string | null>(null);
+  const [os, setOs] = useState<string | null>(null);
+  const [osVersion, setOsVersion] = useState<string | null>(null);
+  const [deviceType, setDeviceType] = useState<string | null>(null);
+  const [deviceModel, setDeviceModel] = useState<string | null>(null);
+  const [language, setLanguage] = useState<string | null>(null);
+  const [browserId, setBrowserId] = useState<string | null>(null); // Nuevo estado
   const [ipAddress, setIpAddress] = useState<string | null>(null);
-  const [location, setLocation] = useState<string | null>(null);
-  const [isReady, setIsReady] = useState(false); // Nuevo estado
+  const [city, setCity] = useState<string | null>(null);
+  const [country, setCountry] = useState<string | null>(null);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obtener deviceInfo (síncrono)
-        const info: DeviceInfo = {
-          userAgent: navigator.userAgent,
-          platform: navigator.platform,
-          language: navigator.language,
-        };
-        setDeviceInfo(JSON.stringify(info));
+        const parser = new UAParser(navigator.userAgent);
+        const uaResult = parser.getResult();
 
-        // Obtener IP pública
+        setBrowser(uaResult.browser.name || "Desconocido");
+        setBrowserVersion(uaResult.browser.version || "Desconocido");
+        setOs(uaResult.os.name || "Desconocido");
+        setOsVersion(uaResult.os.version || "Desconocido");
+        setDeviceType(uaResult.device.type || "desktop");
+        setDeviceModel(uaResult.device.model || "Desconocido");
+        setLanguage(navigator.language || "Desconocido");
+
+        // Generar o recuperar un browserId único
+        let storedBrowserId = localStorage.getItem("browserId");
+        if (!storedBrowserId) {
+          storedBrowserId = crypto.randomUUID(); // Generar un UUID único
+          localStorage.setItem("browserId", storedBrowserId);
+        }
+        setBrowserId(storedBrowserId);
+
         const ipResponse = await fetch("https://api.ipify.org?format=json");
         const ipData = await ipResponse.json();
         setIpAddress(ipData.ip);
 
-        // Obtener ubicación basada en la IP
         const locationResponse = await fetch(`http://ip-api.com/json/${ipData.ip}`);
         const locationData = await locationResponse.json();
-        const locationInfo: LocationData = {
-          city: locationData.city,
-          country: locationData.country,
-          lat: locationData.lat,
-          lon: locationData.lon,
-        };
-        setLocation(JSON.stringify(locationInfo));
+        setCity(locationData.city || "Desconocido");
+        setCountry(locationData.country || "Desconocido");
+        setLatitude(locationData.lat || 0);
+        setLongitude(locationData.lon || 0);
       } catch (error) {
         console.error("Error al obtener datos:", error);
-        // Establecer valores por defecto en caso de error
-        if (!deviceInfo) {
-          const info: DeviceInfo = {
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language,
-          };
-          setDeviceInfo(JSON.stringify(info));
+        const parser = new UAParser(navigator.userAgent);
+        const uaResult = parser.getResult();
+        setBrowser(uaResult.browser.name || "Desconocido");
+        setBrowserVersion(uaResult.browser.version || "Desconocido");
+        setOs(uaResult.os.name || "Desconocido");
+        setOsVersion(uaResult.os.version || "Desconocido");
+        setDeviceType(uaResult.device.type || "desktop");
+        setDeviceModel(uaResult.device.model || "Desconocido");
+        setLanguage(navigator.language || "Desconocido");
+
+        let storedBrowserId = localStorage.getItem("browserId");
+        if (!storedBrowserId) {
+          storedBrowserId = crypto.randomUUID();
+          localStorage.setItem("browserId", storedBrowserId);
         }
-        if (!ipAddress) setIpAddress("unknown");
-        if (!location) setLocation("unknown");
+        setBrowserId(storedBrowserId);
+
+        setIpAddress("unknown");
+        setCity("Desconocido");
+        setCountry("Desconocido");
+        setLatitude(0);
+        setLongitude(0);
       } finally {
-        setIsReady(true); // Marcar como listo, incluso si hay errores
+        setIsReady(true);
       }
     };
 
     fetchData();
-  }, []); // Solo se ejecuta una vez al montar
+  }, []);
 
-  return { deviceInfo, ipAddress, location, isReady };
-};
-
-// Función para parsear los datos de texto plano a su formato original
-export const parseUserData = (data: UserData): ParsedUserData => {
   return {
-    deviceInfo: data.deviceInfo ? JSON.parse(data.deviceInfo) : null,
-    ipAddress: data.ipAddress,
-    location: data.location ? JSON.parse(data.location) : null,
+    browser,
+    browserVersion,
+    os,
+    osVersion,
+    deviceType,
+    deviceModel,
+    language,
+    browserId,
+    ipAddress,
+    city,
+    country,
+    latitude,
+    longitude,
+    isReady,
   };
 };

@@ -3,14 +3,13 @@ import NextAuth from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import authConfig from "./auth.config";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 import { User } from "next-auth";
 import { AdapterUser } from "@auth/core/adapters";
 import { Account, Profile } from "next-auth";
+import { prisma } from "./config/prisma";
 
-const prisma = new PrismaClient();
 
 const { providers, ...restConfig } = authConfig;
 const credentialsProvider = providers.find(
@@ -58,8 +57,8 @@ const callbacks = {
   session: async ({ session, token }: { session: Session; token: JWT }) => {
     if (token.sub) {
       session.user.id = token.sub;
-      // Ahora TypeScript reconoce role como una propiedad válida
       session.user.role = token.role;
+      session.user.sessionToken = token.sessionToken;
 
       try {
         const sessions = await prisma.session.findMany({
@@ -72,33 +71,28 @@ const callbacks = {
     }
     return session;
   },
-  jwt: async ({ token, user, account }: { 
-    token: JWT; 
-    user?: User | AdapterUser; 
+  jwt: async ({
+    token,
+    user,
+    account,
+  }: {
+    token: JWT;
+    user?: User | AdapterUser;
     account?: Account | null;
     profile?: Profile;
   }) => {
-    // Si tenemos un usuario, actualizar el token
-    if (user) {
+    if (user && user.id) {
       token.sub = user.id;
-      
-      // Si el usuario tiene un rol definido (desde credentialsProvider), usarlo
       if ((user as User & { role?: string }).role) {
         token.role = (user as User & { role?: string }).role;
-      } 
-      // Si no tiene rol pero tenemos una cuenta, obtener el rol desde la base de datos
-      else if (account) {
+      } else if (account) {
         try {
           const dbUser = await prisma.user.findUnique({
             where: { id: user.id },
-            include: { roles: {
-              select: { name: true }
-            } },
+            include: { roles: { select: { name: true } } },
           });
-          
           if (dbUser && dbUser.roles && dbUser.roles.length > 0) {
             token.role = dbUser.roles[0].name;
-            // Añadir el rol al objeto user para futuras referencias
             (user as User & { role?: string }).role = dbUser.roles[0].name;
           }
         } catch (error) {

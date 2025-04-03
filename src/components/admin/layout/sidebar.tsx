@@ -26,7 +26,9 @@ import { useRef, useState } from "react";
 
 import { signOut } from "next-auth/react";
 import { Session } from "next-auth";
-import { signOutSession } from "@/actions/auth";
+import { closeSession } from "@/actions/auth";
+import { sessionTokenUser } from "@/actions/user-actions";
+import { useUserData } from "../utils/user-data";
 
 export default function AppSidebar({
   hoveredItem,
@@ -42,6 +44,8 @@ export default function AppSidebar({
   const pathname = usePathname();
   const [hoverPosition, setHoverPosition] = useState<number>(0);
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const { browserId, isReady } = useUserData();
 
   const handleMouseEnter = (item: string, event: React.MouseEvent) => {
     if (
@@ -63,8 +67,33 @@ export default function AppSidebar({
 
   const handleCloseSession = async () => {
     const idUser = session.user.id;
-    await signOutSession(idUser);
-    await signOut();
+
+    if (!isReady || !browserId) return;
+    const sessionTokenU = await sessionTokenUser({
+      id: session.user.id,
+      browserId,
+    });
+    setSessionToken(sessionTokenU ?? null);
+
+    if (!sessionToken) {
+      console.error("No se puede cerrar sesión: sessionToken no disponible");
+      return;
+    }
+
+    try {
+      const result = await closeSession({
+        userId: idUser,
+        sessionToken,
+      });
+      if (result.success) {
+        localStorage.removeItem(`session-updated-${idUser}`);
+        await signOut();
+      } else {
+        console.error("Error al cerrar sesión:", result.message);
+      }
+    } catch (error) {
+      console.error("Error en handleCloseSession:", error);
+    }
   };
 
   return (
@@ -198,7 +227,12 @@ export default function AppSidebar({
             className="bg-destructive text-white hover:bg-destructive/90 hover:text-white flex items-center gap-2 justify-center hover:cursor-pointer"
             onClick={handleCloseSession}
           >
-            <LogOut width={16} className={`transition-all duration-150 ${isCollapsed ? 'rotate-180' : ''}`}/>
+            <LogOut
+              width={16}
+              className={`transition-all duration-150 ${
+                isCollapsed ? "rotate-180" : ""
+              }`}
+            />
             {!isCollapsed && <span>Cerrar sesión</span>}
           </SidebarMenuButton>
         </SidebarFooter>

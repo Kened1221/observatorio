@@ -1,29 +1,20 @@
 /* eslint-disable @next/next/no-img-element */
+import { useProfile } from "@/admin/context/ProfileContext";
 import { ModeToggle } from "@/components/theme/mode-toggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
-import {
-  Bell,
-  Fullscreen,
-  Search,
-} from "lucide-react";
-import { Session } from "next-auth";
+import { Bell, Fullscreen, Search } from "lucide-react";
 
-interface NavbarProps {
-  session: Session;
-}
-
-function Navbar({session}: NavbarProps) {
+function Navbar() {
+  const { profile } = useProfile();
 
   const handleToggleFullscreen = () => {
-    // Si no estamos en fullscreen, lo activamos
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen().catch((err) => {
         console.error("Error al intentar poner en fullscreen:", err);
       });
     } else {
-      // Si ya estamos en fullscreen, lo desactivamos
       document.exitFullscreen().catch((err) => {
         console.error("Error al intentar salir de fullscreen:", err);
       });
@@ -56,15 +47,19 @@ function Navbar({session}: NavbarProps) {
         </Button>
         <div className="flex items-center gap-2">
           <img
-            src="https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png"
+            src={
+              profile.avatar
+                ? profile.avatar
+                : "https://icons.veryicon.com/png/o/miscellaneous/user-avatar/user-avatar-male-5.png"
+            }
             width={36}
             height={36}
             alt="Anna Adame"
             className="rounded-full"
           />
           <div className="hidden text-sm md:block">
-            <div className="font-medium text-primary">{session.user.name}</div>
-            <div className="text-xs text-muted-foreground">{session.user.role}</div>
+            <div className="font-medium text-primary">{profile.name}</div>
+            <div className="text-xs text-muted-foreground">{profile.role}</div>
           </div>
         </div>
       </div>

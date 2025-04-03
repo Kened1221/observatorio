@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { FaGoogle } from "react-icons/fa6";
 import { loginAction } from "@/actions/auth";
-import { useUserData } from "@/components/admin/utils/user-data";
 import { signIn } from "next-auth/react";
 
 export default function LoginWithImagePage() {
@@ -26,8 +25,6 @@ export default function LoginWithImagePage() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") || "/admin";
 
-  const { deviceInfo, ipAddress, location } = useUserData();
-
   const handleCredentialsLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -36,9 +33,6 @@ export default function LoginWithImagePage() {
     const result = await loginAction({
       email,
       password,
-      deviceInfo,
-      ipAddress,
-      location,
     });
 
     if (result.success) {

@@ -1,4 +1,3 @@
-// app/account/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -8,7 +7,8 @@ import Profile from "@/components/admin/account/Profile";
 import Security from "@/components/admin/account/Security";
 import Sessions from "@/components/admin/account/Sessions";
 import History from "@/components/admin/account/History";
-import { googleLinkedAccountVerify } from "@/actions/user-actions";
+import { googleLinkedAccountVerify, sessionTokenUser } from "@/actions/user-actions";
+import { useUserData } from "@/components/admin/utils/user-data";
 
 type TabType = "profile" | "security" | "sessions" | "history";
 
@@ -16,6 +16,8 @@ const AccountManagement = () => {
   const { data: session, status } = useSession();
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [isGoogleLinkedAccount, setIsGoogleLinkedAccount] = useState(false);
+  const [sessionToken, setSessionToken] = useState<string | null>(null);
+  const { browserId, isReady } = useUserData();
 
   // Se llama el useEffect siempre y dentro se verifica si existe session.user.id
   useEffect(() => {
@@ -24,12 +26,18 @@ const AccountManagement = () => {
       try {
         const res = await googleLinkedAccountVerify({ id: session.user.id });
         setIsGoogleLinkedAccount(res);
+
+        // Se obtiene el sessionToken de la sesión actual
+        if (!isReady || !browserId) return;
+        const sessionTokenU = await sessionTokenUser({ id: session.user.id, browserId });
+        setSessionToken(sessionTokenU ?? null);
+
       } catch (error) {
         console.error("Error checking Google linked account:", error);
       }
     };
     checkGoogleLinkedAccount();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, browserId, isReady]);
 
   if (status === "loading") {
     return (
@@ -105,7 +113,7 @@ const AccountManagement = () => {
             <div className="bg-card border text-primary-foreground shadow rounded-lg">
               {activeTab === "profile" && <Profile userData={userData} />}
               {activeTab === "security" && <Security />}
-              {activeTab === "sessions" && <Sessions userId={session.user?.id || ""} />}
+              {activeTab === "sessions" && <Sessions sessionToken={sessionToken} userId={session.user?.id || ""} />}
               {activeTab === "history" && <History userId={session.user?.id || ""} />}
             </div>
           </div>
