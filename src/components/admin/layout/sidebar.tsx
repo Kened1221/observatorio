@@ -67,19 +67,19 @@ export default function AppSidebar({
 
   const handleCloseSession = async () => {
     const idUser = session.user.id;
-
+  
     if (!isReady || !browserId) return;
     const sessionTokenU = await sessionTokenUser({
       id: session.user.id,
       browserId,
     });
     setSessionToken(sessionTokenU ?? null);
-
+  
     if (!sessionToken) {
       console.error("No se puede cerrar sesión: sessionToken no disponible");
       return;
     }
-
+  
     try {
       const result = await closeSession({
         userId: idUser,
@@ -102,7 +102,7 @@ export default function AppSidebar({
         className="rounded-lg border border-border shadow-sm relative h-full"
         collapsible="icon"
       >
-        <SidebarHeader className="flex items-center border-b rounded-t-lg">
+        <SidebarHeader className="flex items-center border-b rounded-t-lg ">
           {!isCollapsed ? (
             <div className="flex items-center gap-4 font-semibold p-6">
               <Image
