@@ -8,152 +8,230 @@ export async function getPoblacion(
   provincia: string = "",
   pAselect: string = "poblacion",
   distrito: string = "",
-  rangoEdad: string = ""
+  rangoEdad: string = "",
+  anio: number = new Date().getFullYear()
 ) {
-  // Construir el filtro where dinámicamente
-  const whereClause: any = {
-    ubicacion: {
-      departamento: {
-        nombre: departamento, // Siempre filtramos por departamento
-      },
-    },
-  };
-
-  // Filtro por distrito si no está vacío
-  if (distrito !== "") {
-    whereClause.ubicacion.distrito = {
-      nombre: distrito,
-    };
-  }
-  // Filtro por provincia si distrito está vacío y provincia no
-  else if (provincia !== "") {
-    whereClause.ubicacion.provincia = {
-      nombre: provincia,
-    };
-  }
-
-  // Filtro por rango de edad solo si rangoEdad no está vacío y no es "Todos"
-  if (rangoEdad !== "" && rangoEdad !== "Todos") {
-    whereClause.edadIntervalo = {
-      intervalo: rangoEdad,
-    };
-  }
-
-  // Determinar qué tabla consultar según pAselect
-  let result;
-  if (pAselect === "ambito") {
-    // Consulta para ámbito (rural y urbano)
-    const rural = await prisma.poblacion.aggregate({
-      _sum: {
-        cantidad: true,
-      },
-      where: {
-        ...whereClause,
-        ambitoId: 1, // Asumiendo 1 = rural
-      },
-    });
-
-    const urbano = await prisma.poblacion.aggregate({
-      _sum: {
-        cantidad: true,
-      },
-      where: {
-        ...whereClause,
-        ambitoId: 2, // Asumiendo 2 = urbano
-      },
-    });
-
-    result = {
-      rural: rural._sum.cantidad || 0,
-      urbano: urbano._sum.cantidad || 0,
-      total: (rural._sum.cantidad || 0) + (urbano._sum.cantidad || 0),
-    };
-  } else {
-    // Por defecto o si pAselect es "poblacion"
-    const hombres = await prisma.poblacion.aggregate({
-      _sum: {
-        cantidad: true,
-      },
-      where: {
-        ...whereClause,
-        generoId: 1, // Asumiendo 1 = hombres
-      },
-    });
-
-    const mujeres = await prisma.poblacion.aggregate({
-      _sum: {
-        cantidad: true,
-      },
-      where: {
-        ...whereClause,
-        generoId: 2, // Asumiendo 2 = mujeres
-      },
-    });
-
-    result = {
-      hombres: hombres._sum.cantidad || 0,
-      mujeres: mujeres._sum.cantidad || 0,
-      total: (hombres._sum.cantidad || 0) + (mujeres._sum.cantidad || 0),
-    };
-  }
-
-  return result;
-}
-
-export async function getMap() {
-  // Obtener todos los distritos de Ayacucho con sus provincias
-  const distritos = await prisma.distrito.findMany({
-    where: {
-      provincia: {
+  try {
+    const whereClause: any = {
+      anio: anio,
+      ubicacion: {
         departamento: {
-          nombre: "AYACUCHO",
+          nombre: departamento,
         },
       },
-    },
-    include: {
-      provincia: {
-        select: {
-          nombre: true,
-        },
-      },
-    },
-  });
+    };
 
-  // Construir el resultado con la puntuación para cada distrito
-  const result = await Promise.all(
-    distritos.map(async (distrito) => {
-      const whereClause: any = {
-        ubicacion: {
-          distrito: {
-            id: distrito.id, // Filtrar por el ID del distrito
-          },
-          departamento: {
-            nombre: "AYACUCHO",
-          },
-        },
+    if (distrito !== "") {
+      whereClause.ubicacion.distrito = {
+        nombre: distrito,
       };
+    } else if (provincia !== "") {
+      whereClause.ubicacion.provincia = {
+        nombre: provincia,
+      };
+    }
 
-      // Calcular la puntuación como la suma total de población (hombres + mujeres)
-      const poblacion = await prisma.poblacion.aggregate({
+    if (rangoEdad !== "" && rangoEdad !== "Todos") {
+      whereClause.edadIntervalo = {
+        intervalo: rangoEdad,
+      };
+    }
+
+    let result;
+    if (pAselect === "ambito") {
+      const rural = await prisma.poblacion.aggregate({
         _sum: {
           cantidad: true,
         },
         where: {
           ...whereClause,
-          generoId: { in: [1, 2] }, // Incluye ambos géneros (1 = hombres, 2 = mujeres)
+          ambitoId: 1,
         },
       });
 
-      const puntuacion = poblacion._sum.cantidad || 0;   
+      const urbano = await prisma.poblacion.aggregate({
+        _sum: {
+          cantidad: true,
+        },
+        where: {
+          ...whereClause,
+          ambitoId: 2,
+        },
+      });
 
-      return {
-        departamento: "AYACUCHO",
-        provincia: distrito.provincia.nombre,
-        distrito: distrito.nombre,
-        puntuacion: puntuacion,
+      result = {
+        rural: rural._sum.cantidad || 0,
+        urbano: urbano._sum.cantidad || 0,
+        total: (rural._sum.cantidad || 0) + (urbano._sum.cantidad || 0),
       };
-    })
-  );
+    } else {
+      const hombres = await prisma.poblacion.aggregate({
+        _sum: {
+          cantidad: true,
+        },
+        where: {
+          ...whereClause,
+          generoId: 1,
+        },
+      });
 
-  return result;
+      const mujeres = await prisma.poblacion.aggregate({
+        _sum: {
+          cantidad: true,
+        },
+        where: {
+          ...whereClause,
+          generoId: 2,
+        },
+      });
+
+      result = {
+        hombres: hombres._sum.cantidad || 0,
+        mujeres: mujeres._sum.cantidad || 0,
+        total: (hombres._sum.cantidad || 0) + (mujeres._sum.cantidad || 0),
+      };
+    }
+
+    return result;
+  } catch (error: any) {
+    console.error("Error al obtener datos de población:", error);
+    return {
+      hombres: 0,
+      mujeres: 0,
+      rural: 0,
+      urbano: 0,
+      total: 0,
+    };
+  }
+}
+
+export async function getMap(anio: number) {
+  try {
+    const distritos = await prisma.distrito.findMany({
+      where: {
+        provincia: {
+          departamento: {
+            nombre: "AYACUCHO",
+          },
+        },
+      },
+      include: {
+        provincia: {
+          select: {
+            nombre: true,
+          },
+        },
+      },
+    });
+
+    const result = await Promise.all(
+      distritos.map(async (distrito) => {
+        const whereClause: any = {
+          anio: anio,
+          ubicacion: {
+            distrito: {
+              id: distrito.id,
+            },
+            departamento: {
+              nombre: "AYACUCHO",
+            },
+          },
+        };
+
+        const poblacion = await prisma.poblacion.aggregate({
+          _sum: {
+            cantidad: true,
+          },
+          where: {
+            ...whereClause,
+            generoId: { in: [1, 2] },
+          },
+        });
+
+        const puntuacion = poblacion._sum.cantidad || 0;
+
+        return {
+          departamento: "AYACUCHO",
+          provincia: distrito.provincia.nombre,
+          distrito: distrito.nombre,
+          puntuacion: puntuacion,
+        };
+      })
+    );
+
+    return result;
+  } catch (error: any) {
+    console.error("Error al obtener datos del mapa:", error);
+    return [];
+  }
+}
+
+export async function getAvailableYears() {
+  try {
+    const years = await prisma.poblacion.findMany({
+      select: {
+        anio: true,
+      },
+      distinct: ["anio"],
+      orderBy: {
+        anio: "desc",
+      },
+    });
+
+    return years.map((item) => item.anio);
+  } catch (error: any) {
+    console.error("Error al obtener años disponibles:", error);
+    return [];
+  }
+}
+
+export async function downloadPoblacionData(anio: number) {
+  try {
+    const poblacionData = await prisma.poblacion.findMany({
+      where: {
+        anio,
+      },
+      include: {
+        ubicacion: {
+          include: {
+            departamento: true,
+            provincia: true,
+            distrito: true,
+          },
+        },
+        genero: true,
+        ambito: true,
+        edadIntervalo: true,
+      },
+    });
+
+    if (poblacionData.length === 0) {
+      return {
+        success: false,
+        error: `No hay datos de población para el año ${anio}`,
+      };
+    }
+
+    const formattedData = poblacionData.map((record) => ({
+      anio: record.anio,
+      departamento: record.ubicacion.departamento.nombre,
+      provincia: record.ubicacion.provincia?.nombre || "",
+      distrito: record.ubicacion.distrito?.nombre || "",
+      genero: record.genero.nombre,
+      ambito: record.ambito.nombre,
+      edadIntervalo: record.edadIntervalo.intervalo,
+      cantidad: record.cantidad,
+    }));
+
+    return {
+      success: true,
+      data: formattedData,
+    };
+  } catch (error: any) {
+    console.error("Error al obtener datos para descarga:", error);
+    return {
+      success: false,
+      error: "No se pudo obtener los datos para la descarga",
+    };
+  }
 }

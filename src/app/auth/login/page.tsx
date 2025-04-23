@@ -1,3 +1,4 @@
+// app/auth/login/page.tsx
 "use client";
 
 import * as React from "react";
@@ -5,7 +6,6 @@ import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -30,10 +30,7 @@ export default function LoginWithImagePage() {
     setLoading(true);
     setError("");
 
-    const result = await loginAction({
-      email,
-      password,
-    });
+    const result = await loginAction({ email, password });
 
     if (result.success) {
       router.push(callbackUrl);
@@ -47,8 +44,18 @@ export default function LoginWithImagePage() {
     setLoading(true);
     setError("");
 
-    await signIn("google", { redirect: false, callbackUrl });
-    setLoading(false);
+    try {
+      const result = await signIn("google", { redirect: false, callbackUrl });
+      if (result?.error) {
+        setError("Error al iniciar sesión con Google: " + result.error);
+        setLoading(false);
+      } else if (result?.url) {
+        router.push(result.url); // Redirige manualmente si es necesario
+      }
+    } catch {
+      setError("Error inesperado al iniciar sesión con Google");
+      setLoading(false);
+    }
   };
 
   return (
@@ -57,9 +64,7 @@ export default function LoginWithImagePage() {
         <div className="flex flex-1 items-center justify-center">
           <Card className="mx-auto w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-sm">
             <div className="mb-8">
-              <h1 className="text-2xl font-semibold text-primary">
-                Bienvenido!
-              </h1>
+              <h1 className="text-2xl font-semibold text-primary">Bienvenido!</h1>
               <p className="mt-2 text-sm text-muted-foreground">
                 Inicia sesión para continuar.
               </p>
@@ -116,18 +121,14 @@ export default function LoginWithImagePage() {
                         <Eye className="h-5 w-5" />
                       )}
                       <span className="sr-only">
-                        {showPassword
-                          ? "Ocultar contraseña"
-                          : "Mostrar contraseña"}
+                        {showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
                       </span>
                     </Button>
                   </div>
                 </div>
 
                 <Button
-                  className={`w-full bg-primary hover:bg-primary/90 hover:cursor-pointer py-5
-                  ${loading ? "opacity-70" : ""}
-                  `}
+                  className={`w-full bg-primary hover:bg-primary/90 hover:cursor-pointer py-5 ${loading ? "opacity-70" : ""}`}
                   disabled={loading}
                   type="submit"
                 >
@@ -170,9 +171,7 @@ export default function LoginWithImagePage() {
         </svg>
         <div
           className="absolute inset-0 bg-slate-900"
-          style={{
-            clipPath: "url(#wave-clip)",
-          }}
+          style={{ clipPath: "url(#wave-clip)" }}
         >
           <Image
             src={"/adm/logos/login-background.jpg"}
@@ -184,9 +183,7 @@ export default function LoginWithImagePage() {
         </div>
         <div
           className="relative flex h-full flex-col items-center justify-center p-8"
-          style={{
-            clipPath: "url(#wave-clip)",
-          }}
+          style={{ clipPath: "url(#wave-clip)" }}
         >
           <Image
             src={"/adm/logos/logo.png"}
@@ -196,11 +193,10 @@ export default function LoginWithImagePage() {
             className="mb-8 flex items-center justify-center"
           />
           <h1 className="mb-4 text-3xl font-bold text-primary-foreground text-center">
-            Observatorio Regional <br /> Administrador{" "}
+            Observatorio Regional <br /> Administrador
           </h1>
           <p className="mb-8 text-center text-gray-300">
-            Panel de administración con diseño moderno y características
-            avanzadas
+            Panel de administración con diseño moderno y características avanzadas
           </p>
         </div>
       </div>

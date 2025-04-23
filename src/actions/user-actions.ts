@@ -105,23 +105,13 @@ export async function historySessions({ id }: { id: string }) {
   }
 }
 
-export async function sessionTokenUser({
-  id,
-  browserId,
-}: {
-  id: string;
-  browserId: string;
-}) {
+// src/actions/user-actions.ts
+export async function closeSession() {
   try {
-    const session = await prisma.session.findFirst({
-      where: { userId: id, browserId },
-      select: { sessionToken: true },
-    });
-
-    return session?.sessionToken;
+    return { success: true, message: "Sesión cerrada correctamente" };
   } catch (error) {
-    console.log("Error al obtener el token de sesión del usuario:", error);
-    return null;
+    console.error("Error al cerrar sesión:", error);
+    return { success: false, message: "Error al cerrar sesión" };
   }
 }
 

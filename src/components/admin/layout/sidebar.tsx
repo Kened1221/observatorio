@@ -1,3 +1,4 @@
+//src/components/admin/layout/sidebar.tsx
 import { sidebarMenus } from "@/admin/utils/data-sidebar";
 import {
   Collapsible,
@@ -26,9 +27,7 @@ import { useRef, useState } from "react";
 
 import { signOut } from "next-auth/react";
 import { Session } from "next-auth";
-import { closeSession } from "@/actions/auth";
-import { sessionTokenUser } from "@/actions/user-actions";
-import { useUserData } from "../utils/user-data";
+import { closeSession } from "@/actions/user-actions";
 
 export default function AppSidebar({
   hoveredItem,
@@ -44,8 +43,6 @@ export default function AppSidebar({
   const pathname = usePathname();
   const [hoverPosition, setHoverPosition] = useState<number>(0);
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
-  const [sessionToken, setSessionToken] = useState<string | null>(null);
-  const { browserId, isReady } = useUserData();
 
   const handleMouseEnter = (item: string, event: React.MouseEvent) => {
     if (
@@ -66,31 +63,21 @@ export default function AppSidebar({
   };
 
   const handleCloseSession = async () => {
-    const idUser = session.user.id;
-  
-    if (!isReady || !browserId) return;
-    const sessionTokenU = await sessionTokenUser({
-      id: session.user.id,
-      browserId,
-    });
-    setSessionToken(sessionTokenU ?? null);
-  
-    if (!sessionToken) {
-      console.error("No se puede cerrar sesión: sessionToken no disponible");
-      return;
-    }
-  
     try {
-      const result = await closeSession({
-        userId: idUser,
-        sessionToken,
-      });
-      if (result.success) {
-        localStorage.removeItem(`session-updated-${idUser}`);
-        await signOut();
-      } else {
+      const idUser = session.user.id;
+
+      // Llama a closeSession para limpieza (futura BBDD)
+      const result = await closeSession();
+      if (!result.success) {
         console.error("Error al cerrar sesión:", result.message);
+        return;
       }
+
+      // Limpia datos locales en el cliente
+      localStorage.removeItem(`session-updated-${idUser}`);
+
+      // Cierra la sesión con NextAuth
+      await signOut({ callbackUrl: "/auth/login" });
     } catch (error) {
       console.error("Error en handleCloseSession:", error);
     }

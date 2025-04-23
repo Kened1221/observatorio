@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { getPoblacion, getMap } from "@/actions/inicio-actions"; // Importar getMap
+import { getPoblacion, getMap, getAvailableYears } from "@/actions/inicio-actions";
 
 interface PoAmProps {
   hombres?: number;
@@ -32,38 +32,54 @@ export default function MapPoblacion() {
     urbano: 0,
     total: 0,
   });
-  
+  const [availableYears, setAvailableYears] = useState<number[]>([]);
+
   const [pAselect, setPAselect] = useState<string>("poblacion");
   const [provincia, setProvincia] = useState<string>("");
   const [distrito, setDistrito] = useState<string>("");
   const [rangoEdad, setRangoEdad] = useState<string>("Todos");
+  const [anio, setAnio] = useState<number>(new Date().getFullYear()); // Año actual por defecto
 
-  // Fetch de datos al montar el componente
+  // Fetch de años disponibles al montar el componente
+  useEffect(() => {
+    const fetchYears = async () => {
+      const years = await getAvailableYears();
+      setAvailableYears(years);
+      if (years.length > 0 && !years.includes(anio)) {
+        setAnio(years[0]); // Establecer el año más reciente por defecto
+      }
+    };
+    fetchYears();
+  }, []);
+
+  // Fetch de datos de población
   const fetchData = async () => {
     const data = await getPoblacion(
       "AYACUCHO",
       provincia,
       pAselect,
       distrito,
-      rangoEdad
+      rangoEdad,
+      anio
     );
     setPoblacionA(data);
   };
 
+  // Fetch de datos del mapa
   const fetchMapa = async () => {
-    const data = await getMap();
+    const data = await getMap(anio);
     setMap(data);
   };
 
   useEffect(() => {
     fetchData();
-  }, [pAselect, provincia, distrito, rangoEdad]); // Eliminé pAselect duplicado
+  }, [pAselect, provincia, distrito, rangoEdad, anio]);
 
   useEffect(() => {
     fetchMapa();
-  }, []); // Solo se ejecuta al montar, ya que pAselect ya no afecta el mapa
+  }, [anio]);
 
-  const value = [
+  const rangosEdad = [
     "Todos",
     "Menores de 1 año",
     "De 1 a 4 años",
@@ -84,9 +100,32 @@ export default function MapPoblacion() {
 
   return (
     <div className="flex flex-col w-full h-full mx-auto overflow-hidden max-w-[95rem] gap-8 p-6 sm:py-10">
-      <h2 className="mb-8 sm:mb-10 text-center text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
-        POBLACIÓN EN AYACUCHO
-      </h2>
+      <div className="flex flex-row items-center justify-center mb-6 gap-4">
+        <h2 className="text-center text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white tracking-tight">
+          POBLACIÓN EN AYACUCHO EN EL AÑO
+        </h2>
+        <Select
+          value={anio.toString()}
+          onValueChange={(value) => setAnio(Number(value))}
+        >
+          <SelectTrigger className="w-[120px] text-3xl font-bold">
+            <SelectValue placeholder="Selecciona un año" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableYears.length > 0 ? (
+              availableYears.map((year) => (
+                <SelectItem key={year} value={year.toString()}>
+                  {year}
+                </SelectItem>
+              ))
+            ) : (
+              <SelectItem value={new Date().getFullYear().toString()}>
+                {new Date().getFullYear()}
+              </SelectItem>
+            )}
+          </SelectContent>
+        </Select>
+      </div>
       <div className="flex flex-col lg:flex-row w-full h-full mx-auto gap-8 p-6">
         <div className="w-full h-full max-w-4xl">
           <GeoJsonSvg
@@ -94,7 +133,7 @@ export default function MapPoblacion() {
             distrito={distrito}
             setProvincia={setProvincia}
             setDistrito={setDistrito}
-            data={map} // Pasamos todo el array al componente
+            data={map}
           />
         </div>
 
@@ -110,7 +149,7 @@ export default function MapPoblacion() {
                 <SelectValue placeholder="Selecciona un rango de edad" />
               </SelectTrigger>
               <SelectContent>
-                {value.map((edad) => (
+                {rangosEdad.map((edad) => (
                   <SelectItem key={edad} value={edad}>
                     {edad}
                   </SelectItem>
