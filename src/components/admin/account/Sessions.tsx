@@ -1,9 +1,10 @@
+// src/components/admin/account/Sessions.tsx
 "use client";
 
 import { useEffect, useState } from "react";
 import { Smartphone, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { closeSession } from "@/actions/auth";
+import { closeSession } from "@/actions/user-actions";
 import { activeSessionsVerify } from "@/actions/user-actions";
 import { useUserData } from "../utils/user-data";
 import { signOut } from "next-auth/react";
@@ -11,7 +12,7 @@ import io from "socket.io-client";
 
 interface Session {
   sessionToken: string;
-  browserId: string;
+  browserId: string | null;
   id: string;
   device: string;
   browser: string;
@@ -30,10 +31,34 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
   const [activeSessions, setActiveSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { browserId, isReady } = useUserData();
+  const [socketPort, setSocketPort] = useState<number | null>(null);
 
   useEffect(() => {
+    async function fetchSocketPort() {
+      try {
+        const response = await fetch("/api/socket-port");
+        const data = await response.json();
+        if (data.port) {
+          setSocketPort(data.port);
+          console.log("Fetched Socket.IO port:", data.port);
+        } else {
+          console.error("No Socket.IO port returned:", data.error);
+        }
+      } catch (error) {
+        console.error("Error fetching Socket.IO port:", error);
+      }
+    }
+    fetchSocketPort();
+  }, []);
+
+  useEffect(() => {
+    console.log("Sessions.tsx - browserId:", browserId, "isReady:", isReady, "userId:", userId, "sessionToken:", sessionToken);
     const fetchSessions = async () => {
-      if (!isReady || !browserId) return;
+      if (!isReady || !browserId) {
+        console.log("Sessions.tsx - Skipping fetch: browserId or isReady not available");
+        setIsLoading(false);
+        return;
+      }
       try {
         const sessions = await activeSessionsVerify({ id: userId, browserId });
         setActiveSessions(
@@ -53,9 +78,12 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
   }, [userId, browserId, isReady]);
 
   useEffect(() => {
-    if (!isReady || !browserId || !userId || !sessionToken) return;
+    if (!isReady || !browserId || !userId || !sessionToken || !socketPort) {
+      console.log("Sessions.tsx - Socket.IO skipped: missing browserId, userId, sessionToken, or socketPort");
+      return;
+    }
 
-    const socket = io("http://localhost:8080", {
+    const socket = io(`http://localhost:${socketPort}`, {
       query: { browserId, userId },
       auth: { token: sessionToken },
       reconnection: true,
@@ -64,12 +92,18 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
     });
 
     socket.on("connect", () => {
-      console.log(`Socket.IO conectado: browserId=${browserId}`);
+      console.log(`Socket.IO conectado: browserId=${browserId}, port=${socketPort}`);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error(`Socket.IO connect_error: ${error.message}`);
     });
 
     socket.on("sessionClosed", (data: { browserId: string }) => {
+      console.log(`Evento sessionClosed recibido: browserId=${data.browserId}`);
       if (data.browserId === browserId) {
-        signOut({ callbackUrl: "/login" });
+        console.log("Cerrando sesión en este dispositivo");
+        signOut({ callbackUrl: "/auth/login" });
       } else {
         setActiveSessions((prev) =>
           prev.filter((session) => session.browserId !== data.browserId)
@@ -88,12 +122,14 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
     return () => {
       socket.disconnect();
     };
-  }, [browserId, userId, isReady, sessionToken]);
+  }, [browserId, userId, isReady, sessionToken, socketPort]);
 
   const handleLogoutDevice = async (sessionToken: string) => {
     setIsLoading(true);
+    console.log("Sessions.tsx - Attempting to close session with token:", sessionToken);
     try {
-      const result = await closeSession({ userId, sessionToken });
+      const result = await closeSession({ sessionToken });
+      console.log("Sessions.tsx - Close session result:", result);
       if (result.success) {
         setActiveSessions((prev) =>
           prev.filter((session) => session.sessionToken !== sessionToken)

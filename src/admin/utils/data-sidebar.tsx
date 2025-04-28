@@ -68,7 +68,7 @@ export const sidebarMenus: SidebarMenuGroup[] = [
         url: "/admin/issue/basic-services",
       },
       {
-        label: "Desarrollo Económico",
+        label: "Desarrollo Económico y Empleo",
         icon: DollarSign,
         url: "/admin/issue/economic-development",
       },

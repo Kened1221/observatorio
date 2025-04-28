@@ -1,3 +1,5 @@
+//src/actions/auth.ts
+
 "use server";
 
 import { z } from "zod";
@@ -119,6 +121,7 @@ export async function updateSession(
     return { success: false, message: "Error del servidor" };
   }
 }
+
 // Acción del servidor para iniciar sesión
 export async function loginAction(
   values: z.infer<typeof signInSchema>
@@ -209,7 +212,11 @@ export async function closeSession({
 }: {
   userId: string;
   sessionToken: string;
-}): Promise<{ success: boolean; message?: string; affectedBrowserId?: string }> {
+}): Promise<{
+  success: boolean;
+  message?: string;
+  affectedBrowserId?: string;
+}> {
   try {
     const session = await prisma.session.findUnique({
       where: { sessionToken, userId },

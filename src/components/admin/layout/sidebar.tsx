@@ -1,4 +1,6 @@
-//src/components/admin/layout/sidebar.tsx
+// src/components/admin/layout/sidebar.tsx
+"use client";
+
 import { sidebarMenus } from "@/admin/utils/data-sidebar";
 import {
   Collapsible,
@@ -24,10 +26,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
-
 import { signOut } from "next-auth/react";
 import { Session } from "next-auth";
 import { closeSession } from "@/actions/user-actions";
+
+// Utility function to create a delay
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function AppSidebar({
   hoveredItem,
@@ -64,22 +68,37 @@ export default function AppSidebar({
 
   const handleCloseSession = async () => {
     try {
+      console.log("Session object:", session);
       const idUser = session.user.id;
+      const sessionToken = session.sessionToken;
 
-      // Llama a closeSession para limpieza (futura BBDD)
-      const result = await closeSession();
-      if (!result.success) {
-        console.error("Error al cerrar sesión:", result.message);
+      console.log("Attempting to close session with token:", sessionToken);
+
+      if (!sessionToken) {
+        console.error("No session token available");
+        await delay(2000); // Wait 2 seconds to view error
+        await signOut({ callbackUrl: "/auth/login" });
         return;
       }
 
-      // Limpia datos locales en el cliente
+      // Call closeSession to mark the session as inactive
+      const result = await closeSession({ sessionToken });
+      if (!result.success) {
+        console.error("Error al cerrar sesión:", result.message);
+        await delay(2000); // Wait 2 seconds to view error
+        await signOut({ callbackUrl: "/auth/login" });
+        return;
+      }
+
+      // Clear local storage
       localStorage.removeItem(`session-updated-${idUser}`);
 
-      // Cierra la sesión con NextAuth
+      // Sign out with NextAuth
       await signOut({ callbackUrl: "/auth/login" });
     } catch (error) {
       console.error("Error en handleCloseSession:", error);
+      await delay(2000); // Wait 2 seconds to view error
+      await signOut({ callbackUrl: "/auth/login" });
     }
   };
 
@@ -89,7 +108,7 @@ export default function AppSidebar({
         className="rounded-lg border border-border shadow-sm relative h-full"
         collapsible="icon"
       >
-        <SidebarHeader className="flex items-center border-b rounded-t-lg ">
+        <SidebarHeader className="flex items-center border-b rounded-t-lg">
           {!isCollapsed ? (
             <div className="flex items-center gap-4 font-semibold p-6">
               <Image
@@ -226,7 +245,6 @@ export default function AppSidebar({
         <SidebarRail />
       </Sidebar>
 
-      {/* Hover menu for items with subitems */}
       {hoveredItem &&
         isCollapsed &&
         sidebarMenus.some((group) =>

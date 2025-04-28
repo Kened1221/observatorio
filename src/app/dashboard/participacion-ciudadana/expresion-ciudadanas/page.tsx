@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
@@ -7,8 +6,6 @@ import Image from "next/image";
 import { Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-
-import * as React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
@@ -17,6 +14,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
+import { fetchParticipacionData } from "@/actions/participacion-actions";
 
 interface VideoItem {
   id: number;
@@ -25,39 +23,12 @@ interface VideoItem {
   videoUrl: string;
 }
 
-const videos: VideoItem[] = [
-  {
-    id: 1,
-    title: "Video 1",
-    description: "Esta es la descripción del Video 1.",
-    videoUrl: "https://www.youtube.com/embed/rs1YAkfF8QM",
-  },
-  {
-    id: 2,
-    title: "Video 2",
-    description: "Esta es la descripción del Video 2.",
-    videoUrl: "https://www.youtube.com/embed/C8XAcfyFTfk",
-  },
-  {
-    id: 3,
-    title: "Video 3",
-    description: "Esta es la descripción del Video 3.",
-    videoUrl: "https://www.youtube.com/embed/IaTGzcc9h-4?si=yk6Qb5jc82TRbEm-",
-  },
-  {
-    id: 4,
-    title: "Video 4",
-    description: "Esta es la descripción del Video 4.",
-    videoUrl: "https://www.youtube.com/embed/9xqOhlAESk0?si=Gbb4nf-hY4mbjY8h",
-  },
-];
-
-const getVideoId = (videoUrl: string) => {
+const getVideoId = (videoUrl: string): string => {
   const parts = videoUrl.split("/embed/");
   return parts.length > 1 ? parts[1].split("?")[0] : "";
 };
 
-const getThumbnail = (videoUrl: string) => {
+const getThumbnail = (videoUrl: string): string => {
   const videoId = getVideoId(videoUrl);
   return videoId
     ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
@@ -71,16 +42,34 @@ declare global {
   }
 }
 
-export default function Page() {
-  const [selectedVideo, setSelectedVideo] = useState<VideoItem>(videos[0]);
+export default function VideoPage() {
+  const [videos, setVideos] = useState<VideoItem[]>([]);
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isPlayerReady, setIsPlayerReady] = useState(false);
 
   const playerContainerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
 
+  const fetchData = async () => {
+    try {
+      const data = await fetchParticipacionData();
+      setVideos(data);
+      // Seleccionar el primer video por defecto si existe
+      if (data.length > 0) {
+        setSelectedVideo(data[0]);
+      }
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
   const loadYouTubePlayer = () => {
-    if (playerContainerRef.current) {
+    if (playerContainerRef.current && selectedVideo) {
       playerRef.current = new window.YT.Player(playerContainerRef.current, {
         videoId: getVideoId(selectedVideo.videoUrl),
         playerVars: { autoplay: 0, controls: 1 },
@@ -92,6 +81,8 @@ export default function Page() {
   };
 
   useEffect(() => {
+    if (!selectedVideo) return; // No hacer nada si no hay video seleccionado
+
     if (!window.YT) {
       const tag = document.createElement("script");
       tag.src = "https://www.youtube.com/iframe_api";
@@ -101,11 +92,12 @@ export default function Page() {
     } else {
       if (playerRef.current && isPlayerReady) {
         playerRef.current.loadVideoById(getVideoId(selectedVideo.videoUrl));
+        setIsPlaying(false); // Resetear el estado de reproducción al cambiar video
       } else if (!playerRef.current) {
         loadYouTubePlayer();
       }
     }
-  }, [selectedVideo, isPlayerReady]);
+  }, [selectedVideo]);
 
   const togglePlayback = () => {
     if (playerRef.current && isPlayerReady) {
@@ -122,7 +114,7 @@ export default function Page() {
 
   return (
     <div className="h-full py-12 md:py-20 bg-white flex items-center justify-center">
-      <div className="w-full max-w-[80%] mx-auto grid grid-cols-1 2xl:grid-cols-[1fr_2fr] gap-8 items-center">
+      <div className="w-full grid grid-cols-1 2xl:grid-cols-[1fr_2fr] gap-8 items-center">
         <div className="space-y-6 p-6 flex flex-col w-full">
           <p className="text-gray-600 text-center sm:text-start text-xl md:text-3xl mb-2">
             Expresión ciudadana
@@ -133,41 +125,52 @@ export default function Page() {
           </p>
           <Carousel className="w-full">
             <CarouselContent className="flex">
-              {videos.map((item) => (
-                <CarouselItem
-                  key={item.id}
-                  className="basis-1/1 lg:basis-1/2"
-                  onClick={() => setSelectedVideo(item)}
-                >
-                  <Card
-                    className={`cursor-grabbing ${
-                      selectedVideo.id === item.id
-                        ? "border-4 border-blue-500"
-                        : ""
-                    }`}
+              {videos.length > 0 ? (
+                videos.map((item) => (
+                  <CarouselItem
+                    key={item.id}
+                    className="basis-1/1 lg:basis-1/2"
+                    onClick={() => setSelectedVideo(item)}
                   >
-                    <CardContent className="flex flex-col items-center p-3 h-[250px]">
-                      <div className="relative w-full h-30 rounded-lg overflow-hidden">
-                        <Image
-                          src={getThumbnail(item.videoUrl)}
-                          alt={item.title}
-                          fill
-                          className="object-cover rounded-md"
-                          sizes="(max-width: 768px) 100vw, 50vw"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <p className="text-sm font-semibold mt-2 text-justify">
-                          {item.title}
-                        </p>
-                        <p className="text-sm font-semibold mt-2 text-justify">
-                          {item.description}
-                        </p>
-                      </div>
+                    <Card
+                      className={clsx(
+                        "cursor-pointer",
+                        selectedVideo?.id === item.id
+                          ? "border-4 border-blue-500"
+                          : ""
+                      )}
+                    >
+                      <CardContent className="flex flex-col items-center p-3 h-[250px]">
+                        <div className="relative w-full h-32 rounded-lg overflow-hidden">
+                          <Image
+                            src={getThumbnail(item.videoUrl)}
+                            alt={item.title}
+                            fill
+                            className="object-cover rounded-md"
+                            sizes="(max-width: 768px) 100vw, 50vw"
+                          />
+                        </div>
+                        <div className="space-y-2 mt-2">
+                          <p className="text-sm font-semibold text-justify">
+                            {item.title}
+                          </p>
+                          <p className="text-sm text-gray-600 text-justify">
+                            {item.description}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </CarouselItem>
+                ))
+              ) : (
+                <CarouselItem>
+                  <Card>
+                    <CardContent className="flex items-center justify-center h-[250px]">
+                      <p className="text-gray-500">Cargando videos...</p>
                     </CardContent>
                   </Card>
                 </CarouselItem>
-              ))}
+              )}
             </CarouselContent>
             <CarouselPrevious />
             <CarouselNext />
@@ -180,6 +183,7 @@ export default function Page() {
                 : "bg-purple-600 hover:bg-purple-700"
             )}
             onClick={togglePlayback}
+            disabled={!isPlayerReady || !selectedVideo}
           >
             <Play className="w-5 h-5" />
             {isPlaying ? "Pausar" : "Reproducir"}

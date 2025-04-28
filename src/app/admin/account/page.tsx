@@ -1,3 +1,4 @@
+// src/app/admin/account/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -7,7 +8,7 @@ import Profile from "@/components/admin/account/Profile";
 import Security from "@/components/admin/account/Security";
 import Sessions from "@/components/admin/account/Sessions";
 import History from "@/components/admin/account/History";
-import { googleLinkedAccountVerify, sessionTokenUser } from "@/actions/user-actions";
+import { googleLinkedAccountVerify, getSessionToken } from "@/actions/user-actions";
 import { useUserData } from "@/components/admin/utils/user-data";
 
 type TabType = "profile" | "security" | "sessions" | "history";
@@ -19,7 +20,6 @@ const AccountManagement = () => {
   const [sessionToken, setSessionToken] = useState<string | null>(null);
   const { browserId, isReady } = useUserData();
 
-  // Se llama el useEffect siempre y dentro se verifica si existe session.user.id
   useEffect(() => {
     if (!session?.user?.id) return;
     const checkGoogleLinkedAccount = async () => {
@@ -27,13 +27,11 @@ const AccountManagement = () => {
         const res = await googleLinkedAccountVerify({ id: session.user.id });
         setIsGoogleLinkedAccount(res);
 
-        // Se obtiene el sessionToken de la sesión actual
         if (!isReady || !browserId) return;
-        const sessionTokenU = await sessionTokenUser({ id: session.user.id, browserId });
+        const sessionTokenU = await getSessionToken({ id: session.user.id, browserId });
         setSessionToken(sessionTokenU ?? null);
-
       } catch (error) {
-        console.error("Error checking Google linked account:", error);
+        console.error("Error checking Google linked account or session token:", error);
       }
     };
     checkGoogleLinkedAccount();
@@ -71,7 +69,6 @@ const AccountManagement = () => {
           </p>
         </div>
         <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-4">
-          {/* Menú de navegación */}
           <div className="lg:col-span-1">
             <nav className="space-y-1 bg-card border shadow rounded-lg p-4">
               <button
@@ -108,7 +105,6 @@ const AccountManagement = () => {
               </button>
             </nav>
           </div>
-          {/* Contenido principal */}
           <div className="lg:col-span-3">
             <div className="bg-card border text-primary-foreground shadow rounded-lg">
               {activeTab === "profile" && <Profile userData={userData} />}

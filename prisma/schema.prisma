@@ -1062,3 +1062,11 @@ model ViolenciaMujer {
 
   @@index([anio])
 }
+
+model Video {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String
+  videoUrl    String
+  createdAt   DateTime @default(now())
+}

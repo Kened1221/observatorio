@@ -59,7 +59,7 @@ const topics: Topic[] = [
   },
   {
     id: 5,
-    title: "Desarrollo Económico",
+    title: "Desarrollo Económico y Empleo",
     imageUrl: "/modulos/mod5.png",
     linkUrl: "/tematica/desarrollo",
     description:

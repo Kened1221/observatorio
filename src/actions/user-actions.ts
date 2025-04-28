@@ -1,10 +1,13 @@
+// src/actions/user-actions.ts
 "use server";
 
 import { prisma } from "@/config/prisma";
 import { compare, hash } from "bcryptjs";
 import { z } from "zod";
+import { auth } from "@/auth";
+import axios from "axios";
+import { notifySessionClosed } from "@/config/socket";
 
-// Esquema de validación para actualizar el perfil
 const updateProfileSchema = z.object({
   userId: z.string().min(1, "El ID del usuario es requerido"),
   name: z.string().min(1, "El nombre es requerido"),
@@ -23,18 +26,11 @@ type UpdateProfileResult = {
 export async function googleLinkedAccountVerify({ id }: { id: string }) {
   try {
     const result = await prisma.account.findFirst({
-      where: {
-        userId: id,
-        provider: "google",
-      },
+      where: { userId: id, provider: "google" },
     });
-
     return !!result;
   } catch (error) {
-    console.log(
-      "Error al verificar si la cuenta está vinculada a Google:",
-      error
-    );
+    console.log("Error al verificar si la cuenta está vinculada a Google:", error);
     return false;
   }
 }
@@ -47,27 +43,121 @@ export async function activeSessionsVerify({
   browserId?: string;
 }) {
   try {
-    const sessions = await prisma.session.findMany({
+    // Limpiar sesiones expiradas
+    await prisma.session.updateMany({
+      where: {
+        userId: id,
+        status: "active",
+        expires: { lte: new Date() },
+      },
+      data: { status: "inactive" },
+    });
+
+    // Obtener todas las sesiones activas
+    const activeSessions = await prisma.session.findMany({
       where: { userId: id, status: "active" },
       orderBy: { updatedAt: "desc" },
     });
 
-    return sessions.map((session) => ({
+    // Deduplicar por browserId, manteniendo la sesión más reciente
+    const sessionsByBrowserId = new Map<string, typeof activeSessions[0]>();
+    const sessionsWithoutBrowserId: typeof activeSessions = [];
+
+    // Separar sesiones con y sin browserId
+    for (const session of activeSessions) {
+      if (session.browserId) {
+        if (!sessionsByBrowserId.has(session.browserId)) {
+          sessionsByBrowserId.set(session.browserId, session);
+        } else {
+          // Marcar la sesión más antigua como inactiva
+          await prisma.session.update({
+            where: { sessionToken: session.sessionToken },
+            data: { status: "inactive", updatedAt: new Date() },
+          });
+          console.log(`Marcada como inactiva (browserId duplicado): sessionToken=${session.sessionToken}, browserId=${session.browserId}`);
+        }
+      } else {
+        sessionsWithoutBrowserId.push(session);
+      }
+    }
+
+    // Deduplicar sesiones sin browserId por sessionToken
+    const sessionsByToken = new Map<string, typeof activeSessions[0]>();
+    for (const session of sessionsWithoutBrowserId) {
+      if (!sessionsByToken.has(session.sessionToken)) {
+        sessionsByToken.set(session.sessionToken, session);
+      } else {
+        await prisma.session.update({
+          where: { sessionToken: session.sessionToken },
+          data: { status: "inactive", updatedAt: new Date() },
+        });
+        console.log(`Marcada como inactiva (sessionToken duplicado, sin browserId): sessionToken=${session.sessionToken}`);
+      }
+    }
+
+    // Actualizar la lista de sesiones después de la deduplicación
+    const sessions = await prisma.session.findMany({
+      where: {
+        userId: id,
+        status: "active",
+        OR: [
+          { browserId: { in: Array.from(sessionsByBrowserId.keys()) } },
+          { sessionToken: { in: Array.from(sessionsByToken.keys()) } },
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    // Asegurarse de que no haya duplicados por browserId después de la actualización
+    const finalSessionsByBrowserId = new Map<string, typeof sessions[0]>();
+    for (const session of sessions) {
+      if (session.browserId) {
+        if (!finalSessionsByBrowserId.has(session.browserId)) {
+          finalSessionsByBrowserId.set(session.browserId, session);
+        } else {
+          await prisma.session.update({
+            where: { sessionToken: session.sessionToken },
+            data: { status: "inactive", updatedAt: new Date() },
+          });
+          console.log(`Marcada como inactiva (verificación final): sessionToken=${session.sessionToken}, browserId=${session.browserId}`);
+        }
+      }
+    }
+
+    // Obtener la lista final de sesiones activas
+    const finalSessions = await prisma.session.findMany({
+      where: {
+        userId: id,
+        status: "active",
+        OR: [
+          { browserId: { in: Array.from(finalSessionsByBrowserId.keys()) } },
+          { sessionToken: { in: Array.from(sessionsByToken.keys()) } },
+        ],
+      },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    console.log("activeSessionsVerify - Sesiones finales:", JSON.stringify(finalSessions.map((session) => ({
       sessionToken: session.sessionToken,
       browserId: session.browserId,
       id: String(session.userId),
-      device: `${session.deviceType || "Desconocido"} (${
-        session.deviceModel || "Desconocido"
-      })`,
-      browser: `${session.browser || "Desconocido"} ${
-        session.browserVersion || ""
-      }`,
+      device: `${session.deviceType || "Desconocido"} (${session.deviceModel || "Desconocido"})`,
+      browser: `${session.browser || "Desconocido"} ${session.browserVersion || ""}`,
       os: `${session.os || "Desconocido"} ${session.osVersion || ""}`,
-      location: `${session.city || "Desconocido"} - ${
-        session.country || "Desconocido"
-      }`,
+      location: `${session.city || "Desconocido"} - ${session.country || "Desconocido"}`,
       lastActive: session.updatedAt.toISOString(),
-      current: browserId ? session.browserId === browserId : false, // Comparar con browserId
+    })), null, 2));
+
+    return finalSessions.map((session) => ({
+      sessionToken: session.sessionToken,
+      browserId: session.browserId,
+      id: String(session.userId),
+      device: `${session.deviceType || "Desconocido"} (${session.deviceModel || "Desconocido"})`,
+      browser: `${session.browser || "Desconocido"} ${session.browserVersion || ""}`,
+      os: `${session.os || "Desconocido"} ${session.osVersion || ""}`,
+      location: `${session.city || "Desconocido"} - ${session.country || "Desconocido"}`,
+      lastActive: session.updatedAt.toISOString(),
+      current: browserId ? session.browserId === browserId : false,
     }));
   } catch (error) {
     console.error("Error al verificar sesiones activas:", error);
@@ -78,24 +168,16 @@ export async function activeSessionsVerify({
 export async function historySessions({ id }: { id: string }) {
   try {
     const sessions = await prisma.session.findMany({
-      where: {
-        userId: id,
-      },
+      where: { userId: id },
       orderBy: { updatedAt: "desc" },
     });
 
     return sessions.map((session) => ({
       id: String(session.userId),
-      device: `${session.deviceType || "Desconocido"} (${
-        session.deviceModel || "Desconocido"
-      })`,
-      browser: `${session.browser || "Desconocido"} ${
-        session.browserVersion || ""
-      }`,
+      device: `${session.deviceType || "Desconocido"} (${session.deviceModel || "Desconocido"})`,
+      browser: `${session.browser || "Desconocido"} ${session.browserVersion || ""}`,
       os: `${session.os || "Desconocido"} ${session.osVersion || ""}`,
-      location: `${session.city || "Desconocido"} - ${
-        session.country || "Desconocido"
-      }`,
+      location: `${session.city || "Desconocido"} - ${session.country || "Desconocido"}`,
       timestamp: session.updatedAt.toISOString(),
       status: session.status,
     }));
@@ -105,13 +187,103 @@ export async function historySessions({ id }: { id: string }) {
   }
 }
 
-// src/actions/user-actions.ts
-export async function closeSession() {
+export async function getSessionToken({ id, browserId }: { id: string; browserId: string }) {
   try {
+    const session = await prisma.session.findFirst({
+      where: { userId: id, browserId, status: "active" },
+    });
+    return session?.sessionToken ?? null;
+  } catch (error) {
+    console.error("Error fetching session token:", error);
+    return null;
+  }
+}
+
+export async function closeSession({ sessionToken }: { sessionToken: string }) {
+  try {
+    console.log("closeSession - Consultando sesión con token:", sessionToken);
+
+    const session = await prisma.session.findUnique({
+      where: { sessionToken },
+    });
+
+    if (!session) {
+      console.error("closeSession - No se encontró sesión para el token:", sessionToken);
+      return { success: true, message: "Sesión no encontrada, posiblemente ya cerrada" };
+    }
+
+    if (session.status !== "active") {
+      console.warn("closeSession - La sesión ya está inactiva:", sessionToken);
+      return { success: true, message: "Sesión ya estaba inactiva" };
+    }
+
+    await prisma.session.update({
+      where: { sessionToken },
+      data: { status: "inactive", updatedAt: new Date() },
+    });
+
+    if (session.browserId) {
+      notifySessionClosed(session.userId, session.browserId);
+    } else {
+      console.warn("closeSession - No hay browserId para la sesión:", sessionToken);
+    }
+
     return { success: true, message: "Sesión cerrada correctamente" };
   } catch (error) {
-    console.error("Error al cerrar sesión:", error);
+    console.error("closeSession - Error al cerrar sesión:", error);
     return { success: false, message: "Error al cerrar sesión" };
+  }
+}
+
+export async function closeAccount({ userId }: { userId: string }) {
+  const session = await auth();
+
+  if (!session || session.user.role !== "Admin") {
+    throw new Error("No autorizado");
+  }
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: { accounts: true },
+    });
+    if (!user) {
+      throw new Error("Usuario no encontrado");
+    }
+
+    const sessions = await prisma.session.findMany({
+      where: { userId },
+    });
+
+    await prisma.session.updateMany({
+      where: { userId },
+      data: { status: "inactive" },
+    });
+
+    const googleAccount = user.accounts.find((acc) => acc.provider === "google");
+    if (googleAccount?.access_token) {
+      try {
+        await axios.post("https://accounts.google.com/o/oauth2/revoke", null, {
+          params: { token: googleAccount.access_token },
+        });
+      } catch (error) {
+        console.error("Error revoking Google token:", error);
+      }
+    }
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    // Notify all sessions via Socket.IO if browserId exists
+    sessions.forEach((s) => {
+      if (s.browserId) {
+        notifySessionClosed(userId, s.browserId);
+      }
+    });
+
+    return { success: true, message: "Cuenta cerrada exitosamente" };
+  } catch (error) {
+    console.error("Error closing account:", error);
+    throw new Error(error instanceof Error ? error.message : "Error interno del servidor");
   }
 }
 
@@ -125,7 +297,6 @@ export async function updatePassword({
   newPassword: string;
 }) {
   try {
-    // Buscar el usuario por ID
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { passwordHash: true },
@@ -138,13 +309,11 @@ export async function updatePassword({
       };
     }
 
-    // Verificar la contraseña actual
     const isPasswordValid = await compare(currentPassword, user.passwordHash);
     if (!isPasswordValid) {
       return { success: false, message: "La contraseña actual es incorrecta" };
     }
 
-    // Validar la nueva contraseña (mínimo 8 caracteres)
     if (newPassword.length < 8) {
       return {
         success: false,
@@ -152,10 +321,8 @@ export async function updatePassword({
       };
     }
 
-    // Hashear la nueva contraseña
     const hashedPassword = await hash(newPassword, 10);
 
-    // Actualizar la contraseña en la base de datos
     await prisma.user.update({
       where: { id: userId },
       data: { passwordHash: hashedPassword },
@@ -168,9 +335,7 @@ export async function updatePassword({
   }
 }
 
-export async function updateProfile(
-  values: z.infer<typeof updateProfileSchema>
-): Promise<UpdateProfileResult> {
+export async function updateProfile(values: z.infer<typeof updateProfileSchema>): Promise<UpdateProfileResult> {
   try {
     const validated = updateProfileSchema.parse(values);
 
