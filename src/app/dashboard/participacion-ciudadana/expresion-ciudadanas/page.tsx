@@ -113,7 +113,7 @@ export default function VideoPage() {
   };
 
   return (
-    <div className="h-full py-12 md:py-20 bg-white flex items-center justify-center">
+    <div className="h-full p-12 md:p-20 bg-white flex items-center justify-center">
       <div className="w-full grid grid-cols-1 2xl:grid-cols-[1fr_2fr] gap-8 items-center">
         <div className="space-y-6 p-6 flex flex-col w-full">
           <p className="text-gray-600 text-center sm:text-start text-xl md:text-3xl mb-2">

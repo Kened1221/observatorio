@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import DragDropExcelInput from "@/components/ui/drag-drop-img-input";
+import DragDropExcelInput from "@/components/ui/drag-drop-excel-input";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
 import {
   Select,

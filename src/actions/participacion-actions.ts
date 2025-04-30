@@ -4,35 +4,10 @@ import { prisma } from "@/config/prisma";
 
 export async function fetchParticipacionData() {
   try {
-    const data = [
-      {
-        id: 1,
-        title: "Video 1",
-        description: "Esta es la descripción del Video 1.",
-        videoUrl: "https://www.youtube.com/embed/rs1YAkfF8QM",
-      },
-      {
-        id: 2,
-        title: "Video 2",
-        description: "Esta es la descripción del Video 2.",
-        videoUrl: "https://www.youtube.com/embed/C8XAcfyFTfk",
-      },
-      {
-        id: 3,
-        title: "Video 3",
-        description: "Esta es la descripción del Video 3.",
-        videoUrl:
-          "https://www.youtube.com/embed/IaTGzcc9h-4?si=yk6Qb5jc82TRbEm-",
-      },
-      {
-        id: 4,
-        title: "Video 4",
-        description: "Esta es la descripción del Video 4.",
-        videoUrl:
-          "https://www.youtube.com/embed/9xqOhlAESk0?si=Gbb4nf-hY4mbjY8h",
-      },
-    ];
-    return data;
+    const videos = await prisma.video.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    return videos;
   } catch (error) {
     console.error("Error fetching participacion data:", error);
     throw error;
@@ -45,30 +20,51 @@ export async function createParticipacion(data: {
   videoUrl: string;
 }) {
   try {
-    console.log("Prisma video model:", prisma.video);
-    if (!prisma.video) {
-      throw new Error("Prisma video model is undefined");
-    }
-
-    if (!data?.title || !data?.description || !data?.videoUrl) {
-      throw new Error(
-        "Missing required fields: title, description, or videoUrl"
-      );
-    }
-
-    console.log("Creating participacion with data:", data);
-
-    const response = await prisma.video.create({
+    await prisma.video.create({
       data: {
         title: data.title,
         description: data.description,
         videoUrl: data.videoUrl,
       },
     });
-
-    return response;
+    return { status: 200, message: "Video subido exitosamente" };
   } catch (error) {
     console.error("Error creating participacion:", error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function updateParticipacion(id: number, data: {
+  title: string;
+  description: string;
+  videoUrl: string;
+}) {
+  try {
+    await prisma.video.update({
+      where: { id },
+      data: {
+        title: data.title,
+        description: data.description,
+        videoUrl: data.videoUrl,
+      },
+    });
+    return { status: 200, message: "Video actualizado exitosamente" };
+  } catch (error) {
+    console.error("Error updating participacion:", error);
+    throw error;
+  } finally {
+    await prisma.$disconnect();
+  }
+}
+
+export async function deleteParticipacion(id: number) {
+  try {
+    await prisma.video.delete({ where: { id } });
+    return { status: 200, message: "Video eliminado exitosamente" };
+  } catch (error) {
+    console.error("Error al eliminar video:", error);
     throw error;
   } finally {
     await prisma.$disconnect();
