@@ -6,36 +6,36 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { fn_active_user, fn_get_user, fn_update_user } from "@/actions/user-m-actions";
-import { fn_get_roles } from "@/actions/role-action";
-import { Entity } from "@/lib/enum";
+import { fn_get_roles } from "@/actions/role-action";;
 
 import { Edit, UserRoundX } from "lucide-react";
-import { entity } from "@prisma/client";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
+import { RoleModule } from "@/admin/lib/enum";
+import { roleModule } from "@prisma/client";
 
 const user_schema = z.object({
   name: z.string(),
   email: z.string(),
   dni: z.string().optional(),
   role: z.string().optional(),
-  entidades: z.array(z.nativeEnum(entity)),
+  modulos: z.array(z.nativeEnum(roleModule)),
 });
 export type UserSchema = z.infer<typeof user_schema>;
 
-type RoleWithEntities = {
+type RoleWithModule = {
   name: string;
-  defaultEntities: z.infer<typeof Entity>[];
+  defaultModule: z.infer<typeof RoleModule>[];
 };
 
 export const ModifyData = ({ user_id, onRefresh, onClose }: { user_id: string; onRefresh: () => void; onClose: () => void }) => {
   const [isPending, startTransition] = React.useTransition();
   const [data, setData] = React.useState<UserSchema | null>(null);
-  const [rolesData, setRolesData] = React.useState<RoleWithEntities[]>([]);
-  const [entidadesDisponibles, setEntidadesDisponibles] = React.useState<z.infer<typeof Entity>[]>([]);
+  const [rolesData, setRolesData] = React.useState<RoleWithModule[]>([]);
+  const [modulosDisponibles, setModulosDisponibles] = React.useState<z.infer<typeof RoleModule>[]>([]);
 
   const form = useForm<UserSchema>({
     resolver: zodResolver(user_schema),
@@ -44,7 +44,7 @@ export const ModifyData = ({ user_id, onRefresh, onClose }: { user_id: string; o
       email: "",
       dni: "",
       role: "",
-      entidades: [],
+      modulos: [],
     },
   });
 
@@ -55,7 +55,7 @@ export const ModifyData = ({ user_id, onRefresh, onClose }: { user_id: string; o
       if (resRoles.success && resRoles.response) {
         const roles = resRoles.response.map((r) => ({
           name: r.name,
-          defaultEntities: r.defaultEntities,
+          defaultModule: r.defaultModule,
         }));
         setRolesData(roles);
       }
@@ -63,18 +63,18 @@ export const ModifyData = ({ user_id, onRefresh, onClose }: { user_id: string; o
       if (resUser.success && resUser.response) {
         const user = resUser.response;
         const rolActual = resRoles.response?.find((r) => r.name === user.role?.name);
-        const defaultEntities = rolActual?.defaultEntities ?? [];
+        const defaultModule = rolActual?.defaultModule ?? [];
 
-        const isOverride = user.overriddenEntities && user.overriddenEntities.length > 0;
+        const isOverride = user.overriddenModule && user.overriddenModule.length > 0;
 
-        setEntidadesDisponibles(defaultEntities);
+        setModulosDisponibles(defaultModule);
 
         setData({
           name: user.name ?? "",
           email: user.email,
           dni: user.dni ?? "",
           role: user.role?.name,
-          entidades: isOverride ? user.overriddenEntities : defaultEntities,
+          modulos: isOverride ? user.overriddenModule : defaultModule,
         });
       }
     };
@@ -179,11 +179,11 @@ export const ModifyData = ({ user_id, onRefresh, onClose }: { user_id: string; o
                         field.onChange(value);
                         const rol = rolesData.find((r) => r.name === value);
                         if (rol) {
-                          setEntidadesDisponibles(rol.defaultEntities);
-                          const currentOverrides = form.getValues("entidades") ?? [];
-                          const intersection = rol.defaultEntities.filter((e) => currentOverrides.includes(e));
+                          setModulosDisponibles(rol.defaultModule);
+                          const currentOverrides = form.getValues("modulos") ?? [];
+                          const intersection = rol.defaultModule.filter((e) => currentOverrides.includes(e));
 
-                          form.setValue("entidades", intersection.length > 0 ? intersection : rol.defaultEntities);
+                          form.setValue("modulos", intersection.length > 0 ? intersection : rol.defaultModule);
                         }
                       }}
                     >
@@ -225,29 +225,29 @@ export const ModifyData = ({ user_id, onRefresh, onClose }: { user_id: string; o
 
           <FormField
             control={form.control}
-            name="entidades"
+            name="modulos"
             render={() => (
               <FormItem>
-                <FormLabel>Entidades Permitidas</FormLabel>
+                <FormLabel>Modulos Permitidas</FormLabel>
                 <div className="gap-2 grid grid-cols-2">
-                  {entidadesDisponibles.map((entidad) => (
+                  {modulosDisponibles.map((modulo) => (
                     <FormField
-                      key={entidad}
+                      key={modulo}
                       control={form.control}
-                      name="entidades"
+                      name="modulos"
                       render={({ field }) => {
                         return (
                           <FormItem className="flex items-center gap-2 px-2">
                             <FormControl>
                               <Checkbox
-                                checked={field.value?.includes(entidad)}
+                                checked={field.value?.includes(modulo)}
                                 onCheckedChange={(checked) => {
-                                  const newValue = checked ? [...(field.value ?? []), entidad] : (field.value ?? []).filter((e) => e !== entidad);
+                                  const newValue = checked ? [...(field.value ?? []), modulo] : (field.value ?? []).filter((e) => e !== modulo);
                                   field.onChange(newValue);
                                 }}
                               />
                             </FormControl>
-                            <FormLabel className="p-2 font-normal uppercase">{entidad}</FormLabel>
+                            <FormLabel className="p-2 font-normal uppercase">{modulo}</FormLabel>
                           </FormItem>
                         );
                       }}

@@ -75,7 +75,7 @@ export default function RolesPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Nombre</TableHead>
-                  <TableHead>Entidades Disponibles</TableHead>
+                  <TableHead>Modulos Disponibles</TableHead>
                   <TableHead>Acciones</TableHead>
                 </TableRow>
               </TableHeader>
@@ -87,7 +87,7 @@ export default function RolesPage() {
                       {role.defaultModule.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {role.defaultModule.map((ent, index) => (
-                            <span key={index} className={`inline-block px-4 text-center items-center py-1 text-xs font-semibold rounded-full bg-red-400`}>
+                            <span key={index} className={`inline-block px-4 text-center items-center py-1 text-xs font-semibold rounded-full bg-stone-200`}>
                               {ent}
                             </span>
                           ))}

@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "RoleModule" AS ENUM ('dasboard', 'cuantos_somos', 'donde_estamos', 'salud_nutricion', 'educacion', 'proteccion_social', 'servicios_basicos', 'desarrollo_economico', 'politica_incluir', 'normas_informes', 'notas_actualidad', 'participacion_ciudadana');
+
 -- CreateTable
 CREATE TABLE "Account" (
     "userId" TEXT NOT NULL,
@@ -34,8 +37,10 @@ CREATE TABLE "Session" (
     "ipAddress" TEXT,
     "city" TEXT,
     "country" TEXT,
-    "latitude" DOUBLE PRECISION,
-    "longitude" DOUBLE PRECISION,
+    "latitude" TEXT,
+    "longitude" TEXT,
+    "closedAt" TIMESTAMP(3),
+    "lastActive" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL
 );
@@ -68,6 +73,7 @@ CREATE TABLE "Role" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
+    "defaultModule" "RoleModule"[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -77,7 +83,7 @@ CREATE TABLE "Role" (
 -- CreateTable
 CREATE TABLE "Module" (
     "id" TEXT NOT NULL,
-    "grupo" TEXT,
+    "grupo" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "url" TEXT,
     "parentId" TEXT,
@@ -98,10 +104,30 @@ CREATE TABLE "User" (
     "image" TEXT,
     "active" INTEGER NOT NULL DEFAULT 1,
     "date_inactive" TIMESTAMP(3),
+    "roleId" TEXT,
+    "overriddenModelu" "RoleModule"[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PasswordResetToken" (
+    "id" TEXT NOT NULL,
+    "userId" TEXT NOT NULL,
+    "code" TEXT NOT NULL,
+    "lastSentAt" BIGINT NOT NULL,
+    "isUsed" BOOLEAN NOT NULL DEFAULT false,
+    "usedAt" TIMESTAMP(3),
+    "email" TEXT NOT NULL,
+    "token" TEXT NOT NULL,
+    "expires" TIMESTAMP(3) NOT NULL,
+    "isValidated" BOOLEAN NOT NULL DEFAULT false,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "PasswordResetToken_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -866,14 +892,6 @@ CREATE TABLE "Image" (
     CONSTRAINT "Image_pkey" PRIMARY KEY ("id")
 );
 
--- CreateTable
-CREATE TABLE "_RoleToUser" (
-    "A" TEXT NOT NULL,
-    "B" TEXT NOT NULL,
-
-    CONSTRAINT "_RoleToUser_AB_pkey" PRIMARY KEY ("A","B")
-);
-
 -- CreateIndex
 CREATE UNIQUE INDEX "Session_sessionToken_key" ON "Session"("sessionToken");
 
@@ -891,6 +909,18 @@ CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_dni_key" ON "User"("dni");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PasswordResetToken_code_key" ON "PasswordResetToken"("code");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "PasswordResetToken_token_key" ON "PasswordResetToken"("token");
+
+-- CreateIndex
+CREATE INDEX "PasswordResetToken_email_idx" ON "PasswordResetToken"("email");
+
+-- CreateIndex
+CREATE INDEX "PasswordResetToken_token_idx" ON "PasswordResetToken"("token");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Departamento_nombre_key" ON "Departamento"("nombre");
@@ -1021,9 +1051,6 @@ CREATE INDEX "DetallesDiscapacidad_personasDiscapacidadId_idx" ON "DetallesDisca
 -- CreateIndex
 CREATE INDEX "ViolenciaMujer_anio_idx" ON "ViolenciaMujer"("anio");
 
--- CreateIndex
-CREATE INDEX "_RoleToUser_B_index" ON "_RoleToUser"("B");
-
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -1035,6 +1062,9 @@ ALTER TABLE "Authenticator" ADD CONSTRAINT "Authenticator_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "Module" ADD CONSTRAINT "Module_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Module"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "User" ADD CONSTRAINT "User_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Provincia" ADD CONSTRAINT "Provincia_departamentoId_fkey" FOREIGN KEY ("departamentoId") REFERENCES "Departamento"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1422,9 +1452,3 @@ ALTER TABLE "ViolenciaMujer" ADD CONSTRAINT "ViolenciaMujer_tipoViolenciaId_fkey
 
 -- AddForeignKey
 ALTER TABLE "ViolenciaMujer" ADD CONSTRAINT "ViolenciaMujer_periodoId_fkey" FOREIGN KEY ("periodoId") REFERENCES "Periodo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_RoleToUser" ADD CONSTRAINT "_RoleToUser_A_fkey" FOREIGN KEY ("A") REFERENCES "Role"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "_RoleToUser" ADD CONSTRAINT "_RoleToUser_B_fkey" FOREIGN KEY ("B") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;

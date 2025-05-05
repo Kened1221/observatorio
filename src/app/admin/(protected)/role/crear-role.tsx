@@ -4,16 +4,17 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RoleModule } from "@prisma/client";
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { fn_create_role } from "@/actions/role-action";
+import { roleModule } from "@prisma/client";
 
 const formSchema = z.object({
   name: z.string().min(1, "El nombre es obligatorio"),
-  defaultModule: z.array(z.nativeEnum(RoleModule)),
+  defaultModule: z.array(z.nativeEnum(roleModule)),
 });
 
 type RoleForm = z.infer<typeof formSchema>;
@@ -32,7 +33,7 @@ export default function CrearRole({ onClose }: CrearRoleProps) {
   });
 
   const [isSaving, setIsSaving] = useState(false);
-  const allPermissions = Object.values(RoleModule);
+  const allPermissions = Object.values(roleModule);
 
   const onSubmit = async (values: RoleForm) => {
     setIsSaving(true);
@@ -70,7 +71,7 @@ export default function CrearRole({ onClose }: CrearRoleProps) {
           name="defaultModule"
           render={() => (
             <FormItem>
-              <FormLabel>Entidades permitidas</FormLabel>
+              <FormLabel>Modulos permitidas</FormLabel>
               <div className="gap-3 grid grid-cols-2 sm:grid-cols-3 mt-2">
                 {allPermissions.map((perm) => (
                   <FormField

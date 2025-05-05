@@ -1,9 +1,3 @@
-function Page() {
-  return (
-    <>
-      Aqui van varias páginas
-    </>
-  )
+export default function Page() {
+  return <div>HOLA SALUD Y NUTRICIÓN</div>;
 }
-
-export default Page;

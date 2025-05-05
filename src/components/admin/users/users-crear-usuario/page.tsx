@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Eye, EyeOff } from "lucide-react"; // Import eye icons
 
-import { Entity } from "@/lib/enum";
+
 import { fn_user_create } from "@/actions/user-m-actions";
 import { fn_get_roles } from "@/actions/role-action";
 
@@ -15,11 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { entity } from "@prisma/client";
+import { RoleModule } from "@/admin/lib/enum";
+import { roleModule } from "@prisma/client";
 
-type RoleWithEntities = {
+
+type RoleWithModule = {
   name: string;
-  defaultEntities: z.infer<typeof Entity>[];
+  defaultModule: z.infer<typeof RoleModule>[];
 };
 
 export const user_create_schema = z.object({
@@ -28,14 +30,14 @@ export const user_create_schema = z.object({
   email: z.string().email("Correo inválido"),
   password: z.string().min(8, "La contraseña debe tener al menos 8 caracteres"),
   role: z.string().min(1, "Selecciona un rol"),
-  entidades: z.array(z.nativeEnum(entity)),
+  modulos: z.array(z.nativeEnum(roleModule)),
 });
 export type UserCreateSchema = z.infer<typeof user_create_schema>;
 
 export default function PageCreateUser() {
   const [isPending, startTransition] = useTransition();
-  const [rolesData, setRolesData] = useState<RoleWithEntities[]>([]);
-  const [entidadesDisponibles, setEntidadesDisponibles] = useState<z.infer<typeof Entity>[]>([]);
+  const [rolesData, setRolesData] = useState<RoleWithModule[]>([]);
+  const [modulosDisponibles, setModulosDisponibles] = useState<z.infer<typeof RoleModule>[]>([]);
   const [showPassword, setShowPassword] = useState(false); // State for password visibility
 
   const form = useForm<UserCreateSchema>({
@@ -46,7 +48,7 @@ export default function PageCreateUser() {
       email: "",
       password: "",
       role: undefined,
-      entidades: [],
+      modulos: [],
     },
   });
 
@@ -56,7 +58,7 @@ export default function PageCreateUser() {
       if (res.success && res.response) {
         const roles = res.response.map((r) => ({
           name: r.name,
-          defaultEntities: r.defaultEntities,
+          defaultModule: r.defaultModule,
         }));
         setRolesData(roles);
       }
@@ -75,7 +77,7 @@ export default function PageCreateUser() {
         console.error("🔥 Error al crear usuario:", error);
       } finally {
         form.reset();
-        setEntidadesDisponibles([]);
+        setModulosDisponibles([]);
       }
     });
   };
@@ -169,8 +171,8 @@ export default function PageCreateUser() {
                       field.onChange(value);
                       const rol = rolesData.find((r) => r.name === value);
                       if (rol) {
-                        setEntidadesDisponibles(rol.defaultEntities);
-                        form.setValue("entidades", rol.defaultEntities);
+                        setModulosDisponibles(rol.defaultModule);
+                        form.setValue("modulos", rol.defaultModule);
                       }
                     }}
                   >
@@ -192,20 +194,20 @@ export default function PageCreateUser() {
               )}
             />
 
-            {form.watch("role") && entidadesDisponibles.length > 0 && (
+            {form.watch("role") && modulosDisponibles.length > 0 && (
               <div className="px-4 w-full">
                 <FormField
                   control={form.control}
-                  name="entidades"
+                  name="modulos"
                   render={() => (
                     <FormItem>
-                      <FormLabel>Entidades Permitidas</FormLabel>
+                      <FormLabel>Modulos Permitidas</FormLabel>
                       <div className="gap-2 grid grid-cols-2">
-                        {entidadesDisponibles.map((ent) => (
+                        {modulosDisponibles.map((ent) => (
                           <FormField
                             key={ent}
                             control={form.control}
-                            name="entidades"
+                            name="modulos"
                             render={({ field }) => {
                               return (
                                 <FormItem className="flex items-center space-x-2 px-2">

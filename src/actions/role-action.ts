@@ -1,9 +1,9 @@
 "use server";
 
 import { prisma } from "@/config/prisma";
-import { RoleModule, Role } from "@prisma/client";
+import { roleModule, Role } from "@prisma/client";
 
-export const fn_get_roles_user = async (userId: string): Promise<{ success: boolean; message?: string; response?: RoleModule[] }> => {
+export const fn_get_roles_user = async (userId: string): Promise<{ success: boolean; message?: string; response?: roleModule[] }> => {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -43,15 +43,15 @@ export const fn_get_role = async (id: string): Promise<{ success: boolean; messa
   }
 };
 
-export const fn_update_role = async (data: Partial<Role> & { defaultModule?: RoleModule[] }): Promise<{ success: boolean; message?: string }> => {
+export const fn_update_role = async (data: Partial<Role> & { defaultModule?: roleModule[] }): Promise<{ success: boolean; message?: string }> => {
   try {
     if (!data.id) throw new Error("Falta el ID del rol.");
 
     const current_role = await prisma.role.findUnique({ where: { id: data.id } });
     if (!current_role) throw new Error("No se encontró el rol en la base de datos.");
 
-    const validEntities = Object.values(RoleModule);
-    const newDefaultModule = (data.defaultModule ?? []).filter((ent) => validEntities.includes(ent));
+    const validModule = Object.values(roleModule);
+    const newDefaultModule = (data.defaultModule ?? []).filter((ent) => validModule.includes(ent));
 
     await prisma.role.update({
       where: { id: data.id },
@@ -91,7 +91,7 @@ export const fn_delete_role = async (id: string): Promise<{ success: boolean; me
 interface CreateRoleInput {
   name: string;
   description?: string;
-  defaultModule: RoleModule[];
+  defaultModule: roleModule[];
 }
 
 export const fn_create_role = async (data: CreateRoleInput): Promise<{ success: boolean; message?: string }> => {
@@ -107,14 +107,14 @@ export const fn_create_role = async (data: CreateRoleInput): Promise<{ success: 
       };
     }
 
-    const validEntities = Object.values(RoleModule);
-    const filteredEntities = data.defaultModule.filter((ent) => validEntities.includes(ent));
+    const validModule = Object.values(roleModule);
+    const filteredModule = data.defaultModule.filter((ent) => validModule.includes(ent));
 
     await prisma.role.create({
       data: {
         name: data.name.trim(),
         description: data.description?.trim(),
-        defaultModule: filteredEntities,
+        defaultModule: filteredModule,
       },
     });
 

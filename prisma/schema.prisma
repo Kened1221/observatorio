@@ -79,7 +79,7 @@ model Authenticator {
   @@id([userId, credentialID])
 }
 
-enum RoleModule {
+enum roleModule {
   dasboard
   cuantos_somos
   donde_estamos
@@ -99,7 +99,7 @@ model Role {
   name        String   @unique
   description String?
 
-  defaultModule RoleModule[]
+  defaultModule roleModule[]
 
   users       User[]
   createdAt   DateTime @default(now())
@@ -133,6 +133,8 @@ model User {
 
   roleId String?
   role   Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
+  overriddenModule roleModule[]
 
   accounts      Account[]
   sessions      Session[]

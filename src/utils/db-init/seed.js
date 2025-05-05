@@ -51,7 +51,7 @@ const sidebarMenus = [
 async function seedDatabase() {
   try {
     // 1. Crear el usuario Admin
-    const adminPassword = await bcrypt.hash("12345678", 10);
+    const adminPassword = await bcrypt.hash("12345678", 12);
     const adminUser = await prisma.user.upsert({
       where: { email: "admin@admin.com" },
       update: {},
