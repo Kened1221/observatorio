@@ -3,15 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "node src/utils/db-init/seed.js",
+    "check-env": "node -e \"require('dotenv').config();['GOOGLE_CLIENT_ID','GOOGLE_CLIENT_SECRET'].forEach(k=>{if(!process.env[k])throw new Error(`Missing ${k}`)})\""
   },
   "dependencies": {
-    "@auth/prisma-adapter": "1.0.17",
     "@hookform/resolvers": "^5.0.1",
     "@next-auth/prisma-adapter": "^1.0.7",
+    "@prisma/client": "^6.5.0",
     "@radix-ui/react-accordion": "^1.2.8",
     "@radix-ui/react-checkbox": "^1.2.3",
     "@radix-ui/react-collapsible": "^1.1.8",
@@ -25,6 +27,7 @@
     "@radix-ui/react-slot": "^1.2.0",
     "@radix-ui/react-tabs": "^1.1.9",
     "@radix-ui/react-tooltip": "^1.2.4",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/ws": "^8.18.1",
     "axios": "^1.8.4",
     "bcryptjs": "^3.0.2",
@@ -34,6 +37,7 @@
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.8.0",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.503.0",
     "next": "15.3.1",
     "next-auth": "5.0.0-beta.26",
@@ -58,17 +62,17 @@
     "zod": "^3.24.3"
   },
   "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@prisma/client": "^6.6.0",
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^22",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
+    "@eslint/eslintrc": "^3.1.0",
+    "@tailwindcss/postcss": "^4.0.0-alpha.26",
+    "@types/node": "^22.7.4",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/socket.io-client": "^3.0.0",
     "@types/uuid": "^10.0.0",
-    "eslint": "^9",
-    "eslint-config-next": "15.3.1",
-    "prisma": "^6.6.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
+    "eslint": "^9.13.0",
+    "eslint-config-next": "15.2.4",
+    "prisma": "^6.5.0",
+    "tailwindcss": "^4.0.0-alpha.26",
+    "typescript": "^5.6.3"
   }
 }

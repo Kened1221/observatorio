@@ -1,5 +1,5 @@
-import Card3 from "@/components/animation/card3";
-import Card2 from "@/components/animation/card2";
+import Card3 from "@/components/animation/card/card3";
+import Card2 from "@/components/animation/card/card2";
 import Image from "next/image";
 
 interface Topic {
@@ -22,8 +22,8 @@ const topics: Topic[] = [
     description:
       "Comparte tus historias y opiniones para crear una comunidad inclusiva y participativa. Tu voz importa.",
     backend: "#FF4081",
-    borderColor: "#FF4081", 
-    frontend: "#fff", 
+    borderColor: "#FF4081",
+    frontend: "#fff",
   },
   {
     id: 2,
@@ -44,8 +44,8 @@ const topics: Topic[] = [
     description:
       "Comparte tu creatividad a través del arte y la palabra para inspirar cambios y transformación social.",
     backend: "#FF9800",
-    borderColor: "#FF9800", 
-    frontend: "#fff", 
+    borderColor: "#FF9800",
+    frontend: "#fff",
   },
 ];
 

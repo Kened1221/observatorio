@@ -1,7 +1,6 @@
 // src/components/admin/layout/sidebar.tsx
 "use client";
 
-import { sidebarMenus } from "@/admin/utils/data-sidebar";
 import {
   Collapsible,
   CollapsibleContent,
@@ -28,10 +27,12 @@ import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 import { signOut } from "next-auth/react";
 import { Session } from "next-auth";
-import { closeSession } from "@/actions/user-actions";
+import { revokeSpecificSession } from "@/actions/auth";
+import { sessionTokenUser } from "@/actions/user-actions";
+import { useUserData } from "../utils/user-data";
+import { sidebarMenus as sidebarMainMenus, sidebarSpecificMenus } from "../utils/data-sidebar";
+import { useProfile } from "@/admin/context/ProfileContext";
 
-// Utility function to create a delay
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export default function AppSidebar({
   hoveredItem,
@@ -42,11 +43,51 @@ export default function AppSidebar({
   setHoveredItem: (item: string | null) => void;
   session: Session;
 }) {
+  const { profile } = useProfile();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const pathname = usePathname();
   const [hoverPosition, setHoverPosition] = useState<number>(0);
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const { browserId, isReady } = useUserData();
+
+  const sidebarMenus = profile.role === "Admin" ? sidebarMainMenus : sidebarSpecificMenus;
+
+  const handleCloseSession = async () => {
+    try {
+      // Verificar si tenemos todos los datos para hacer un cierre de sesión adecuado
+      if (isReady && browserId) {
+        const idUser = session.user.id;
+
+        // Intentar obtener sessionToken
+        const sessionTokenU = await sessionTokenUser({
+          id: idUser,
+          browserId: browserId,
+        });
+
+        if (sessionTokenU) {
+          // Cerrar sesión con token
+          const result = await revokeSpecificSession({
+            userId: idUser,
+            sessionTokenToRevoke: sessionTokenU,
+          });
+
+          if (result.success) {
+            localStorage.removeItem(`session-updated-${idUser}`);
+            await signOut({ callbackUrl: "/" });
+          } else {
+            console.warn("No se pudo cerrar la sesión correctamente:", result.message);
+          }
+        } else {
+          console.warn("No se pudo obtener el sessionTokenU");
+        }
+      } else {
+        console.warn("Datos de usuario no listos, procediendo con cierre de sesión simple");
+      }
+    } catch (error) {
+      console.error("Error durante el cierre de sesión:", error);
+    }
+  };
 
   const handleMouseEnter = (item: string, event: React.MouseEvent) => {
     if (
@@ -66,41 +107,6 @@ export default function AppSidebar({
     setHoveredItem(null);
   };
 
-  const handleCloseSession = async () => {
-    try {
-      console.log("Session object:", session);
-      const idUser = session.user.id;
-      const sessionToken = session.sessionToken;
-
-      console.log("Attempting to close session with token:", sessionToken);
-
-      if (!sessionToken) {
-        console.error("No session token available");
-        await delay(2000); // Wait 2 seconds to view error
-        await signOut({ callbackUrl: "/auth/login" });
-        return;
-      }
-
-      // Call closeSession to mark the session as inactive
-      const result = await closeSession({ sessionToken });
-      if (!result.success) {
-        console.error("Error al cerrar sesión:", result.message);
-        await delay(2000); // Wait 2 seconds to view error
-        await signOut({ callbackUrl: "/auth/login" });
-        return;
-      }
-
-      // Clear local storage
-      localStorage.removeItem(`session-updated-${idUser}`);
-
-      // Sign out with NextAuth
-      await signOut({ callbackUrl: "/auth/login" });
-    } catch (error) {
-      console.error("Error en handleCloseSession:", error);
-      await delay(2000); // Wait 2 seconds to view error
-      await signOut({ callbackUrl: "/auth/login" });
-    }
-  };
 
   return (
     <>
@@ -160,11 +166,10 @@ export default function AppSidebar({
                             <CollapsibleTrigger asChild>
                               <SidebarMenuButton
                                 tooltip={item.items ? undefined : item.label}
-                                className={`hover:bg-primary hover:text-white ${
-                                  isActive
-                                    ? "bg-primary text-white"
-                                    : "data-[active=true]:bg-primary data-[active=true]:text-white"
-                                } hover:cursor-pointer`}
+                                className={`hover:bg-primary hover:text-white ${isActive
+                                  ? "bg-primary text-white"
+                                  : "data-[active=true]:bg-primary data-[active=true]:text-white"
+                                  } hover:cursor-pointer`}
                                 onMouseEnter={(e) =>
                                   handleMouseEnter(item.label, e)
                                 }
@@ -184,11 +189,10 @@ export default function AppSidebar({
                                     <Link
                                       href={subitem.url}
                                       key={j}
-                                      className={`px-2 py-1 text-xs flex items-center gap-2 rounded-lg ${
-                                        isSubItemActive
-                                          ? "bg-primary text-white"
-                                          : "hover:bg-primary hover:text-white"
-                                      }`}
+                                      className={`px-2 py-1 text-xs flex items-center gap-2 rounded-lg ${isSubItemActive
+                                        ? "bg-primary text-white"
+                                        : "hover:bg-primary hover:text-white"
+                                        }`}
                                     >
                                       {subitem.icon && (
                                         <subitem.icon width={16} />
@@ -204,11 +208,10 @@ export default function AppSidebar({
                       ) : (
                         <Link href={item.url}>
                           <SidebarMenuButton
-                            className={`hover:bg-primary hover:text-white ${
-                              isActive
-                                ? "bg-primary text-white"
-                                : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
-                            } hover:cursor-pointer`}
+                            className={`hover:bg-primary hover:text-white ${isActive
+                              ? "bg-primary text-white"
+                              : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
+                              } hover:cursor-pointer`}
                             onMouseEnter={(e) =>
                               handleMouseEnter(item.label, e)
                             }
@@ -235,9 +238,8 @@ export default function AppSidebar({
           >
             <LogOut
               width={16}
-              className={`transition-all duration-150 ${
-                isCollapsed ? "rotate-180" : ""
-              }`}
+              className={`transition-all duration-150 ${isCollapsed ? "rotate-180" : ""
+                }`}
             />
             {!isCollapsed && <span>Cerrar sesión</span>}
           </SidebarMenuButton>
@@ -274,11 +276,10 @@ export default function AppSidebar({
                   <Link
                     href={subitem.url}
                     key={index}
-                    className={`flex items-center gap-2 m-2 px-3 py-2 text-sm rounded-lg ${
-                      isSubItemActive
-                        ? "bg-primary text-white"
-                        : "hover:bg-primary hover:text-white"
-                    }`}
+                    className={`flex items-center gap-2 m-2 px-3 py-2 text-sm rounded-lg ${isSubItemActive
+                      ? "bg-primary text-white"
+                      : "hover:bg-primary hover:text-white"
+                      }`}
                   >
                     {subitem.icon && <subitem.icon className="h-4 w-4" />}
                     <span>{subitem.label}</span>

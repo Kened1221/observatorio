@@ -86,7 +86,7 @@ const Security = () => {
 
   return (
     <div className="px-4 py-5 sm:p-6">
-      <h2 className="text-lg font-medium text-primary-foreground">
+      <h2 className="text-lg font-medium text-secondary-foreground">
         Seguridad de la Cuenta
       </h2>
       <div className="mt-5">
@@ -101,7 +101,7 @@ const Security = () => {
                 <span>••••••••••••</span>
               </div>
               <Button
-                variant="outline"
+                variant="secondary"
                 onClick={() => setShowPasswordForm(!showPasswordForm)}
                 className="inline-flex items-center px-3 py-1.5"
               >
@@ -114,7 +114,7 @@ const Security = () => {
               <Form {...form}>
                 <form
                   onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-6"
+                  className="space-y-6 text-secondary-foreground"
                 >
                   {/* Campo: Contraseña actual */}
                   <FormField

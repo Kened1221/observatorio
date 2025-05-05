@@ -1,18 +1,17 @@
-// src/components/admin/account/Sessions.tsx
+//src/components/account/Sessions.tsx
 "use client";
 
+import { useSocket } from "@/admin/context/SocketContext"; // Importa el hook del contexto
+import { revokeSpecificSession } from "@/actions/auth"; // Importa la acción corregida
 import { useEffect, useState } from "react";
 import { Smartphone, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { closeSession } from "@/actions/user-actions";
 import { activeSessionsVerify } from "@/actions/user-actions";
 import { useUserData } from "../utils/user-data";
-import { signOut } from "next-auth/react";
-import io from "socket.io-client";
 
 interface Session {
   sessionToken: string;
-  browserId: string | null;
+  browserId: string;
   id: string;
   device: string;
   browser: string;
@@ -22,43 +21,15 @@ interface Session {
   current: boolean;
 }
 
-interface SessionsProps {
-  userId: string;
-  sessionToken: string | null;
-}
-
-const Sessions = ({ userId, sessionToken }: SessionsProps) => {
+const Sessions = ({ userId }: { userId: string }) => {
   const [activeSessions, setActiveSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { browserId, isReady } = useUserData();
-  const [socketPort, setSocketPort] = useState<number | null>(null);
+  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
-    async function fetchSocketPort() {
-      try {
-        const response = await fetch("/api/socket-port");
-        const data = await response.json();
-        if (data.port) {
-          setSocketPort(data.port);
-          console.log("Fetched Socket.IO port:", data.port);
-        } else {
-          console.error("No Socket.IO port returned:", data.error);
-        }
-      } catch (error) {
-        console.error("Error fetching Socket.IO port:", error);
-      }
-    }
-    fetchSocketPort();
-  }, []);
-
-  useEffect(() => {
-    console.log("Sessions.tsx - browserId:", browserId, "isReady:", isReady, "userId:", userId, "sessionToken:", sessionToken);
     const fetchSessions = async () => {
-      if (!isReady || !browserId) {
-        console.log("Sessions.tsx - Skipping fetch: browserId or isReady not available");
-        setIsLoading(false);
-        return;
-      }
+      if (!isReady || !browserId) return;
       try {
         const sessions = await activeSessionsVerify({ id: userId, browserId });
         setActiveSessions(
@@ -77,69 +48,57 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
     fetchSessions();
   }, [userId, browserId, isReady]);
 
+  // --- Listener para actualizar UI cuando OTRA sesión se cierra ---
   useEffect(() => {
-    if (!isReady || !browserId || !userId || !sessionToken || !socketPort) {
-      console.log("Sessions.tsx - Socket.IO skipped: missing browserId, userId, sessionToken, or socketPort");
-      return;
+    if (socket && isConnected) {
+      const handleOtherSessionClosed = (data: {
+        browserId: string;
+        reason?: string;
+      }) => {
+        // Si el evento NO es para este navegador, actualiza la lista
+        if (data.browserId !== browserId) {
+          console.log(
+            `[Sessions Component] Recibido cierre de otra sesión (${data.browserId}), actualizando lista.`
+          );
+          setActiveSessions((prev) =>
+            prev.filter((session) => session.browserId !== data.browserId)
+          );
+        }
+      };
+
+      socket.on("sessionClosed", handleOtherSessionClosed);
+
+      // Limpieza del listener específico de este componente
+      return () => {
+        socket.off("sessionClosed", handleOtherSessionClosed);
+      };
     }
+  }, [socket, isConnected, browserId]); // Depende del socket, estado de conexión y browserId local
 
-    const socket = io(`http://localhost:${socketPort}`, {
-      query: { browserId, userId },
-      auth: { token: sessionToken },
-      reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-    });
-
-    socket.on("connect", () => {
-      console.log(`Socket.IO conectado: browserId=${browserId}, port=${socketPort}`);
-    });
-
-    socket.on("connect_error", (error) => {
-      console.error(`Socket.IO connect_error: ${error.message}`);
-    });
-
-    socket.on("sessionClosed", (data: { browserId: string }) => {
-      console.log(`Evento sessionClosed recibido: browserId=${data.browserId}`);
-      if (data.browserId === browserId) {
-        console.log("Cerrando sesión en este dispositivo");
-        signOut({ callbackUrl: "/auth/login" });
-      } else {
-        setActiveSessions((prev) =>
-          prev.filter((session) => session.browserId !== data.browserId)
-        );
-      }
-    });
-
-    socket.on("disconnect", () => {
-      console.log(`Socket.IO desconectado: browserId=${browserId}`);
-    });
-
-    socket.on("reconnect", () => {
-      console.log(`Socket.IO reconectado: browserId=${browserId}`);
-    });
-
-    return () => {
-      socket.disconnect();
-    };
-  }, [browserId, userId, isReady, sessionToken, socketPort]);
-
-  const handleLogoutDevice = async (sessionToken: string) => {
+  // --- Handler para cerrar una sesión específica ---
+  const handleLogoutDevice = async (sessionTokenToRevoke: string) => {
     setIsLoading(true);
-    console.log("Sessions.tsx - Attempting to close session with token:", sessionToken);
     try {
-      const result = await closeSession({ sessionToken });
-      console.log("Sessions.tsx - Close session result:", result);
+      // Llama a la acción corregida
+      const result = await revokeSpecificSession({
+        userId,
+        sessionTokenToRevoke,
+      });
       if (result.success) {
+        // Actualiza el estado local eliminando la sesión revocada
+        // Usa el browserId devuelto por la acción si lo necesitas, o filtra por token
         setActiveSessions((prev) =>
-          prev.filter((session) => session.sessionToken !== sessionToken)
+          prev.filter(
+            (session) => session.sessionToken !== sessionTokenToRevoke
+          )
         );
-        console.log("Sesión cerrada exitosamente:", result.message);
+        console.log("Sesión remota revocada:", result.message);
       } else {
-        console.error("Error al cerrar sesión:", result.message);
+        console.error("Error al revocar sesión remota:", result.message);
+        // Podrías mostrar una notificación al usuario
       }
     } catch (error) {
-      console.error("Error logging out device:", error);
+      console.error("Error en handleLogoutDevice:", error);
     } finally {
       setIsLoading(false);
     }
@@ -150,8 +109,12 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
 
   return (
     <div className="px-4 py-5 sm:p-6">
-      <h2 className="text-lg font-medium">Sesiones Activas</h2>
-      <p className="mt-1 text-sm">Dispositivos donde tu cuenta está actualmente conectada.</p>
+      <h2 className="text-lg font-medium text-secondary-foreground">
+        Sesiones Activas
+      </h2>
+      <p className="mt-1 text-sm">
+        Dispositivos donde tu cuenta está actualmente conectada.
+      </p>
       <ul className="mt-5 divide-y">
         {activeSessions.map((session) => (
           <li
@@ -159,12 +122,12 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
             className="py-4 flex items-center justify-between"
           >
             <div className="flex items-center">
-              <Smartphone className="w-10 h-10" />
+              <Smartphone className="w-10 h-10 text-secondary-foreground" />
               <div className="ml-3">
-                <p className="text-sm font-medium">
+                <p className="text-sm font-medium text-secondary-foreground">
                   {session.device}{" "}
                   {session.current && (
-                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-green-100 text-green-800">
+                    <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs bg-green-100 text-green-500">
                       Actual
                     </span>
                   )}
@@ -190,7 +153,9 @@ const Sessions = ({ userId, sessionToken }: SessionsProps) => {
           </li>
         ))}
         {activeSessions.length === 0 && (
-          <li className="py-8 text-center">No hay sesiones activas actualmente.</li>
+          <li className="py-8 text-center">
+            No hay sesiones activas actualmente.
+          </li>
         )}
       </ul>
     </div>

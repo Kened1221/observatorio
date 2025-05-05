@@ -31,24 +31,26 @@ model Account {
 }
 
 model Session {
-  sessionToken   String   @unique
+  sessionToken   String    @unique
   userId         String
   expires        DateTime
-  status         String   @default("active")
-  browser        String? // Ej: "Chrome"
-  browserVersion String? // Ej: "120.0.0"
-  os             String? // Ej: "Windows 11"
-  osVersion      String? // Ej: "10.0"
-  deviceType     String? // Ej: "desktop", "mobile"
-  deviceModel    String? // Ej: "iPhone 14"
-  language       String? // Ej: "es-ES"
-  browserId      String? // Identificador único
-  ipAddress      String? // IP pública
-  city           String? // Ciudad
-  country        String? // País
-  latitude       Float? // Latitud
-  longitude      Float? // Longitud
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status         String    @default("active")
+  browser        String? 
+  browserVersion String? 
+  os             String? 
+  osVersion      String? 
+  deviceType     String? 
+  deviceModel    String? 
+  language       String? 
+  browserId      String? 
+  ipAddress      String? 
+  city           String? 
+  country        String? 
+  latitude       String? 
+  longitude      String? 
+  closedAt       DateTime? 
+  lastActive     DateTime? 
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -77,62 +79,86 @@ model Authenticator {
   @@id([userId, credentialID])
 }
 
-// Modelo de Rol
+enum RoleModule {
+  dasboard
+  cuantos_somos
+  donde_estamos
+  salud_nutricion
+  educacion
+  proteccion_social
+  servicios_basicos
+  desarrollo_economico
+  politica_incluir
+  normas_informes
+  notas_actualidad
+  participacion_ciudadana
+}
+
 model Role {
-  id          String           @id @default(cuid())
-  name        String           @unique // Ej: "Admin", "Editor", "Custom"
-  description String? // Descripción opcional del rol
-  isCustom    Boolean          @default(false) // Indica si es un rol personalizado
-  users       User[] // Relación muchos-a-muchos con User
-  permissions RolePermission[] // Permisos asociados al rol
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+
+  defaultModule RoleModule[]
+
+  users       User[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
-// Modelo de Módulo (para representar módulos y submódulos)
 model Module {
-  id          String           @id @default(cuid())
-  name        String           @unique // Ej: "Salud y Nutrición", "Protección Social"
-  url         String?
-  parentId    String? // Si es submódulo, referencia al módulo padre
-  parent      Module?          @relation("Submodules", fields: [parentId], references: [id])
-  submodules  Module[]         @relation("Submodules") // Relación jerárquica
-  permissions RolePermission[] // Permisos asociados al módulo
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id         String   @id @default(cuid())
+  grupo      String
+  name       String   @unique
+  url        String?
+  parentId   String?
+  parent     Module?  @relation("Submodules", fields: [parentId], references: [id])
+  submodules Module[] @relation("Submodules")
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
-// Modelo de Permisos por Rol y Módulo
-model RolePermission {
-  id        String  @id @default(cuid())
-  roleId    String
-  moduleId  String
-  canRead   Boolean @default(false) // Permiso de lectura
-  canWrite  Boolean @default(false)
-  canEdit   Boolean @default(false) // Permiso de edición
-  canDelete Boolean @default(false) // Permiso de eliminación
-
-  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  module Module @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-
-  @@unique([roleId, moduleId]) // Un rol no puede tener múltiples permisos para el mismo módulo
-}
-
-// Modificación al modelo User para incluir roles
 model User {
-  id            String          @id @default(cuid())
+  id            String    @id @default(cuid())
   name          String?
-  email         String          @unique
+  email         String    @unique
+  dni           String?   @unique
   passwordHash  String?
   emailVerified DateTime?
   image         String?
+
+  active        Int       @default(1)
+  date_inactive DateTime?
+
+  roleId String?
+  role   Role?   @relation(fields: [roleId], references: [id], onDelete: SetNull)
+
   accounts      Account[]
   sessions      Session[]
   Authenticator Authenticator[]
-  roles         Role[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model PasswordResetToken {
+  id          String    @id @default(cuid())
+  userId      String
+  code        String    @unique
+  lastSentAt  BigInt
+  isUsed      Boolean   @default(false)
+  usedAt      DateTime?
+  email       String
+  token       String    @unique
+  expires     DateTime
+  isValidated Boolean   @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([email])
+  @@index([token])
 }
 
 // Modelo: Departamento

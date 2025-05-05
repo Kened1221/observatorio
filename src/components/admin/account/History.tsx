@@ -100,7 +100,7 @@ const History = ({ userId }: HistoryProps) => {
     return <div className="px-4 py-5 sm:p-6">Cargando historial de sesiones...</div>;
 
   return (
-    <div className="px-4 py-5 sm:p-6">
+    <div className="px-4 py-5 sm:p-6 text-secondary-foreground">
       <h2 className="text-lg font-medium">Historial de Sesiones</h2>
       <p className="mt-1 text-sm">Registro de inicios de sesión recientes en tu cuenta.</p>
       <div className="mt-5">

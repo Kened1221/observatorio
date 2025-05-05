@@ -1,4 +1,4 @@
-import { SidebarMenuGroup } from "../types/sidebar-types";
+import { SidebarMenuGroup } from "@/admin/types/sidebar-types";
 import {
   BookOpen,
   DollarSign,
@@ -6,7 +6,6 @@ import {
   HeartPulse,
   Home,
   LayoutDashboard,
-  Lock,
   Newspaper,
   Shield,
   ShieldCheck,
@@ -100,17 +99,12 @@ export const sidebarMenus: SidebarMenuGroup[] = [
       {
         label: "Usuarios",
         icon: User,
-        url: "/admin/access/users",
+        url: "/admin/users",
       },
       {
         label: "Roles",
         icon: ShieldCheck,
-        url: "/admin/access/role",
-      },
-      {
-        label: "Permisos",
-        icon: Lock,
-        url: "/admin/access/permissions",
+        url: "/admin/role",
       },
     ],
   },
@@ -121,6 +115,43 @@ export const sidebarMenus: SidebarMenuGroup[] = [
         label: "Cuenta",
         icon: UserCircle,
         url: "/admin/account",
+      },
+    ],
+  },
+];
+export const sidebarSpecificMenus: SidebarMenuGroup[] = [
+  {
+    title: "Menú",
+    menu: [
+      {
+        label: "Dashboard",
+        icon: LayoutDashboard,
+        url: "/dashboard",
+      },
+    ],
+  },
+  {
+    title: "Acciones",
+    menu: [
+      {
+        label: "Consultas",
+        icon: LayoutDashboard,
+        url: "/dashboard/consultas",
+      },
+      {
+        label: "Historial",
+        icon: LayoutDashboard,
+        url: "/dashboard/historial",
+      },
+    ],
+  },
+  {
+    title: "Configuración",
+    menu: [
+      {
+        label: "Cuenta",
+        icon: UserCircle,
+        url: "/dashboard/account",
       },
     ],
   },

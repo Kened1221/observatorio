@@ -1,5 +1,5 @@
 "use client";
-import Card3 from "@/components/animation/card3";
+import Card3 from "@/components/animation/card/card3";
 
 interface Topic {
   id: number;

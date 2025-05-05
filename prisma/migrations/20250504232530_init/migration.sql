@@ -68,7 +68,6 @@ CREATE TABLE "Role" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "isCustom" BOOLEAN NOT NULL DEFAULT false,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -78,6 +77,7 @@ CREATE TABLE "Role" (
 -- CreateTable
 CREATE TABLE "Module" (
     "id" TEXT NOT NULL,
+    "grupo" TEXT,
     "name" TEXT NOT NULL,
     "url" TEXT,
     "parentId" TEXT,
@@ -88,26 +88,16 @@ CREATE TABLE "Module" (
 );
 
 -- CreateTable
-CREATE TABLE "RolePermission" (
-    "id" TEXT NOT NULL,
-    "roleId" TEXT NOT NULL,
-    "moduleId" TEXT NOT NULL,
-    "canRead" BOOLEAN NOT NULL DEFAULT false,
-    "canWrite" BOOLEAN NOT NULL DEFAULT false,
-    "canEdit" BOOLEAN NOT NULL DEFAULT false,
-    "canDelete" BOOLEAN NOT NULL DEFAULT false,
-
-    CONSTRAINT "RolePermission_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "User" (
     "id" TEXT NOT NULL,
     "name" TEXT,
     "email" TEXT NOT NULL,
+    "dni" TEXT,
     "passwordHash" TEXT,
     "emailVerified" TIMESTAMP(3),
     "image" TEXT,
+    "active" INTEGER NOT NULL DEFAULT 1,
+    "date_inactive" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -897,10 +887,10 @@ CREATE UNIQUE INDEX "Role_name_key" ON "Role"("name");
 CREATE UNIQUE INDEX "Module_name_key" ON "Module"("name");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "RolePermission_roleId_moduleId_key" ON "RolePermission"("roleId", "moduleId");
+CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
+CREATE UNIQUE INDEX "User_dni_key" ON "User"("dni");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Departamento_nombre_key" ON "Departamento"("nombre");
@@ -1045,12 +1035,6 @@ ALTER TABLE "Authenticator" ADD CONSTRAINT "Authenticator_userId_fkey" FOREIGN K
 
 -- AddForeignKey
 ALTER TABLE "Module" ADD CONSTRAINT "Module_parentId_fkey" FOREIGN KEY ("parentId") REFERENCES "Module"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "RolePermission" ADD CONSTRAINT "RolePermission_roleId_fkey" FOREIGN KEY ("roleId") REFERENCES "Role"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "RolePermission" ADD CONSTRAINT "RolePermission_moduleId_fkey" FOREIGN KEY ("moduleId") REFERENCES "Module"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Provincia" ADD CONSTRAINT "Provincia_departamentoId_fkey" FOREIGN KEY ("departamentoId") REFERENCES "Departamento"("id") ON DELETE CASCADE ON UPDATE CASCADE;

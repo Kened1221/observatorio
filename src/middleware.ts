@@ -1,4 +1,4 @@
-// middleware.ts
+// src/middleware.ts
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -16,6 +16,7 @@ export default async function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
+// Configuración de las rutas a proteger
 export const config = {
   matcher: ["/admin/:path*"],
 };
