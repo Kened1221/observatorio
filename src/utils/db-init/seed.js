@@ -105,7 +105,7 @@ async function seedDatabase() {
         name: "Admin",
         description: "Rol con acceso completo a todos los módulos",
         defaultModule: [
-          "dasboard",
+          "inicio",
           "salud_nutricion",
           "educacion",
           "proteccion_social",

@@ -14,6 +14,7 @@ import {
   UserCircle,
   UserRoundCheck,
   Users,
+  ChartBarBig,
 } from "lucide-react";
 import { Session } from "next-auth";
 
@@ -25,6 +26,11 @@ export const sidebarMenus: SidebarMenuGroup[] = [
         label: "Dashboard",
         icon: LayoutDashboard,
         url: "/admin",
+      },
+      {
+        label: "Inicio",
+        icon: ChartBarBig,
+        url: "/admin/issue/starts",
       },
     ],
   },
@@ -107,6 +113,7 @@ export const sidebarMenus: SidebarMenuGroup[] = [
 
 const moduleToUrlMap: { [key: string]: string } = {
   dasboard: "/admin",
+  inicio: "/admin/issue/starts",
   salud_nutricion: "/admin/issue/health-and-nutrition",
   educacion: "/admin/issue/education",
   proteccion_social: "/admin/issue/social-protection",
@@ -127,15 +134,23 @@ export async function getFilteredMenus(
 
     const filteredMenus: SidebarMenuGroup[] = sidebarMenus
       .map((group) => {
+        // Always include "Configuración" group
         if (group.title === "Configuración") {
           return group;
         }
 
+        // Include "Acceso" group for Admin role
         if (group.title === "Acceso" && session.user.role === "Admin") {
           return group;
         }
 
+        // For the "Menú" group, ensure "Dashboard" is included
         const filteredMenu = group.menu.filter((item) => {
+          // Always include the "Dashboard" menu item
+          if (item.url === "/admin") {
+            return true;
+          }
+
           const isIncluded = modules.includes(
             Object.keys(moduleToUrlMap).find(
               (key) => moduleToUrlMap[key] === item.url
@@ -163,6 +178,7 @@ export async function getFilteredMenus(
     return filteredMenus;
   } catch (error) {
     console.error("Error en getFilteredMenus:", error);
+    // In case of error, return only the "Configuración" group
     return [sidebarMenus.find((group) => group.title === "Configuración")!];
   }
 }

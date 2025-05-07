@@ -80,7 +80,7 @@ model Authenticator {
 }
 
 enum roleModule {
-  dasboard
+  inicio
   salud_nutricion
   educacion
   proteccion_social
