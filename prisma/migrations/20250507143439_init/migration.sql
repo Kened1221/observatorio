@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "RoleModule" AS ENUM ('dasboard', 'cuantos_somos', 'donde_estamos', 'salud_nutricion', 'educacion', 'proteccion_social', 'servicios_basicos', 'desarrollo_economico', 'politica_incluir', 'normas_informes', 'notas_actualidad', 'participacion_ciudadana');
+CREATE TYPE "roleModule" AS ENUM ('dasboard', 'salud_nutricion', 'educacion', 'proteccion_social', 'servicios_basicos', 'desarrollo_economico', 'politica_incluir', 'normas_informes', 'notas_actualidad', 'participacion_ciudadana');
 
 -- CreateTable
 CREATE TABLE "Account" (
@@ -73,7 +73,7 @@ CREATE TABLE "Role" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "defaultModule" "RoleModule"[],
+    "defaultModule" "roleModule"[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -105,7 +105,7 @@ CREATE TABLE "User" (
     "active" INTEGER NOT NULL DEFAULT 1,
     "date_inactive" TIMESTAMP(3),
     "roleId" TEXT,
-    "overriddenModelu" "RoleModule"[],
+    "overriddenModule" "roleModule"[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

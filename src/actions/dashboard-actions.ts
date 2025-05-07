@@ -2,6 +2,7 @@
 "use server";
 
 import { prisma } from "@/config/prisma";
+import { Session } from "next-auth";
 
 export async function uploadPoblacionData(data: any[]) {
   try {
@@ -93,5 +94,34 @@ export async function uploadPoblacionData(data: any[]) {
       success: false,
       error: `Error al procesar los datos: ${error.message || "Error desconocido"}`,
     };
+  }
+}
+
+
+export async function getUserModules(session: Session): Promise<string[]> {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        overriddenModule: true,
+        role: {
+          select: {
+            defaultModule: true,
+          },
+        },
+      },
+    });
+
+    if (!user) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    if (user.overriddenModule && user.overriddenModule.length > 0) {
+      return user.overriddenModule;
+    }
+    return user.role?.defaultModule ?? [];
+  } catch (error) {
+    console.error('Error al obtener módulos del usuario:', error);
+    throw new Error('No se pudieron obtener los módulos');
   }
 }

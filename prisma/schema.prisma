@@ -81,8 +81,6 @@ model Authenticator {
 
 enum roleModule {
   dasboard
-  cuantos_somos
-  donde_estamos
   salud_nutricion
   educacion
   proteccion_social

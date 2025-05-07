@@ -1,4 +1,3 @@
-// src/components/admin/layout/sidebar.tsx
 "use client";
 
 import {
@@ -24,15 +23,14 @@ import { ChevronDown, LogOut } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { signOut } from "next-auth/react";
 import { Session } from "next-auth";
 import { revokeSpecificSession } from "@/actions/auth";
 import { sessionTokenUser } from "@/actions/user-actions";
 import { useUserData } from "../utils/user-data";
-import { sidebarMenus as sidebarMainMenus, sidebarSpecificMenus } from "../utils/data-sidebar";
-import { useProfile } from "@/admin/context/ProfileContext";
-
+import { getFilteredMenus } from "../utils/data-sidebar";
+import { SidebarMenuGroup } from "@/admin/types/sidebar-types";
 
 export default function AppSidebar({
   hoveredItem,
@@ -43,15 +41,29 @@ export default function AppSidebar({
   setHoveredItem: (item: string | null) => void;
   session: Session;
 }) {
-  const { profile } = useProfile();
   const { state } = useSidebar();
   const isCollapsed = state === "collapsed";
   const pathname = usePathname();
   const [hoverPosition, setHoverPosition] = useState<number>(0);
   const menuRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { browserId, isReady } = useUserData();
+  const [dynamicMenus, setDynamicMenus] = useState<SidebarMenuGroup[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  const sidebarMenus = profile.role === "Admin" ? sidebarMainMenus : sidebarSpecificMenus;
+  useEffect(() => {
+    const fetchMenus = async () => {
+      try {
+        const menus = await getFilteredMenus(session);
+        setDynamicMenus(menus);
+      } catch (error) {
+        console.error("Error fetching dynamic menus:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMenus();
+  }, []);
 
   const handleCloseSession = async () => {
     try {
@@ -76,13 +88,18 @@ export default function AppSidebar({
             localStorage.removeItem(`session-updated-${idUser}`);
             await signOut({ callbackUrl: "/" });
           } else {
-            console.warn("No se pudo cerrar la sesión correctamente:", result.message);
+            console.warn(
+              "No se pudo cerrar la sesión correctamente:",
+              result.message
+            );
           }
         } else {
           console.warn("No se pudo obtener el sessionTokenU");
         }
       } else {
-        console.warn("Datos de usuario no listos, procediendo con cierre de sesión simple");
+        console.warn(
+          "Datos de usuario no listos, procediendo con cierre de sesión simple"
+        );
       }
     } catch (error) {
       console.error("Error durante el cierre de sesión:", error);
@@ -92,7 +109,7 @@ export default function AppSidebar({
   const handleMouseEnter = (item: string, event: React.MouseEvent) => {
     if (
       isCollapsed &&
-      sidebarMenus.some((group) =>
+      dynamicMenus.some((group) =>
         group.menu.some((menuItem) => menuItem.label === item && menuItem.items)
       )
     ) {
@@ -107,6 +124,26 @@ export default function AppSidebar({
     setHoveredItem(null);
   };
 
+  if (loading) {
+    return (
+      <Sidebar className="rounded-lg border border-border shadow-sm relative h-full">
+        <SidebarHeader className="flex items-center border-b rounded-t-lg">
+          <div className="flex items-center gap-4 font-semibold p-6">
+            <Image
+              src={"/adm/logos/logo.png"}
+              alt="logo"
+              width={40}
+              height={20}
+            />
+            <span className="text-xl font-bold">Observatorio Regional</span>
+          </div>
+        </SidebarHeader>
+        <SidebarContent className="flex items-center justify-center">
+          <div className="p-6">Cargando menú...</div>
+        </SidebarContent>
+      </Sidebar>
+    );
+  }
 
   return (
     <>
@@ -137,7 +174,7 @@ export default function AppSidebar({
           )}
         </SidebarHeader>
         <SidebarContent className="bg-card text-primary-foreground rounded-b-lg">
-          {sidebarMenus.map((menubar, index) => (
+          {dynamicMenus.map((menubar, index) => (
             <SidebarGroup key={index}>
               {!isCollapsed && (
                 <SidebarGroupLabel className="px-6 text-xs font-semibold uppercase text-secondary-foreground">
@@ -166,10 +203,11 @@ export default function AppSidebar({
                             <CollapsibleTrigger asChild>
                               <SidebarMenuButton
                                 tooltip={item.items ? undefined : item.label}
-                                className={`hover:bg-primary hover:text-white ${isActive
-                                  ? "bg-primary text-white"
-                                  : "data-[active=true]:bg-primary data-[active=true]:text-white"
-                                  } hover:cursor-pointer`}
+                                className={`hover:bg-primary hover:text-white ${
+                                  isActive
+                                    ? "bg-primary text-white"
+                                    : "data-[active=true]:bg-primary data-[active=true]:text-white"
+                                } hover:cursor-pointer`}
                                 onMouseEnter={(e) =>
                                   handleMouseEnter(item.label, e)
                                 }
@@ -189,10 +227,11 @@ export default function AppSidebar({
                                     <Link
                                       href={subitem.url}
                                       key={j}
-                                      className={`px-2 py-1 text-xs flex items-center gap-2 rounded-lg ${isSubItemActive
-                                        ? "bg-primary text-white"
-                                        : "hover:bg-primary hover:text-white"
-                                        }`}
+                                      className={`px-2 py-1 text-xs flex items-center gap-2 rounded-lg ${
+                                        isSubItemActive
+                                          ? "bg-primary text-white"
+                                          : "hover:bg-primary hover:text-white"
+                                      }`}
                                     >
                                       {subitem.icon && (
                                         <subitem.icon width={16} />
@@ -208,10 +247,11 @@ export default function AppSidebar({
                       ) : (
                         <Link href={item.url}>
                           <SidebarMenuButton
-                            className={`hover:bg-primary hover:text-white ${isActive
-                              ? "bg-primary text-white"
-                              : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
-                              } hover:cursor-pointer`}
+                            className={`hover:bg-primary hover:text-white ${
+                              isActive
+                                ? "bg-primary text-white"
+                                : "data-[active=true]:bg-indigo-600/20 data-[active=true]:text-white"
+                            } hover:cursor-pointer`}
                             onMouseEnter={(e) =>
                               handleMouseEnter(item.label, e)
                             }
@@ -238,8 +278,9 @@ export default function AppSidebar({
           >
             <LogOut
               width={16}
-              className={`transition-all duration-150 ${isCollapsed ? "rotate-180" : ""
-                }`}
+              className={`transition-all duration-150 ${
+                isCollapsed ? "rotate-180" : ""
+              }`}
             />
             {!isCollapsed && <span>Cerrar sesión</span>}
           </SidebarMenuButton>
@@ -249,14 +290,14 @@ export default function AppSidebar({
 
       {hoveredItem &&
         isCollapsed &&
-        sidebarMenus.some((group) =>
+        dynamicMenus.some((group) =>
           group.menu.some((item) => item.label === hoveredItem && item.items)
         ) && (
           <div
             className="absolute left-14 z-50 w-48 rounded-md border bg-card py-1 shadow-lg"
             style={{ top: `${hoverPosition}px` }}
             onMouseEnter={() => {
-              const item = sidebarMenus
+              const item = dynamicMenus
                 .flatMap((group) => group.menu)
                 .find((i) => i.label === hoveredItem);
               if (item?.items) setHoveredItem(hoveredItem);
@@ -267,7 +308,7 @@ export default function AppSidebar({
               {hoveredItem}
             </div>
             <div className="border-t"></div>
-            {sidebarMenus
+            {dynamicMenus
               .flatMap((group) => group.menu)
               .find((item) => item.label === hoveredItem)
               ?.items?.map((subitem, index) => {
@@ -276,10 +317,11 @@ export default function AppSidebar({
                   <Link
                     href={subitem.url}
                     key={index}
-                    className={`flex items-center gap-2 m-2 px-3 py-2 text-sm rounded-lg ${isSubItemActive
-                      ? "bg-primary text-white"
-                      : "hover:bg-primary hover:text-white"
-                      }`}
+                    className={`flex items-center gap-2 m-2 px-3 py-2 text-sm rounded-lg ${
+                      isSubItemActive
+                        ? "bg-primary text-white"
+                        : "hover:bg-primary hover:text-white"
+                    }`}
                   >
                     {subitem.icon && <subitem.icon className="h-4 w-4" />}
                     <span>{subitem.label}</span>

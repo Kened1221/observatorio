@@ -265,7 +265,7 @@ export const ModifyData = ({ user_id, onRefresh, onClose }: { user_id: string; o
 
           <div>
             <strong className="text-primary">{data.name}</strong> fue inhabilidato el
-            <strong className="text-red-600">{data.fecha_inactive && fn_format_date(data.fecha_inactive)}</strong>
+            <strong className="text-red-600"> {data.fecha_inactive && fn_format_date(data.fecha_inactive)}</strong>
           </div>
 
           <div className="flex justify-end gap-3">

@@ -1,3 +1,4 @@
+import { getUserModules } from "@/actions/dashboard-actions";
 import { SidebarMenuGroup } from "@/admin/types/sidebar-types";
 import {
   BookOpen,
@@ -14,6 +15,7 @@ import {
   UserRoundCheck,
   Users,
 } from "lucide-react";
+import { Session } from "next-auth";
 
 export const sidebarMenus: SidebarMenuGroup[] = [
   {
@@ -32,24 +34,7 @@ export const sidebarMenus: SidebarMenuGroup[] = [
       {
         label: "Salud y Nutrición",
         icon: HeartPulse,
-        url: "",
-        items: [
-          {
-            label: "Protección Social",
-            icon: Shield,
-            url: "/admin/issue/health-and-nutrition",
-          },
-          {
-            label: "Educación",
-            icon: BookOpen,
-            url: "/admin/issue/health-and-nutrition/ed",
-          },
-          {
-            label: "Salud y Nutrición",
-            icon: Home,
-            url: "/admin/issue/health-and-nutrition/sa",
-          },
-        ],
+        url: "/admin/issue/health-and-nutrition",
       },
       {
         label: "Educación",
@@ -119,40 +104,65 @@ export const sidebarMenus: SidebarMenuGroup[] = [
     ],
   },
 ];
-export const sidebarSpecificMenus: SidebarMenuGroup[] = [
-  {
-    title: "Menú",
-    menu: [
-      {
-        label: "Dashboard",
-        icon: LayoutDashboard,
-        url: "/dashboard",
-      },
-    ],
-  },
-  {
-    title: "Acciones",
-    menu: [
-      {
-        label: "Consultas",
-        icon: LayoutDashboard,
-        url: "/dashboard/consultas",
-      },
-      {
-        label: "Historial",
-        icon: LayoutDashboard,
-        url: "/dashboard/historial",
-      },
-    ],
-  },
-  {
-    title: "Configuración",
-    menu: [
-      {
-        label: "Cuenta",
-        icon: UserCircle,
-        url: "/dashboard/account",
-      },
-    ],
-  },
-];
+
+const moduleToUrlMap: { [key: string]: string } = {
+  dasboard: "/admin",
+  salud_nutricion: "/admin/issue/health-and-nutrition",
+  educacion: "/admin/issue/education",
+  proteccion_social: "/admin/issue/social-protection",
+  servicios_basicos: "/admin/issue/basic-services",
+  desarrollo_economico: "/admin/issue/economic-development",
+  politica_incluir: "/admin/issue/include-to-grow",
+  normas_informes: "/admin/issue/rules-and-information",
+  notas_actualidad: "/admin/issue/present",
+  participacion_ciudadana: "/admin/issue/citizen-participation",
+};
+
+export async function getFilteredMenus(
+  session: Session
+): Promise<SidebarMenuGroup[]> {
+  try {
+    const modules = await getUserModules(session);
+    console.log("Módulos recibidos en getFilteredMenus:", modules);
+
+    const filteredMenus: SidebarMenuGroup[] = sidebarMenus
+      .map((group) => {
+        if (group.title === "Configuración") {
+          return group;
+        }
+
+        if (group.title === "Acceso" && session.user.role === "Admin") {
+          return group;
+        }
+
+        const filteredMenu = group.menu.filter((item) => {
+          const isIncluded = modules.includes(
+            Object.keys(moduleToUrlMap).find(
+              (key) => moduleToUrlMap[key] === item.url
+            ) || ""
+          );
+          console.log(
+            `Verificando menú ${item.label} (${item.url}): ${
+              isIncluded ? "Incluido" : "Excluido"
+            }`
+          );
+          return isIncluded;
+        });
+
+        return {
+          ...group,
+          menu: filteredMenu,
+        };
+      })
+      .filter((group) => group.menu.length > 0);
+
+    console.log(
+      "Filtered Sidebar Menus:",
+      JSON.stringify(filteredMenus, null, 2)
+    );
+    return filteredMenus;
+  } catch (error) {
+    console.error("Error en getFilteredMenus:", error);
+    return [sidebarMenus.find((group) => group.title === "Configuración")!];
+  }
+}
