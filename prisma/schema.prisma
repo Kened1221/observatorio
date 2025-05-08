@@ -35,21 +35,21 @@ model Session {
   userId         String
   expires        DateTime
   status         String    @default("active")
-  browser        String? 
-  browserVersion String? 
-  os             String? 
-  osVersion      String? 
-  deviceType     String? 
-  deviceModel    String? 
-  language       String? 
-  browserId      String? 
-  ipAddress      String? 
-  city           String? 
-  country        String? 
-  latitude       String? 
-  longitude      String? 
-  closedAt       DateTime? 
-  lastActive     DateTime? 
+  browser        String?
+  browserVersion String?
+  os             String?
+  osVersion      String?
+  deviceType     String?
+  deviceModel    String?
+  language       String?
+  browserId      String?
+  ipAddress      String?
+  city           String?
+  country        String?
+  latitude       String?
+  longitude      String?
+  closedAt       DateTime?
+  lastActive     DateTime?
   user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
@@ -93,15 +93,15 @@ enum roleModule {
 }
 
 model Role {
-  id          String   @id @default(cuid())
-  name        String   @unique
+  id          String  @id @default(cuid())
+  name        String  @unique
   description String?
 
   defaultModule roleModule[]
 
-  users       User[]
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Module {
@@ -113,8 +113,8 @@ model Module {
   parent     Module?  @relation("Submodules", fields: [parentId], references: [id])
   submodules Module[] @relation("Submodules")
 
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model User {
@@ -173,20 +173,24 @@ model Departamento {
 // Modelo: Provincia
 model Provincia {
   id             Int          @id @default(autoincrement())
-  nombre         String       @db.VarChar(100)
+  nombre         String       @unique @db.VarChar(100)
   departamentoId Int
   departamento   Departamento @relation(fields: [departamentoId], references: [id], onDelete: Cascade)
-  ubicaciones    Ubicacion[]
   Distrito       Distrito[]
+  ubicaciones    Ubicacion[]
+
+  @@unique([nombre, departamentoId])
 }
 
 // Modelo: Distrito
 model Distrito {
   id          Int         @id @default(autoincrement())
-  nombre      String      @db.VarChar(100)
+  nombre      String      @unique @db.VarChar(100)
   provinciaId Int
   provincia   Provincia   @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
   ubicaciones Ubicacion[]
+
+  @@unique([nombre, provinciaId])
 }
 
 // Modelo: Ubicacion (nueva tabla para centralizar geografía)
@@ -231,7 +235,7 @@ model Ubicacion {
 // Modelo: Ambito
 model Ambito {
   id                   Int                    @id @default(autoincrement())
-  nombre               String                 @db.VarChar(100)
+  nombre               String                 @unique @db.VarChar(100)
   poblaciones          Poblacion[]
   viviendas            Vivienda[]
   dificultades         DificultadFisica[]
@@ -245,7 +249,7 @@ model Ambito {
 // Modelo: Genero
 model Genero {
   id                   Int                    @id @default(autoincrement())
-  nombre               String                 @db.VarChar(100)
+  nombre               String                 @unique @db.VarChar(100)
   poblaciones          Poblacion[]
   dificultades         DificultadFisica[]
   AfiliacionSalud      AfiliacionSalud[]
@@ -259,7 +263,7 @@ model Genero {
 // Modelo: EdadIntervalo (corregido de EdadIbtervalo)
 model EdadIntervalo {
   id                   Int                    @id @default(autoincrement())
-  intervalo            String // Ej: "0-18", "19-30"
+  intervalo            String                 @unique @db.VarChar(100)
   poblaciones          Poblacion[]
   dificultades         DificultadFisica[]
   AfiliacionSalud      AfiliacionSalud[]

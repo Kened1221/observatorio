@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "roleModule" AS ENUM ('dasboard', 'salud_nutricion', 'educacion', 'proteccion_social', 'servicios_basicos', 'desarrollo_economico', 'politica_incluir', 'normas_informes', 'notas_actualidad', 'participacion_ciudadana');
+CREATE TYPE "roleModule" AS ENUM ('inicio', 'salud_nutricion', 'educacion', 'proteccion_social', 'servicios_basicos', 'desarrollo_economico', 'politica_incluir', 'normas_informes', 'notas_actualidad', 'participacion_ciudadana');
 
 -- CreateTable
 CREATE TABLE "Account" (
@@ -926,7 +926,25 @@ CREATE INDEX "PasswordResetToken_token_idx" ON "PasswordResetToken"("token");
 CREATE UNIQUE INDEX "Departamento_nombre_key" ON "Departamento"("nombre");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Provincia_nombre_key" ON "Provincia"("nombre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Provincia_nombre_departamentoId_key" ON "Provincia"("nombre", "departamentoId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Distrito_nombre_key" ON "Distrito"("nombre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Distrito_nombre_provinciaId_key" ON "Distrito"("nombre", "provinciaId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "Ubicacion_departamentoId_provinciaId_distritoId_key" ON "Ubicacion"("departamentoId", "provinciaId", "distritoId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Ambito_nombre_key" ON "Ambito"("nombre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Genero_nombre_key" ON "Genero"("nombre");
 
 -- CreateIndex
 CREATE INDEX "Poblacion_anio_idx" ON "Poblacion"("anio");
