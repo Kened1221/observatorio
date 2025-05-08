@@ -8,6 +8,7 @@ const sidebarMenus = [
     title: "Menú",
     menu: [
       { label: "Dashboard", url: "/admin" },
+      { label: "inicio", url: "/issue/starts" },
     ],
   },
   {
@@ -15,21 +16,25 @@ const sidebarMenus = [
     menu: [
       {
         label: "Salud y Nutrición",
-        url: "",
-        items: [
-          { label: "Protección Social", url: "/admin/issue/health-and-nutrition" },
-          { label: "Educación", url: "/admin/issue/health-and-nutrition/ed" },
-          { label: "Salud y Nutrición", url: "/admin/issue/health-and-nutrition/sa" },
-        ],
+        url: "/admin/issue/health-and-nutrition",
       },
       { label: "Educación", url: "/admin/issue/education" },
       { label: "Protección Social", url: "/admin/issue/social-protection" },
       { label: "Servicios Básicos", url: "/admin/issue/basic-services" },
-      { label: "Desarrollo Económico", url: "/admin/issue/economic-development" },
+      {
+        label: "Desarrollo Económico",
+        url: "/admin/issue/economic-development",
+      },
       { label: "Incluir para crecer", url: "/admin/issue/include-to-grow" },
-      { label: "Normas e información", url: "/admin/issue/rules-and-information" },
+      {
+        label: "Normas e información",
+        url: "/admin/issue/rules-and-information",
+      },
       { label: "Notas de Actualidad", url: "/admin/issue/present" },
-      { label: "Participación ciudadana", url: "/admin/issue/citizen-participation" },
+      {
+        label: "Participación ciudadana",
+        url: "/admin/issue/citizen-participation",
+      },
     ],
   },
   {
@@ -42,9 +47,7 @@ const sidebarMenus = [
   },
   {
     title: "Configuración",
-    menu: [
-      { label: "Cuenta", url: "/admin/account" },
-    ],
+    menu: [{ label: "Cuenta", url: "/admin/account" }],
   },
 ];
 
@@ -131,7 +134,6 @@ async function seedDatabase() {
     console.log("Datos iniciales subidos correctamente:");
     console.log("Módulos creados:", moduleMap.size);
     console.log("Rol Admin creado con ID:", adminRole.id);
-
   } catch (error) {
     console.error("Error al subir los datos iniciales:", error);
   } finally {

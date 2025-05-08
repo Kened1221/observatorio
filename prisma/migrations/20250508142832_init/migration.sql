@@ -185,7 +185,7 @@ CREATE TABLE "Genero" (
 -- CreateTable
 CREATE TABLE "EdadIntervalo" (
     "id" SERIAL NOT NULL,
-    "intervalo" TEXT NOT NULL,
+    "intervalo" VARCHAR(100) NOT NULL,
 
     CONSTRAINT "EdadIntervalo_pkey" PRIMARY KEY ("id")
 );
@@ -945,6 +945,9 @@ CREATE UNIQUE INDEX "Ambito_nombre_key" ON "Ambito"("nombre");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Genero_nombre_key" ON "Genero"("nombre");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "EdadIntervalo_intervalo_key" ON "EdadIntervalo"("intervalo");
 
 -- CreateIndex
 CREATE INDEX "Poblacion_anio_idx" ON "Poblacion"("anio");
