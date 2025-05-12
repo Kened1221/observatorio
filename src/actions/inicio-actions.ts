@@ -235,3 +235,54 @@ export async function downloadPoblacionData(anio: number) {
     };
   }
 }
+
+export async function deleteOrResetPoblacionData(anio: number, mode: "delete" | "reset") {
+  try {
+    if (mode === "delete") {
+      const deleteResult = await prisma.poblacion.deleteMany({
+        where: {
+          anio,
+        },
+      });
+
+      if (deleteResult.count === 0) {
+        return {
+          success: false,
+          error: `No hay datos de población para el año ${anio} para eliminar`,
+        };
+      }
+
+      return {
+        success: true,
+        message: `Datos del año ${anio} eliminados exitosamente`,
+      };
+    } else {
+      const updateResult = await prisma.poblacion.updateMany({
+        where: {
+          anio,
+        },
+        data: {
+          cantidad: 0,
+        },
+      });
+
+      if (updateResult.count === 0) {
+        return {
+          success: false,
+          error: `No hay datos de población para el año ${anio} para actualizar`,
+        };
+      }
+
+      return {
+        success: true,
+        message: `Datos del año ${anio} restablecidos a 0 exitosamente`,
+      };
+    }
+  } catch (error: any) {
+    console.error(`Error al ${mode === "delete" ? "eliminar" : "restablecer"} datos:`, error);
+    return {
+      success: false,
+      error: `No se pudo ${mode === "delete" ? "eliminar" : "restablecer"} los datos`,
+    };
+  }
+}

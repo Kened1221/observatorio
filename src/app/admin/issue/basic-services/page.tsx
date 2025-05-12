@@ -1,248 +1,247 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
-import * as XLSX from "xlsx";
-import { uploadPoblacionData } from "@/actions/dashboard-actions";
-import { Button } from "@/components/ui/button";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 import DragDropExcelInput from "@/components/ui/drag-drop-excel-input";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { downloadPoblacionData, getAvailableYears } from "@/actions/inicio-actions";
+import ContainerBasicServices from "./container-BasicServices";
 
 export default function Page() {
+  const [accesoAguaExcel, setAccesoAguaExcel] = useState<File | null>(null);
+  const [metalesPesadosExcel, setMetalesPesadosExcel] = useState<File | null>(
+    null
+  );
+  const [sistemasAguaExcel, setSistemasAguaExcel] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
-  const [file, setFile] = useState<File | null>(null);
-  const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string>("");
+  const [showConfirmationModal, setShowConfirmationModal] = useState<{
+    isOpen: boolean;
+    category:
+      | "acceso_agua_clorada"
+      | "riesgo_metales_pesados"
+      | "riesgo_sistemas_agua"
+      | null;
+  }>({ isOpen: false, category: null });
+  const [uploadedFiles, setUploadedFiles] = useState<
+    {
+      id: number;
+      fileName: string;
+      category:
+        | "acceso_agua_clorada"
+        | "riesgo_metales_pesados"
+        | "riesgo_sistemas_agua";
+      uploadedAt: string;
+    }[]
+  >([]);
 
-  // Obtener años disponibles al montar el componente
-  useEffect(() => {
-    const fetchYears = async () => {
-      const years = await getAvailableYears();
-      setAvailableYears(years);
-      if (years.length > 0) {
-        setSelectedYear(years[0].toString());
-      }
-    };
-    fetchYears();
-  }, []);
-
-  const handleFileSelect = (selectedFile: File) => {
-    setFile(selectedFile);
+  const handleCancel = (
+    category:
+      | "acceso_agua_clorada"
+      | "riesgo_metales_pesados"
+      | "riesgo_sistemas_agua"
+  ) => {
+    if (category === "acceso_agua_clorada") {
+      setAccesoAguaExcel(null);
+    } else if (category === "riesgo_metales_pesados") {
+      setMetalesPesadosExcel(null);
+    } else {
+      setSistemasAguaExcel(null);
+    }
   };
 
-  const handleOpenConfirmationModal = () => {
-    if (file) {
-      setShowConfirmationModal(true);
+  const handleOpenConfirmationModal = (
+    category:
+      | "acceso_agua_clorada"
+      | "riesgo_metales_pesados"
+      | "riesgo_sistemas_agua"
+  ) => {
+    if (
+      (category === "acceso_agua_clorada" && accesoAguaExcel) ||
+      (category === "riesgo_metales_pesados" && metalesPesadosExcel) ||
+      (category === "riesgo_sistemas_agua" && sistemasAguaExcel)
+    ) {
+      setShowConfirmationModal({ isOpen: true, category });
     }
   };
 
   const handleCloseConfirmationModal = () => {
-    setShowConfirmationModal(false);
-  };
-
-  const handleConfirmSave = async () => {
-    if (!file) return;
-
-    setUploading(true);
-    setMessage(null);
-    setShowConfirmationModal(false);
-
-    try {
-      const data = await file.arrayBuffer();
-      const workbook = XLSX.read(data);
-      const worksheet = workbook.Sheets[workbook.SheetNames[0]];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet);
-
-      const processedData = jsonData.map((row: any) => ({
-        anio: parseInt(row.anio) || 0,
-        cantidad: parseInt(row.cantidad) || 0,
-        ubicacionId: parseInt(row.ubicacionId) || 0,
-        ambitoId: parseInt(row.ambitoId) || 0,
-        edadIntervaloId: parseInt(row.edadIntervalo) || 0,
-        generoId: parseInt(row.generoId) || 0,
-      }));
-
-      const result = await uploadPoblacionData(processedData);
-
-      if (result.success) {
-        setMessage({
-          type: "success",
-          text: result.message || "Datos subidos exitosamente",
-        });
-      } else {
-        setMessage({
-          type: "error",
-          text: result.error || "Error al subir los datos",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error al procesar el archivo:", error);
-      setMessage({
-        type: "error",
-        text: error.message || "No se pudo procesar el archivo",
-      });
-    } finally {
-      setUploading(false);
-      setFile(null);
-    }
-  };
-
-  const handleDownload = async () => {
-    if (!selectedYear) return;
-
-    setDownloading(true);
-    setMessage(null);
-
-    try {
-      const result = await downloadPoblacionData(parseInt(selectedYear));
-
-      if (result.success && result.data) {
-        const worksheet = XLSX.utils.json_to_sheet(result.data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Poblacion");
-        const excelBuffer = XLSX.write(workbook, {
-          bookType: "xlsx",
-          type: "array",
-        });
-        const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `Poblacion_${selectedYear}.xlsx`;
-        link.click();
-        URL.revokeObjectURL(url);
-        setMessage({
-          type: "success",
-          text: `Datos del año ${selectedYear} descargados exitosamente`,
-        });
-      } else {
-        setMessage({
-          type: "error",
-          text: result.error || "No se pudo descargar los datos",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error al descargar el archivo:", error);
-      setMessage({
-        type: "error",
-        text: error.message || "No se pudo descargar el archivo",
-      });
-    } finally {
-      setDownloading(false);
-    }
+    setShowConfirmationModal({ isOpen: false, category: null });
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-8 space-y-6">
-      <Card className="shadow-lg max-w-7xl w-full">
-        <CardHeader>
-          <CardTitle className="text-3xl font-semibold">SERVICIOS BÁSICOS</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Sube datos para actualizar la base de datos
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <DragDropExcelInput
-              file={file}
-              setFile={setFile}
-              onFileSelect={handleFileSelect}
-              placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) aquí o haz clic para seleccionar"
-            />
-            <Button
-              onClick={handleOpenConfirmationModal}
-              disabled={!file || uploading}
-              className="w-full"
-            >
-              {uploading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              {uploading ? "Subiendo..." : "Enviar Archivo"}
-            </Button>
-          </div>
-          {message && message.type === "success" && (
-            <Alert variant="default">
-              <AlertTitle>Éxito</AlertTitle>
-              <AlertDescription>{message.text}</AlertDescription>
-            </Alert>
-          )}
-          <ConfirmDialog
-            isOpen={showConfirmationModal}
-            onClose={handleCloseConfirmationModal}
-            onConfirm={handleConfirmSave}
-            title="¿Estás seguro de guardar este archivo?"
-            description="Los datos que intentas guardar reemplazarán los registros existentes para el mismo año en la base de datos."
-            styleButton="bg-primary hover:bg-primary/70 text-white"
-          />
-        </CardContent>
-      </Card>
-      <Card className="shadow-lg max-w-7xl w-full">
-        <CardHeader>
-          <CardTitle className="text-3xl font-semibold">Panel de Control</CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Aquí puedes descargar en Excel los datos de la población
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <Select
-              value={selectedYear}
-              onValueChange={setSelectedYear}
-              disabled={downloading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecciona un año" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableYears.length > 0 ? (
-                  availableYears.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="0" disabled>
-                    No hay años disponibles
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={handleDownload}
-              disabled={!selectedYear || downloading}
-              className="w-full"
-            >
-              {downloading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              {downloading ? "Descargando..." : "Descargar Excel"}
-            </Button>
-          </div>
-          {message && message.type === "error" && (
-            <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{message.text}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+          Servicios Básicos - Agua para Consumo Humano
+        </h1>
+        <p className="text-lg text-muted-foreground">
+          Administra los datos relacionados con el acceso al agua y riesgos
+          sanitarios
+        </p>
+      </div>
+      <Tabs defaultValue="acceso_agua_clorada" className="mb-8">
+        <TabsList className="grid w-full grid-cols-3 max-w-3xl mx-auto bg-gray-100 rounded-lg p-1">
+          <TabsTrigger
+            value="acceso_agua_clorada"
+            className="py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            Acceso a Agua Clorada
+          </TabsTrigger>
+          <TabsTrigger
+            value="riesgo_metales_pesados"
+            className="py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            Metales Pesados
+          </TabsTrigger>
+          <TabsTrigger
+            value="riesgo_sistemas_agua"
+            className="py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
+          >
+            Sistemas de Agua
+          </TabsTrigger>
+        </TabsList>
+        <TabsContent value="acceso_agua_clorada">
+          <Card className="border-none shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold text-blue-900">
+                Subir Datos de Acceso a Agua Clorada
+              </CardTitle>
+              <p className="text-sm text-blue-700">
+                Carga un archivo Excel con información sobre sistemas de agua
+                (bueno, regular, colapsado) y monitoreo de cloro residual.
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <DragDropExcelInput
+                file={accesoAguaExcel}
+                setFile={setAccesoAguaExcel}
+                onFileSelect={(file) => setAccesoAguaExcel(file)}
+                placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) con datos de acceso a agua clorada"
+              />
+              <div className="mt-6 flex gap-4">
+                <Button
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                  onClick={() =>
+                    handleOpenConfirmationModal("acceso_agua_clorada")
+                  }
+                  disabled={!accesoAguaExcel || uploading}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {uploading ? "Subiendo..." : "Guardar"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-blue-300 text-blue-600 hover:bg-blue-50"
+                  onClick={() => handleCancel("acceso_agua_clorada")}
+                  disabled={!accesoAguaExcel || uploading}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="riesgo_metales_pesados">
+          <Card className="border-none shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold text-red-900">
+                Subir Datos de Metales Pesados
+              </CardTitle>
+              <p className="text-sm text-red-700">
+                Carga un archivo Excel con información sobre centros poblados de
+                distritos con metales pesados, incluyendo tipo de metal.
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <DragDropExcelInput
+                file={metalesPesadosExcel}
+                setFile={setMetalesPesadosExcel}
+                onFileSelect={(file) => setMetalesPesadosExcel(file)}
+                placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) con datos de metales pesados"
+              />
+              <div className="mt-6 flex gap-4">
+                <Button
+                  className="w-full bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() =>
+                    handleOpenConfirmationModal("riesgo_metales_pesados")
+                  }
+                  disabled={!metalesPesadosExcel || uploading}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {uploading ? "Subiendo..." : "Guardar"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-red-300 text-red-600 hover:bg-red-50"
+                  onClick={() => handleCancel("riesgo_metales_pesados")}
+                  disabled={!metalesPesadosExcel || uploading}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="riesgo_sistemas_agua">
+          <Card className="border-none shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-semibold text-amber-900">
+                Subir Datos de Sistemas de Agua
+              </CardTitle>
+              <p className="text-sm text-amber-700">
+                Carga un archivo Excel con información sobre centros poblados
+                por distritos con y sin sistemas de agua.
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <DragDropExcelInput
+                file={sistemasAguaExcel}
+                setFile={setSistemasAguaExcel}
+                onFileSelect={(file) => setSistemasAguaExcel(file)}
+                placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) con datos de sistemas de agua"
+              />
+              <div className="mt-6 flex gap-4">
+                <Button
+                  className="w-full bg-amber-600 hover:bg-amber-700 text-white"
+                  onClick={() =>
+                    handleOpenConfirmationModal("riesgo_sistemas_agua")
+                  }
+                  disabled={!sistemasAguaExcel || uploading}
+                >
+                  {uploading ? (
+                    <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  ) : null}
+                  {uploading ? "Subiendo..." : "Guardar"}
+                </Button>
+                <Button
+                  variant="outline"
+                  className="w-full border-amber-300 text-amber-600 hover:bg-amber-50"
+                  onClick={() => handleCancel("riesgo_sistemas_agua")}
+                  disabled={!sistemasAguaExcel || uploading}
+                >
+                  Cancelar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
+      <ContainerBasicServices uploadedFiles={uploadedFiles} />
+      <ConfirmDialog
+        isOpen={showConfirmationModal.isOpen}
+        onClose={handleCloseConfirmationModal}
+        onConfirm={() => {}}
+        title="¿Estás seguro de guardar este archivo?"
+        description="Los datos que intentas guardar reemplazarán los registros existentes para el mismo año en la base de datos."
+        styleButton="bg-blue-600 hover:bg-blue-700 text-white"
+      />
     </div>
   );
 }

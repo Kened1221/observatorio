@@ -1,50 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import * as XLSX from "xlsx";
-import { uploadPoblacionData } from "@/actions/dashboard-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 import DragDropExcelInput from "@/components/ui/drag-drop-excel-input";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  downloadPoblacionData,
-  getAvailableYears,
-} from "@/actions/inicio-actions";
+import ContainerStart from "./container-start";
+import { uploadPoblacionData } from "@/actions/dashboard-actions";
 
-export default function Dashboard() {
+interface Message {
+  type: "success" | "error";
+  text: string;
+}
+
+export default function Page() {
   const [uploading, setUploading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
-  const [message, setMessage] = useState<{
-    type: "success" | "error";
-    text: string;
-  } | null>(null);
+  const [message, setMessage] = useState<Message | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
-  const [availableYears, setAvailableYears] = useState<number[]>([]);
-  const [selectedYear, setSelectedYear] = useState<string>("");
-
-  // Obtener años disponibles al montar el componente
-  useEffect(() => {
-    const fetchYears = async () => {
-      const years = await getAvailableYears();
-      setAvailableYears(years);
-      if (years.length > 0) {
-        setSelectedYear(years[0].toString());
-      }
-    };
-    fetchYears();
-  }, []);
 
   const handleFileSelect = (selectedFile: File) => {
     setFile(selectedFile);
@@ -107,53 +84,6 @@ export default function Dashboard() {
     }
   };
 
-  const handleDownload = async () => {
-    if (!selectedYear) return;
-
-    setDownloading(true);
-    setMessage(null);
-
-    try {
-      const result = await downloadPoblacionData(parseInt(selectedYear));
-
-      if (result.success && result.data) {
-        const worksheet = XLSX.utils.json_to_sheet(result.data);
-        const workbook = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(workbook, worksheet, "Poblacion");
-        const excelBuffer = XLSX.write(workbook, {
-          bookType: "xlsx",
-          type: "array",
-        });
-        const blob = new Blob([excelBuffer], {
-          type: "application/octet-stream",
-        });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement("a");
-        link.href = url;
-        link.download = `Poblacion_${selectedYear}.xlsx`;
-        link.click();
-        URL.revokeObjectURL(url);
-        setMessage({
-          type: "success",
-          text: `Datos del año ${selectedYear} descargados exitosamente`,
-        });
-      } else {
-        setMessage({
-          type: "error",
-          text: result.error || "No se pudo descargar los datos",
-        });
-      }
-    } catch (error: any) {
-      console.error("Error al descargar el archivo:", error);
-      setMessage({
-        type: "error",
-        text: error.message || "No se pudo descargar el archivo",
-      });
-    } finally {
-      setDownloading(false);
-    }
-  };
-
   return (
     <div className="flex flex-col items-center justify-center p-8 space-y-6">
       <Card className="shadow-lg max-w-7xl w-full">
@@ -200,58 +130,7 @@ export default function Dashboard() {
           />
         </CardContent>
       </Card>
-      <Card className="shadow-lg max-w-7xl w-full">
-        <CardHeader>
-          <CardTitle className="text-3xl font-semibold">
-            Panel de Control
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Aquí puedes descargar en Excel los datos de la población
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="space-y-4">
-            <Select
-              value={selectedYear}
-              onValueChange={setSelectedYear}
-              disabled={downloading}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Selecciona un año" />
-              </SelectTrigger>
-              <SelectContent>
-                {availableYears.length > 0 ? (
-                  availableYears.map((year) => (
-                    <SelectItem key={year} value={year.toString()}>
-                      {year}
-                    </SelectItem>
-                  ))
-                ) : (
-                  <SelectItem value="0" disabled>
-                    No hay años disponibles
-                  </SelectItem>
-                )}
-              </SelectContent>
-            </Select>
-            <Button
-              onClick={handleDownload}
-              disabled={!selectedYear || downloading}
-              className="w-full"
-            >
-              {downloading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              ) : null}
-              {downloading ? "Descargando..." : "Descargar Excel"}
-            </Button>
-          </div>
-          {message && message.type === "error" && (
-            <Alert variant="destructive">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{message.text}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+      <ContainerStart />
     </div>
   );
 }

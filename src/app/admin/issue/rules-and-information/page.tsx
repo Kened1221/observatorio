@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import DragDropPdfInput from "@/components/ui/drag-drop-pdf-input";
 import { PdfRow, columns } from "./table-columns";
 import toasterCustom from "@/components/toaster-custom";
-import { Search, ArrowUpDown } from "lucide-react";
+import { Search, ArrowUpDown, FileSpreadsheet } from "lucide-react";
 
 export default function Page() {
   const [normasPdf, setNormasPdf] = useState<File | null>(null);
@@ -157,27 +157,32 @@ export default function Page() {
           </Card>
         </TabsContent>
       </Tabs>
-      <Card>
-        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <CardTitle>Archivos Subidos</CardTitle>
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-2 top-2.5 h-4 w-4 text-gray-500" />
+      <Card className="border-none shadow-lg">
+        <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 rounded-t-lg">
+          <CardTitle className="text-2xl font-semibold text-gray-900">
+            Archivos Subidos
+          </CardTitle>
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
             <Input
               placeholder="Buscar por nombre o categoría..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-8 text-sm"
+              className="pl-10 text-sm border-gray-200 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
         </CardHeader>
-        <CardContent>
-          {sortedFiles.length === 0 ? (
-            <p className="text-muted-foreground">
+        <CardContent className="pt-6">
+        {sortedFiles.length === 0 ? (
+          <div className="text-center py-8">
+            <FileSpreadsheet className="mx-auto h-12 w-12 text-gray-400" />
+            <p className="mt-2 text-sm text-muted-foreground">
               {searchQuery
                 ? "No se encontraron archivos que coincidan con la búsqueda."
                 : "No se han subido archivos aún."}
             </p>
-          ) : (
+          </div>
+        ) : (
             <div className="overflow-x-auto">
               <table className="w-full border-collapse">
                 <thead>
