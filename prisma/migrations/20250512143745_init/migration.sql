@@ -855,7 +855,7 @@ CREATE TABLE "Periodo" (
 );
 
 -- CreateTable
-CREATE TABLE "ViolenciaMujer" (
+CREATE TABLE "ViolenciaFemenino" (
     "id" SERIAL NOT NULL,
     "cantidad" INTEGER NOT NULL,
     "anio" INTEGER NOT NULL,
@@ -865,7 +865,7 @@ CREATE TABLE "ViolenciaMujer" (
     "tipoViolenciaId" INTEGER,
     "periodoId" INTEGER NOT NULL,
 
-    CONSTRAINT "ViolenciaMujer_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "ViolenciaFemenino_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -1070,7 +1070,7 @@ CREATE INDEX "MetricasDiscapacidad_personasDiscapacidadId_idx" ON "MetricasDisca
 CREATE INDEX "DetallesDiscapacidad_personasDiscapacidadId_idx" ON "DetallesDiscapacidad"("personasDiscapacidadId");
 
 -- CreateIndex
-CREATE INDEX "ViolenciaMujer_anio_idx" ON "ViolenciaMujer"("anio");
+CREATE INDEX "ViolenciaFemenino_anio_idx" ON "ViolenciaFemenino"("anio");
 
 -- AddForeignKey
 ALTER TABLE "Account" ADD CONSTRAINT "Account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1460,16 +1460,16 @@ ALTER TABLE "DetallesDiscapacidad" ADD CONSTRAINT "DetallesDiscapacidad_trimestr
 ALTER TABLE "Periodo" ADD CONSTRAINT "Periodo_tipoPeriodoId_fkey" FOREIGN KEY ("tipoPeriodoId") REFERENCES "TipoPeriodo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ViolenciaMujer" ADD CONSTRAINT "ViolenciaMujer_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "ViolenciaFemenino" ADD CONSTRAINT "ViolenciaFemenino_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ViolenciaMujer" ADD CONSTRAINT "ViolenciaMujer_edadId_fkey" FOREIGN KEY ("edadId") REFERENCES "Edad"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ViolenciaFemenino" ADD CONSTRAINT "ViolenciaFemenino_edadId_fkey" FOREIGN KEY ("edadId") REFERENCES "Edad"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ViolenciaMujer" ADD CONSTRAINT "ViolenciaMujer_estadoCivilId_fkey" FOREIGN KEY ("estadoCivilId") REFERENCES "EstadoCivil"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ViolenciaFemenino" ADD CONSTRAINT "ViolenciaFemenino_estadoCivilId_fkey" FOREIGN KEY ("estadoCivilId") REFERENCES "EstadoCivil"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ViolenciaMujer" ADD CONSTRAINT "ViolenciaMujer_tipoViolenciaId_fkey" FOREIGN KEY ("tipoViolenciaId") REFERENCES "TipoViolencia"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ViolenciaFemenino" ADD CONSTRAINT "ViolenciaFemenino_tipoViolenciaId_fkey" FOREIGN KEY ("tipoViolenciaId") REFERENCES "TipoViolencia"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "ViolenciaMujer" ADD CONSTRAINT "ViolenciaMujer_periodoId_fkey" FOREIGN KEY ("periodoId") REFERENCES "Periodo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "ViolenciaFemenino" ADD CONSTRAINT "ViolenciaFemenino_periodoId_fkey" FOREIGN KEY ("periodoId") REFERENCES "Periodo"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

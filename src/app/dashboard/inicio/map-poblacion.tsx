@@ -16,8 +16,8 @@ import {
 import { getPoblacion, getMap, getAvailableYears } from "@/actions/inicio-actions";
 
 interface PoAmProps {
-  hombres?: number;
-  mujeres?: number;
+  masculino?: number;
+  femenino?: number;
   rural?: number;
   urbano?: number;
   total: number;
@@ -26,8 +26,8 @@ interface PoAmProps {
 export default function MapPoblacion() {
   const [map, setMap] = useState<any>(null);
   const [poblacionA, setPoblacionA] = useState<PoAmProps>({
-    hombres: 0,
-    mujeres: 0,
+    masculino: 0,
+    femenino: 0,
     rural: 0,
     urbano: 0,
     total: 0,
@@ -159,17 +159,17 @@ export default function MapPoblacion() {
           </div>
           {pAselect === "poblacion" ? (
             <div className="flex justify-center gap-20 w-full">
-              {/* Hombres */}
+              {/* Masculino */}
               <div className="flex flex-col items-center">
-                <p className="text-xl font-bold">Hombres</p>
+                <p className="text-xl font-bold">Masculino</p>
                 <FaChild className="text-9xl text-blue-500" />
-                <p className="text-6xl font-bold">{poblacionA.hombres}</p>
+                <p className="text-6xl font-bold">{poblacionA.masculino}</p>
               </div>
-              {/* Mujeres */}
+              {/* Femenino */}
               <div className="flex flex-col items-center">
-                <p className="text-xl font-bold">Mujeres</p>
+                <p className="text-xl font-bold">Femenino</p>
                 <FaChildDress className="text-9xl text-red-500" />
-                <p className="text-6xl font-bold">{poblacionA.mujeres}</p>
+                <p className="text-6xl font-bold">{poblacionA.femenino}</p>
               </div>
             </div>
           ) : (

@@ -16,7 +16,7 @@ export default function Page() {
     pobreza: null,
     adultos_mayores_riesgo: null,
     adultos_mayores_asociaciones: null,
-    mujeres: null,
+    femenino: null,
     oredis: null,
     nino_nina: null,
     victimas: null,

@@ -82,7 +82,7 @@ const objetivos: Objective[] = [
     id: "objetivo5",
     titulo: "Objetivo prioritario N° 5",
     describe:
-      "Protección Social a Poblaciones Vulnerables y la Prevención de la Violencia contra la Mujer y los Integrantes del Grupo Familiar",
+      "Protección Social a Poblaciones Vulnerables y la Prevención de la Violencia contra la Femenino y los Integrantes del Grupo Familiar",
     ulr: "https://chatgpt.com/",
 
     images: [

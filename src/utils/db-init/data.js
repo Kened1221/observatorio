@@ -60,7 +60,10 @@ async function seedDatabase() {
       // Huamanga (provinciaId = 2)
       { nombre: "ACOCRO", provinciaId: provincias[1].id },
       { nombre: "ACOS VINCHOS", provinciaId: provincias[1].id },
-      { nombre: "ANDRES AVELINO CACERES DORREGARAY", provinciaId: provincias[1].id },
+      {
+        nombre: "ANDRES AVELINO CACERES DORREGARAY",
+        provinciaId: provincias[1].id,
+      },
       { nombre: "AYACUCHO", provinciaId: provincias[1].id },
       { nombre: "CARMEN ALTO", provinciaId: provincias[1].id },
       { nombre: "CHIARA", provinciaId: provincias[1].id },
@@ -207,10 +210,7 @@ async function seedDatabase() {
     console.log("Distritos creados:", distritos.length);
 
     // 4. Crear Géneros
-    const generosData = [
-      { nombre: "Masculino" },
-      { nombre: "Femenino" },
-    ];
+    const generosData = [{ nombre: "masculino" }, { nombre: "femenino" }];
 
     const generos = [];
     for (const gen of generosData) {
@@ -226,10 +226,7 @@ async function seedDatabase() {
     console.log("Géneros creados:", generos.length);
 
     // 5. Crear Ámbitos
-    const ambitosData = [
-      { nombre: "rural" },
-      { nombre: "urbano" },
-    ];
+    const ambitosData = [{ nombre: "rural" }, { nombre: "urbano" }];
 
     const ambitos = [];
     for (const amb of ambitosData) {
@@ -393,7 +390,6 @@ async function seedDatabase() {
     console.log("Poblaciones creadas:", poblacionesData.length);
 
     console.log("Datos iniciales subidos correctamente.");
-
   } catch (error) {
     console.error("Error al subir los datos iniciales:", error);
   } finally {

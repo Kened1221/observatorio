@@ -227,7 +227,7 @@ model Ubicacion {
   CentrosAcogida       CentrosAcogida[]
   Reniec               Reniec[]
   PersonasDiscapacidad PersonasDiscapacidad[]
-  ViolenciaMujer       ViolenciaMujer[]
+  ViolenciaFemenino       ViolenciaFemenino[]
 
   @@unique([departamentoId, provinciaId, distritoId]) // Evita duplicados
 }
@@ -665,7 +665,7 @@ model EstablecimientoSalud {
 
 model IndicadorSalud {
   id            Int             @id @default(autoincrement())
-  nombre        String          @db.VarChar(255) // Ej: "AG-34 - Porcentaje de varones y mujeres con tamizaje para cáncer de colon y recto"
+  nombre        String          @db.VarChar(255) // Ej: "AG-34 - Porcentaje de masculino y femenino con tamizaje para cáncer de colon y recto"
   saludPrenatal SaludPrenatal[]
   Ninos         Ninos[]
   Jovenes       Jovenes[]
@@ -921,7 +921,7 @@ model Adolescentes {
 // Modelo: SubCorte (nuevo modelo para "sub_corte" y "desagregado")
 model SubCorte {
   id             Int              @id @default(autoincrement())
-  nombre         String           @db.VarChar(100) // Ej: "De 12 a 17 Años", "Hombres", "Mujeres", "Total"
+  nombre         String           @db.VarChar(100) // Ej: "De 12 a 17 Años", "Masculino", "Femenino", "Total"
   centrosAcogida CentrosAcogida[]
 }
 
@@ -959,7 +959,7 @@ model Edad {
   generoId             Int? // Nueva relación con Genero
   reniec               Reniec[]
   DetallesDiscapacidad DetallesDiscapacidad[]
-  ViolenciaMujer       ViolenciaMujer[]
+  ViolenciaFemenino       ViolenciaFemenino[]
 
   genero Genero? @relation(fields: [generoId], references: [id], onDelete: Restrict)
 }
@@ -1048,14 +1048,14 @@ model DetallesDiscapacidad {
 model EstadoCivil {
   id             Int              @id @default(autoincrement())
   nombre         String           @db.VarChar(100) // Ej: "Soltero", "Viudo", "Casado"
-  violenciaMujer ViolenciaMujer[]
+  violenciaFemenino ViolenciaFemenino[]
 }
 
 // Modelo: TipoViolencia (nuevo modelo para "Tipo violencia")
 model TipoViolencia {
   id             Int              @id @default(autoincrement())
   nombre         String           @db.VarChar(100) // Ej: "Física", "Abandono", "Psicológica", "Sexual"
-  violenciaMujer ViolenciaMujer[]
+  violenciaFemenino ViolenciaFemenino[]
 }
 
 model TipoPeriodo {
@@ -1068,13 +1068,13 @@ model Periodo {
   id             Int              @id @default(autoincrement())
   nombre         String           @db.VarChar(100) // Ej: "Enero - agosto", "I Trimestre"
   tipoPeriodoId  Int
-  violenciaMujer ViolenciaMujer[]
+  violenciaFemenino ViolenciaFemenino[]
 
   tipoPeriodo TipoPeriodo @relation(fields: [tipoPeriodoId], references: [id], onDelete: Restrict)
 }
 
-// Modelo: ViolenciaMujer (modelo unificado para las tablas)
-model ViolenciaMujer {
+// Modelo: ViolenciaFemenino (modelo unificado para las tablas)
+model ViolenciaFemenino {
   id              Int  @id @default(autoincrement())
   cantidad        Int // Cantidad de casos de violencia (Ej: 557, 961, 671)
   anio            Int // Año de los datos (Ej: 2023, 2024)

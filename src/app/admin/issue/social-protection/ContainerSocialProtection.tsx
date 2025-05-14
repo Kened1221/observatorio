@@ -57,8 +57,8 @@ const columns = [
           return "Adultos Mayores en Situación de Riesgo";
         case "adultos_mayores_asociaciones":
           return "Asociaciones de Adultos Mayores";
-        case "mujeres":
-          return "Mujeres";
+        case "femenino":
+          return "Femenino";
         case "oredis":
           return "OREDIS";
         case "nino_nina":
@@ -119,8 +119,8 @@ export default function ContainerSocialProtection({
           ? "adultos mayores en situación de riesgo"
           : file.subCategory === "adultos_mayores_asociaciones"
           ? "asociaciones de adultos mayores"
-          : file.subCategory === "mujeres"
-          ? "mujeres"
+          : file.subCategory === "femenino"
+          ? "femenino"
           : file.subCategory === "oredis"
           ? "oredis"
           : file.subCategory === "nino_nina"
