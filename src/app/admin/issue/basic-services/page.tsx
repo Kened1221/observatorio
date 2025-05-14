@@ -84,22 +84,13 @@ export default function Page() {
       </div>
       <Tabs defaultValue="acceso_agua_clorada" className="mb-8">
         <TabsList className="grid w-full grid-cols-3 max-w-3xl mx-auto bg-gray-100 rounded-lg p-1">
-          <TabsTrigger
-            value="acceso_agua_clorada"
-            className="py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
+          <TabsTrigger value="acceso_agua_clorada">
             Acceso a Agua Clorada
           </TabsTrigger>
-          <TabsTrigger
-            value="riesgo_metales_pesados"
-            className="py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
+          <TabsTrigger value="riesgo_metales_pesados">
             Metales Pesados
           </TabsTrigger>
-          <TabsTrigger
-            value="riesgo_sistemas_agua"
-            className="py-2 text-sm font-medium data-[state=active]:bg-white data-[state=active]:shadow-sm"
-          >
+          <TabsTrigger value="riesgo_sistemas_agua">
             Sistemas de Agua
           </TabsTrigger>
         </TabsList>
