@@ -1,61 +1,37 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import ContainerGestantes from "./gestantes/page";
-import ContainerNino from "./ninos/page";
-import { useState } from "react";
-
-const categorias = [
-  {
-    nombre: "Indicadores de acceso, cobertura de calidad",
-    color: "#0A7BBA",
-    component: ContainerGestantes,
-  },
-  {
-    nombre: "Vigilancia Epidemiológica",
-    color: "#f59e0b",
-    component: ContainerNino,
-  },
-];
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ContainerQualityCoverage from "./ContainerQualityCoverage";
+import ContainerEpidemiologicalSurveillance from "./ContainerEpidemiologicalSurveillance";
 
 export default function Page() {
-  const [categoria, setCategoria] = useState(categorias[0].nombre);
-
-  const categoriaActual = categorias.find((c) => c.nombre === categoria);
-  // ComponenteActual should always be a valid component
-  const ComponenteActual =
-    categoriaActual?.component || (() => <div>Selecciona una categoría</div>);
-
   return (
-    <div className="w-full h-full flex flex-col lg:flex-row pt-16 max-w-[80%] mx-auto gap-8 p-4">
-      {/* Menú lateral */}
-      <div className="flex flex-col h-full w-full lg:w-1/5 gap-4">
-        {categorias.map((item) => (
-          <div
-            key={item.nombre}
-            className={`rounded-xl p-2 text-center cursor-pointer transition ${
-              categoria === item.nombre
-                ? "text-white shadow-lg"
-                : "bg-gray-200 text-gray-700"
-            }`}
-            style={{
-              backgroundColor:
-                categoria === item.nombre ? item.color : undefined,
-            }}
-            onClick={() => setCategoria(item.nombre)}
-          >
-            {item.nombre}
-          </div>
-        ))}
-      </div>
-
-      <div className="h-full w-full flex flex-col md:flex-row gap-2">
-        <div
-          className="h-full flex-1 p-6 rounded-xl shadow-lg text-white"
-          style={{ backgroundColor: categoriaActual?.color || "#cccccc" }}
-        >
-          <ComponenteActual />
+    <div className="h-full w-full max-w-[75%] flex flex-col mx-auto">
+      <div className="flex pt-12 gap-8 flex-col items-center">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Salud y Nutrición 2025
+          </h1>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Explora datos interactivos sobre cobertura de calidad en servicios de salud y vigilancia epidemiológica en diferentes provincias y distritos.
+          </p>
         </div>
+        <Tabs defaultValue="cobertura_calidad" className="mb-8 w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-gray-100 rounded-lg p-1">
+            <TabsTrigger value="cobertura_calidad">
+              Cobertura de Calidad
+            </TabsTrigger>
+            <TabsTrigger value="vigilancia_epidemiologica">
+              Vigilancia Epidemiológica
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="cobertura_calidad">
+            <ContainerQualityCoverage />
+          </TabsContent>
+          <TabsContent value="vigilancia_epidemiologica">
+            <ContainerEpidemiologicalSurveillance />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

@@ -1,8 +1,11 @@
 import { ColumnDef } from "@tanstack/react-table";
+import { FileSpreadsheet } from "lucide-react";
 
 export interface PdfRow {
   id: number;
   fileName: string;
+  title: string;
+  description: string;
   category: "normas" | "informes";
   uploadedAt: string;
   file: File;
@@ -13,14 +16,31 @@ export const columns: ColumnDef<PdfRow>[] = [
     accessorKey: "fileName",
     header: "Nombre del Archivo",
     cell: ({ row }) => (
-      <span className="text-sm font-medium">{row.original.fileName}</span>
+      <div className="flex items-center gap-2">
+        <FileSpreadsheet className="h-4 w-4 text-muted-foreground" />
+        <span className="text-sm font-medium">{row.original.fileName}</span>
+      </div>
+    ),
+  },
+  {
+    accessorKey: "title",
+    header: "Título",
+    cell: ({ row }) => <span className="text-sm">{row.original.title}</span>,
+  },
+  {
+    accessorKey: "description",
+    header: "Descripción",
+    cell: ({ row }) => (
+      <span className="text-sm">{row.original.description}</span>
     ),
   },
   {
     accessorKey: "category",
     header: "Categoría",
     cell: ({ row }) => (
-      <span className="text-sm capitalize">{row.original.category}</span>
+      <span className="text-sm capitalize">
+        {row.original.category === "normas" ? "Normas" : "Informes"}
+      </span>
     ),
   },
   {

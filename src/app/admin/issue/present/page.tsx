@@ -323,11 +323,11 @@ export default function Page() {
                 )}
               />
               {error && <p className="text-red-500 text-sm">{error}</p>}
-              {success && <p className="text-green-500 text-sm">{success}</p>}
+              {success && <p className="text-primary text-sm">{success}</p>}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
                 <Button
                   type="submit"
-                  className="w-full bg-green-600 hover:bg-green-500 text-sm sm:text-base py-1 sm:py-2"
+                  className="w-full bg-primary hover:bg-primary/50 text-sm sm:text-base py-1 sm:py-2"
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
