@@ -3,37 +3,65 @@
 
 import { prisma } from "@/config/prisma";
 import { Session } from "next-auth";
+import { Prisma } from "@prisma/client";
 
-export async function uploadAvanceData(data: any[]) {
+export async function uploadAvanceData(data: any[], objetivo: string) {
   try {
     if (!Array.isArray(data) || data.length === 0) {
       return { success: false, error: "No se proporcionaron datos válidos" };
     }
 
-    const distritosNombres = [...new Set(data.map((row) => row.distrito))];
+    // Normalize and validate input data
+    const distritosNombres = [...new Set(data.map((row) => row.distrito?.toUpperCase()))].filter(Boolean);
+    if (!distritosNombres.length) {
+      return { success: false, error: "No se encontraron distritos válidos en los datos" };
+    }
+
+    // Fetch distritos in a single query
     const distritos = await prisma.distrito.findMany({
       where: { nombre: { in: distritosNombres } },
       select: { id: true, nombre: true, provincia: { select: { nombre: true } } },
     });
 
-    const validDistritoMap = new Map(distritos.map((d) => [d.nombre, { id: d.id, provinciaNombre: d.provincia.nombre }]));
+    const validDistritoMap = new Map(
+      distritos.map((d) => [d.nombre.toUpperCase(), { id: d.id, provinciaNombre: d.provincia.nombre }])
+    );
 
-    const validData = data.filter((row) => validDistritoMap.has(row.distrito));
+    // Filter and normalize data
+    const validData = data
+      .filter(
+        (row) =>
+          row.distrito &&
+          validDistritoMap.has(row.distrito.toUpperCase()) &&
+          row.operation &&
+          typeof row.percentage === "number" &&
+          typeof row.total === "number"
+      )
+      .map((row) => ({
+        ...row,
+        distrito: row.distrito.toUpperCase(),
+      }));
 
     if (validData.length === 0) {
-      return { success: false, error: "Ningún dato válido para insertar: distritos no encontrados" };
+      return { success: false, error: "Ningún dato válido para insertar: distritos no encontrados o datos incompletos" };
     }
 
+    // Perform transaction
     await prisma.$transaction(async (tx) => {
-      await tx.avance.deleteMany({});
+      // Delete existing records for the objective
+      await tx.avance.deleteMany({
+        where: { objetive: objetivo },
+      });
+
+      // Insert new records
       await tx.avance.createMany({
         data: validData.map((row) => ({
+          objetive: objetivo,
           distritoId: validDistritoMap.get(row.distrito)!.id,
           operation: row.operation,
-          percentage: row.percentage,
-          total: row.total,
+          percentage: Math.max(0, Math.min(100, row.percentage)),
+          total: Math.max(0, row.total),
         })),
-        skipDuplicates: true,
       });
     });
 
@@ -43,14 +71,29 @@ export async function uploadAvanceData(data: any[]) {
     };
   } catch (error: any) {
     console.error("Error al procesar los datos de avance:", error);
-    return { success: false, error: `Error al procesar los datos: ${error.message || "Error desconocido"}` };
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      return {
+        success: false,
+        error:
+          "Error: El archivo contiene datos duplicados para el mismo objetivo, distrito y operación. Cada combinación debe ser única.",
+        details: error.message,
+      };
+    }
+    return {
+      success: false,
+      error: `Error al procesar los datos: ${error.message || "Error desconocido"}`,
+      details: error.stack || "No stack trace available",
+    };
   }
 }
 
-export async function getAvanceData(operation: string) {
+export async function getAvanceData(operation: string, objetivo: string) {
   try {
     const avances = await prisma.avance.findMany({
-      where: { operation },
+      where: {
+        operation,
+        objetive: objetivo,
+      },
       include: {
         distrito: {
           include: {
@@ -65,8 +108,8 @@ export async function getAvanceData(operation: string) {
     return avances.map((avance) => ({
       provincia: avance.distrito.provincia.nombre,
       distrito: avance.distrito.nombre,
-      percentage: avance.percentage,
-      total: avance.total ?? 0,
+      percentage: Number(avance.percentage) || 0,
+      total: Number(avance.total) || 0,
     }));
   } catch (error: any) {
     console.error("Error al obtener datos de avance:", error);
@@ -74,16 +117,17 @@ export async function getAvanceData(operation: string) {
   }
 }
 
-export async function getAvanceOperations() {
+export async function getAvanceOperations(objetivo: string) {
   try {
     const operations = await prisma.avance.findMany({
+      where: { objetive: objetivo },
       select: { operation: true },
       distinct: ["operation"],
     });
     return operations.map((op) => op.operation).sort();
   } catch (error: any) {
     console.error("Error al obtener operaciones de avance:", error);
-    return ["AVANCE OP 01", "AVANCE OP 02", "AVANCE OP 03", "AVANCE OP 04", "AVANCE OP 05"];
+    return [];
   }
 }
 

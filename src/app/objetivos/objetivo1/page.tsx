@@ -26,7 +26,7 @@ export default function Objetivos1Page() {
 
     useEffect(() => {
         const fetchOperations = async () => {
-            const ops = await getAvanceOperations();
+            const ops = await getAvanceOperations("objetivo 1");
             setOperations(ops);
             if (ops.length > 0 && !ops.includes(avance)) {
                 setAvance(ops[0]);
@@ -38,7 +38,7 @@ export default function Objetivos1Page() {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            const data = await getAvanceData(avance);
+            const data = await getAvanceData(avance, "objetivo 1");
             setAvanceData(data);
             setLoading(false);
         };

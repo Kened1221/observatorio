@@ -191,6 +191,7 @@ model Distrito {
   provincia   Provincia   @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
   ubicaciones Ubicacion[]
   avances     Avance[]    @relation("AvanceToDistrito")
+
   @@unique([nombre, provinciaId])
 }
 
@@ -302,15 +303,16 @@ model Poblacion {
 }
 
 model Avance {
-  id          Int      @id @default(autoincrement())
-  distritoId  Int
-  distrito    Distrito @relation("AvanceToDistrito", fields: [distritoId], references: [id], onDelete: Cascade)
-  operation   String   // e.g., "AVANCE OP 01"
-  percentage  Float    // Stored as decimal, e.g., 16.7
-  total       Float?   // Total percentage, nullable
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  @@unique([distritoId, operation])
+  objetive   String
+  distritoId Int
+  distrito   Distrito @relation("AvanceToDistrito", fields: [distritoId], references: [id], onDelete: Cascade)
+  operation  String
+  percentage Float
+  total      Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([objetive, distritoId, operation])
 }
 
 // Modelo: Vivienda

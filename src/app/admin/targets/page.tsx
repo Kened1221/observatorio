@@ -10,6 +10,7 @@ import { Loader2 } from "lucide-react";
 import DragDropExcelInput from "@/components/ui/drag-drop-excel-input";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
 import { uploadAvanceData } from "@/actions/objetivos-actions";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Message {
   type: "success" | "error";
@@ -21,6 +22,7 @@ export default function Page() {
   const [message, setMessage] = useState<Message | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
+  const [selectedObjective, setSelectedObjective] = useState("objetivo 1");
 
   const handleFileSelect = (selectedFile: File) => {
     setFile(selectedFile);
@@ -106,7 +108,7 @@ export default function Page() {
         );
       }
 
-      const result = await uploadAvanceData(processedData);
+      const result = await uploadAvanceData(processedData, selectedObjective);
 
       if (result.success) {
         setMessage({
@@ -136,7 +138,7 @@ export default function Page() {
       <Card className="shadow-lg max-w-7xl w-full">
         <CardHeader>
           <CardTitle className="text-3xl font-semibold">
-            Panel de Inicio
+            Objetivos prioritarios
           </CardTitle>
           <p className="text-sm text-muted-foreground">
             Sube datos de avances para actualizar la base de datos
@@ -150,6 +152,21 @@ export default function Page() {
               onFileSelect={handleFileSelect}
               placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) aquí o haz clic para seleccionar"
             />
+            <Select
+              value={selectedObjective}
+              onValueChange={setSelectedObjective}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Selecciona un objetivo" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="objetivo 1">Objetivo 1</SelectItem>
+                <SelectItem value="objetivo 2">Objetivo 2</SelectItem>
+                <SelectItem value="objetivo 3">Objetivo 3</SelectItem>
+                <SelectItem value="objetivo 4">Objetivo 4</SelectItem>
+                <SelectItem value="objetivo 5">Objetivo 5</SelectItem>
+              </SelectContent>
+            </Select>
             <Button
               onClick={handleOpenConfirmationModal}
               disabled={!file || uploading}
