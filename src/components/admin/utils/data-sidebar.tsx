@@ -15,6 +15,7 @@ import {
   UserRoundCheck,
   Users,
   ChartBarBig,
+  TableProperties,
 } from "lucide-react";
 import { Session } from "next-auth";
 
@@ -31,6 +32,16 @@ export const sidebarMenus: SidebarMenuGroup[] = [
         label: "Inicio",
         icon: ChartBarBig,
         url: "/admin/issue/starts",
+      },
+    ],
+  },
+  {
+    title: "Prioridades",
+    menu: [
+      {
+        label: "Objetivos",
+        icon: TableProperties,
+        url: "/admin/targets",
       },
     ],
   },
@@ -113,6 +124,7 @@ export const sidebarMenus: SidebarMenuGroup[] = [
 
 const moduleToUrlMap: { [key: string]: string } = {
   dasboard: "/admin",
+  objetivos: "/admin/targets",
   inicio: "/admin/issue/starts",
   salud_nutricion: "/admin/issue/health-and-nutrition",
   educacion: "/admin/issue/education",
@@ -157,8 +169,7 @@ export async function getFilteredMenus(
             ) || ""
           );
           console.log(
-            `Verificando menú ${item.label} (${item.url}): ${
-              isIncluded ? "Incluido" : "Excluido"
+            `Verificando menú ${item.label} (${item.url}): ${isIncluded ? "Incluido" : "Excluido"
             }`
           );
           return isIncluded;

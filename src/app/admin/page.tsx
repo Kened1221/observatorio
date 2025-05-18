@@ -21,8 +21,7 @@ import {
   Legend,
   Cell,
 } from "recharts";
-import { cn } from "@/lib/utils";
-import { Calendar, Users, DollarSign, TrendingUp } from "lucide-react";
+import { Users, DollarSign, TrendingUp } from "lucide-react";
 
 // Test data for charts (in Spanish)
 const ingresosData = [
@@ -73,39 +72,6 @@ const chartConfig = {
 export default function Dashboard() {
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
-      <Sidebar className="w-64 bg-white shadow-md">
-        <div className="p-4">
-          <h2 className="text-xl font-semibold">Panel de Administración</h2>
-        </div>
-        <nav className="mt-4">
-          <a
-            href="#"
-            className="flex items-center p-4 text-gray-700 hover:bg-gray-100"
-          >
-            <TrendingUp className="mr-2 h-5 w-5" /> Dashboard
-          </a>
-          <a
-            href="#"
-            className="flex items-center p-4 text-gray-700 hover:bg-gray-100"
-          >
-            <Users className="mr-2 h-5 w-5" /> Usuarios
-          </a>
-          <a
-            href="#"
-            className="flex items-center p-4 text-gray-700 hover:bg-gray-100"
-          >
-            <DollarSign className="mr-2 h-5 w-5" /> Ingresos
-          </a>
-          <a
-            href="#"
-            className="flex items-center p-4 text-gray-700 hover:bg-gray-100"
-          >
-            <Calendar className="mr-2 h-5 w-5" /> Reportes
-          </a>
-        </nav>
-      </Sidebar>
-
       {/* Main Content */}
       <div className="flex-1 p-6">
         <h1 className="text-3xl font-bold mb-6">Panel de Control</h1>
@@ -254,20 +220,5 @@ export default function Dashboard() {
         </div>
       </div>
     </div>
-  );
-}
-
-// Sidebar Component
-function Sidebar({
-  className,
-  children,
-}: {
-  className?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <aside className={cn("fixed top-0 left-0 h-screen border-r", className)}>
-      {children}
-    </aside>
   );
 }

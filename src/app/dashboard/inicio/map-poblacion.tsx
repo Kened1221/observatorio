@@ -126,7 +126,7 @@ export default function MapPoblacion() {
           </SelectContent>
         </Select>
       </div>
-      <div className="flex flex-col lg:flex-row w-full h-full mx-auto gap-8 p-6">
+      <div className="flex flex-col lg:flex-row w-full h-full mx-auto gap-20 p-6">
         <div className="w-full h-full max-w-4xl">
           <GeoJsonSvg
             provincia={provincia}

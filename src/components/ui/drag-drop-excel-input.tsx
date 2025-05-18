@@ -57,11 +57,10 @@ export default function DragDropExcelInput({
   return (
     <div
       ref={wrapperRef}
-      className={`relative w-full border-dashed border-2 rounded-lg flex items-center justify-center p-6 cursor-pointer transition-colors ${
-        file
+      className={`relative w-full border-dashed border-2 rounded-lg flex items-center justify-center p-6 cursor-pointer transition-colors ${file
           ? "border-ring bg-primary/10"
           : "border-primary hover:border-ring hover:bg-primary/10"
-      }`}
+        }`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}

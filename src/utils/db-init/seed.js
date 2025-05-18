@@ -15,6 +15,10 @@ const sidebarMenus = [
     title: "Temáticas",
     menu: [
       {
+        label: "Objetivos",
+        url: "/admin/targets",
+      },
+      {
         label: "Salud y Nutrición",
         url: "/admin/issue/health-and-nutrition",
       },
@@ -109,6 +113,7 @@ async function seedDatabase() {
         description: "Rol con acceso completo a todos los módulos",
         defaultModule: [
           "inicio",
+          "objetivos",
           "salud_nutricion",
           "educacion",
           "proteccion_social",

@@ -128,8 +128,11 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
   const minY = Math.min(...allCoordinates.map(([, y]) => y));
   const maxX = Math.max(...allCoordinates.map(([x]) => x));
   const maxY = Math.max(...allCoordinates.map(([, y]) => y));
-
-  const scale = 1000 / Math.max(maxX - minX, maxY - minY);
+  const width = maxX - minX;
+  const height = maxY - minY;
+  const scale = 1000 / Math.max(width, height);
+  const viewBoxWidth = width * scale;
+  const viewBoxHeight = height * scale;
 
   // Función para calcular el color basado en la puntuación
   const getColor = (puntuacion: number) => {
@@ -282,7 +285,7 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
       <div className="w-full h-full relative">
         <svg
           ref={svgRef}
-          viewBox="0 0 1000 1000"
+          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
           preserveAspectRatio="xMidYMid meet"
           className="w-full h-full"
         >
@@ -322,7 +325,7 @@ const GeoJsonSvg: React.FC<GeoJSONMap> = ({
             const isSelected =
               distrito !== ""
                 ? feature.properties.nombdist === distrito &&
-                  feature.properties.nombprov === provincia
+                feature.properties.nombprov === provincia
                 : feature.properties.nombprov === provincia;
 
             const strokeWidth = isSelected ? "3" : "1";

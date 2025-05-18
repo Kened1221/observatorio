@@ -22,7 +22,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 1",
     describe:
       "Gestión Territorial Estilos de Vida y las Condiciones del Entorno",
-    ulr: "https://chatgpt.com/",
+    ulr: "/objetivos/objetivo1",
     images: [
       { id: 1, image: "/imgs/objetivo1/obj1.jpg" },
       { id: 2, image: "/imgs/objetivo1/obj2.jpg" },
@@ -36,7 +36,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 2",
     describe:
       "Salud Materno Neonatal. Desarrollo Infantil Temprano para asegurar su Inclusión Social",
-    ulr: "https://claude.ai/chat",
+    ulr: "/objetivos/objetivo2",
     images: [
       { id: 1, image: "/imgs/objetivo2/obj5.jpg" },
       { id: 2, image: "/imgs/objetivo2/obj6.jpg" },
@@ -51,7 +51,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 3",
     describe:
       "Garantizar el Desarrollo Físico Cognitivo y Socioemocional para la Protección y Participación de Niñas, Niños, Adolescentes y Jóvenes",
-    ulr: "https://chatgpt.com/",
+    ulr: "/objetivos/objetivo3",
 
     images: [
       { id: 1, image: "/imgs/objetivo3/obj10.jpg" },
@@ -67,7 +67,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 4",
     describe:
       "Inclusión Económica para Mejorar la Seguridad Alimentaria Nutricional y Calidad de Vida de las Familias",
-    ulr: "https://chatgpt.com/",
+    ulr: "/objetivos/objetivo4",
 
     images: [
       { id: 1, image: "/imgs/objetivo4/obj15.jpeg" },
@@ -83,7 +83,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 5",
     describe:
       "Protección Social a Poblaciones Vulnerables y la Prevención de la Violencia contra la Femenino y los Integrantes del Grupo Familiar",
-    ulr: "https://chatgpt.com/",
+    ulr: "/objetivos/objetivo5",
 
     images: [
       { id: 1, image: "/imgs/objetivo5/obj20.jpeg" },
@@ -134,9 +134,8 @@ export default function HeroSection() {
           {currentObj.images.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                index === currentSlide ? "opacity-100" : "opacity-0"
-              }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? "opacity-100" : "opacity-0"
+                }`}
             >
               <Image
                 src={slide.image}
@@ -151,9 +150,8 @@ export default function HeroSection() {
             {currentObj.images.map((_, index) => (
               <button
                 key={index}
-                className={`h-2 w-6 lg:h-2 lg:w-8 rounded-full transition-colors ${
-                  index === currentSlide ? "bg-white" : "bg-white/50"
-                }`}
+                className={`h-2 w-6 lg:h-2 lg:w-8 rounded-full transition-colors ${index === currentSlide ? "bg-white" : "bg-white/50"
+                  }`}
                 onClick={() => setCurrentSlide(index)}
               />
             ))}

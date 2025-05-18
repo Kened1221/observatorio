@@ -81,6 +81,7 @@ model Authenticator {
 
 enum roleModule {
   inicio
+  objetivos
   salud_nutricion
   educacion
   proteccion_social
@@ -189,7 +190,7 @@ model Distrito {
   provinciaId Int
   provincia   Provincia   @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
   ubicaciones Ubicacion[]
-
+  avances     Avance[]    @relation("AvanceToDistrito")
   @@unique([nombre, provinciaId])
 }
 
@@ -227,7 +228,7 @@ model Ubicacion {
   CentrosAcogida       CentrosAcogida[]
   Reniec               Reniec[]
   PersonasDiscapacidad PersonasDiscapacidad[]
-  ViolenciaFemenino       ViolenciaFemenino[]
+  ViolenciaFemenino    ViolenciaFemenino[]
 
   @@unique([departamentoId, provinciaId, distritoId]) // Evita duplicados
 }
@@ -298,6 +299,18 @@ model Poblacion {
   genero        Genero        @relation(fields: [generoId], references: [id], onDelete: Restrict)
 
   @@index([anio]) // Índice para consultas por año
+}
+
+model Avance {
+  id          Int      @id @default(autoincrement())
+  distritoId  Int
+  distrito    Distrito @relation("AvanceToDistrito", fields: [distritoId], references: [id], onDelete: Cascade)
+  operation   String   // e.g., "AVANCE OP 01"
+  percentage  Float    // Stored as decimal, e.g., 16.7
+  total       Float?   // Total percentage, nullable
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  @@unique([distritoId, operation])
 }
 
 // Modelo: Vivienda
@@ -959,7 +972,7 @@ model Edad {
   generoId             Int? // Nueva relación con Genero
   reniec               Reniec[]
   DetallesDiscapacidad DetallesDiscapacidad[]
-  ViolenciaFemenino       ViolenciaFemenino[]
+  ViolenciaFemenino    ViolenciaFemenino[]
 
   genero Genero? @relation(fields: [generoId], references: [id], onDelete: Restrict)
 }
@@ -1046,15 +1059,15 @@ model DetallesDiscapacidad {
 
 // Modelo: EstadoCivil (nuevo modelo para "Estado civil")
 model EstadoCivil {
-  id             Int              @id @default(autoincrement())
-  nombre         String           @db.VarChar(100) // Ej: "Soltero", "Viudo", "Casado"
+  id                Int                 @id @default(autoincrement())
+  nombre            String              @db.VarChar(100) // Ej: "Soltero", "Viudo", "Casado"
   violenciaFemenino ViolenciaFemenino[]
 }
 
 // Modelo: TipoViolencia (nuevo modelo para "Tipo violencia")
 model TipoViolencia {
-  id             Int              @id @default(autoincrement())
-  nombre         String           @db.VarChar(100) // Ej: "Física", "Abandono", "Psicológica", "Sexual"
+  id                Int                 @id @default(autoincrement())
+  nombre            String              @db.VarChar(100) // Ej: "Física", "Abandono", "Psicológica", "Sexual"
   violenciaFemenino ViolenciaFemenino[]
 }
 
@@ -1065,9 +1078,9 @@ model TipoPeriodo {
 }
 
 model Periodo {
-  id             Int              @id @default(autoincrement())
-  nombre         String           @db.VarChar(100) // Ej: "Enero - agosto", "I Trimestre"
-  tipoPeriodoId  Int
+  id                Int                 @id @default(autoincrement())
+  nombre            String              @db.VarChar(100) // Ej: "Enero - agosto", "I Trimestre"
+  tipoPeriodoId     Int
   violenciaFemenino ViolenciaFemenino[]
 
   tipoPeriodo TipoPeriodo @relation(fields: [tipoPeriodoId], references: [id], onDelete: Restrict)

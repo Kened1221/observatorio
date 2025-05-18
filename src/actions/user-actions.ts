@@ -117,7 +117,6 @@ export async function updatePassword({ userId, currentPassword, newPassword }: {
 export async function getProfile(userId: string): Promise<{ name: string; role: string; avatar: string }> {
   try {
     const user = await prisma.user.findUnique({ where: { id: userId }, select: { name: true, image: true, role: true } });
-
     return {
       name: user?.name || "",
       role: user?.role ? user.role.name : "",

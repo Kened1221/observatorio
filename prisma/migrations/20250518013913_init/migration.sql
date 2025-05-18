@@ -1,5 +1,5 @@
 -- CreateEnum
-CREATE TYPE "roleModule" AS ENUM ('inicio', 'salud_nutricion', 'educacion', 'proteccion_social', 'servicios_basicos', 'desarrollo_economico', 'politica_incluir', 'normas_informes', 'notas_actualidad', 'participacion_ciudadana');
+CREATE TYPE "roleModule" AS ENUM ('inicio', 'objetivos', 'salud_nutricion', 'educacion', 'proteccion_social', 'servicios_basicos', 'desarrollo_economico', 'politica_incluir', 'normas_informes', 'notas_actualidad', 'participacion_ciudadana');
 
 -- CreateTable
 CREATE TABLE "Account" (
@@ -209,6 +209,19 @@ CREATE TABLE "Poblacion" (
     "generoId" INTEGER NOT NULL,
 
     CONSTRAINT "Poblacion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Avance" (
+    "id" SERIAL NOT NULL,
+    "distritoId" INTEGER NOT NULL,
+    "operation" TEXT NOT NULL,
+    "percentage" DOUBLE PRECISION NOT NULL,
+    "total" DOUBLE PRECISION,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Avance_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -953,6 +966,9 @@ CREATE UNIQUE INDEX "EdadIntervalo_intervalo_key" ON "EdadIntervalo"("intervalo"
 CREATE INDEX "Poblacion_anio_idx" ON "Poblacion"("anio");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "Avance_distritoId_operation_key" ON "Avance"("distritoId", "operation");
+
+-- CreateIndex
 CREATE INDEX "Vivienda_anio_idx" ON "Vivienda"("anio");
 
 -- CreateIndex
@@ -1113,6 +1129,9 @@ ALTER TABLE "Poblacion" ADD CONSTRAINT "Poblacion_edadIntervaloId_fkey" FOREIGN 
 
 -- AddForeignKey
 ALTER TABLE "Poblacion" ADD CONSTRAINT "Poblacion_generoId_fkey" FOREIGN KEY ("generoId") REFERENCES "Genero"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Avance" ADD CONSTRAINT "Avance_distritoId_fkey" FOREIGN KEY ("distritoId") REFERENCES "Distrito"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vivienda" ADD CONSTRAINT "Vivienda_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
