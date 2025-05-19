@@ -11,7 +11,7 @@ interface Objective {
   id: string;
   titulo: string;
   describe: string;
-  ulr: string;
+  url: string;
   images: { id: number; image: string }[];
   logo: string;
 }
@@ -22,7 +22,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 1",
     describe:
       "Gestión Territorial Estilos de Vida y las Condiciones del Entorno",
-    ulr: "/objetivos/objetivo1",
+    url: "/objetivos/objetivo1",
     images: [
       { id: 1, image: "/imgs/objetivo1/obj1.jpg" },
       { id: 2, image: "/imgs/objetivo1/obj2.jpg" },
@@ -36,7 +36,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 2",
     describe:
       "Salud Materno Neonatal. Desarrollo Infantil Temprano para asegurar su Inclusión Social",
-    ulr: "/objetivos/objetivo2",
+    url: "/objetivos/objetivo2",
     images: [
       { id: 1, image: "/imgs/objetivo2/obj5.jpg" },
       { id: 2, image: "/imgs/objetivo2/obj6.jpg" },
@@ -51,8 +51,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 3",
     describe:
       "Garantizar el Desarrollo Físico Cognitivo y Socioemocional para la Protección y Participación de Niñas, Niños, Adolescentes y Jóvenes",
-    ulr: "/objetivos/objetivo3",
-
+    url: "/objetivos/objetivo3",
     images: [
       { id: 1, image: "/imgs/objetivo3/obj10.jpg" },
       { id: 2, image: "/imgs/objetivo3/obj11.jpg" },
@@ -67,8 +66,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 4",
     describe:
       "Inclusión Económica para Mejorar la Seguridad Alimentaria Nutricional y Calidad de Vida de las Familias",
-    ulr: "/objetivos/objetivo4",
-
+    url: "/objetivos/objetivo4",
     images: [
       { id: 1, image: "/imgs/objetivo4/obj15.jpeg" },
       { id: 2, image: "/imgs/objetivo4/obj16.jpeg" },
@@ -83,8 +81,7 @@ const objetivos: Objective[] = [
     titulo: "Objetivo prioritario N° 5",
     describe:
       "Protección Social a Poblaciones Vulnerables y la Prevención de la Violencia contra la Femenino y los Integrantes del Grupo Familiar",
-    ulr: "/objetivos/objetivo5",
-
+    url: "/objetivos/objetivo5",
     images: [
       { id: 1, image: "/imgs/objetivo5/obj20.jpeg" },
       { id: 2, image: "/imgs/objetivo5/obj21.jpeg" },
@@ -129,13 +126,14 @@ export default function HeroSection() {
   return (
     <div className="relative overflow-hidden w-full bg-red-600">
       <div className="flex flex-col md:flex-row w-full h-auto md:h-[600px] lg:h-[700px]">
-        {/* Lado Izquierdo: Imágenes e Indicadores */}
+        {/* Left Side: Images and Indicators */}
         <div className="relative w-full md:w-1/2 h-64 md:h-80 lg:h-full">
           {currentObj.images.map((slide, index) => (
             <div
               key={slide.id}
-              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${index === currentSlide ? "opacity-100" : "opacity-0"
-                }`}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                index === currentSlide ? "opacity-100" : "opacity-0"
+              }`}
             >
               <Image
                 src={slide.image}
@@ -150,42 +148,44 @@ export default function HeroSection() {
             {currentObj.images.map((_, index) => (
               <button
                 key={index}
-                className={`h-2 w-6 lg:h-2 lg:w-8 rounded-full transition-colors ${index === currentSlide ? "bg-white" : "bg-white/50"
-                  }`}
+                className={`h-2 w-6 lg:h-2 lg:w-8 rounded-full transition-colors ${
+                  index === currentSlide ? "bg-white" : "bg-white/50"
+                }`}
                 onClick={() => setCurrentSlide(index)}
               />
             ))}
           </div>
         </div>
 
-        {/* Lado Derecho: Tarjeta y Menú */}
-        <div className="relative w-full md:w-1/2 h-64 md:h-full flex justify-center items-center">
+        {/* Right Side: Card and Menu */}
+        <div className="relative w-full md:w-1/2 h-64 md:h-full flex justify-center items-center overflow-hidden">
           <Image
             src={currentObj.logo}
-            alt="Imagen de fondo"
+            alt={`${currentObj.titulo} Logo`}
             fill
-            className="top-0 left-0 object-cover opacity-25"
+            className="object-contain opacity-20 scale-110"
+            priority
           />
-          <Card className="absolute z-10 top-0 left-0 bg-transparent shadow-none border-none w-full sm:max-w-1/2 space-y-4">
-            <CardContent className="p-6">
-              <h2 className="text-lg md:text-2xl lg:text-3xl font-bold text-white mb-2">
+          <Card className="absolute z-10 w-full bg-transparent shadow-none border-none flex items-start justify-center">
+            <CardContent className="p-4 md:p-6 space-y-12 w-full">
+              <h2 className="text-2xl md:text-5xl lg:text-7xl font-extrabold text-white tracking-tight text-left">
                 {currentObj.titulo}
               </h2>
-              <p className="text-sm md:text-base lg:text-lg text-gray-200 text-justify mb-4">
+              <p className="text-xl md:text-base lg:text-2xl text-gray-100 text-justify leading-relaxed">
                 {currentObj.describe}
               </p>
               <Button
-                variant="secondary"
-                className="group bg-gray-200 hover:bg-white text-sm md:text-base px-4 py-2 rounded-lg shadow-md transition-transform transform hover:scale-105"
+                variant="default"
+                className="group bg-white/90 hover:bg-white text-gray-900 font-semibold px-6 py-2 rounded-full shadow-md transition-all duration-300 hover:shadow-xl hover:scale-105"
               >
                 <Link
-                  href={currentObj.ulr}
+                  href={currentObj.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex flex-row items-center"
+                  className="flex items-center gap-2 text-sm md:text-base"
                 >
                   Conocer más
-                  <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                  <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Link>
               </Button>
             </CardContent>
@@ -193,22 +193,21 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* Botones de Navegación */}
       <Button
         variant="outline"
-        size="largeIcon"
+        size="icon"
         className="absolute left-2 md:left-3 lg:left-4 top-1/2 z-10 -translate-y-1/2 rounded-full border-none bg-background/70 hover:bg-background/90"
         onClick={prevObjective}
       >
-        <ChevronLeft className="text-sidebar-primary" />
+        <ChevronLeft className="text-gray-900" />
       </Button>
       <Button
         variant="outline"
-        size="largeIcon"
+        size="icon"
         className="absolute right-2 md:right-3 lg:right-4 top-1/2 z-10 -translate-y-1/2 rounded-full border-none bg-background/70 hover:bg-background/90"
         onClick={nextObjective}
       >
-        <ChevronRight className="text-sidebar-primary" />
+        <ChevronRight className="text-gray-900" />
       </Button>
     </div>
   );

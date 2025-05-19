@@ -87,6 +87,36 @@ export async function uploadAvanceData(data: any[], objetivo: string) {
   }
 }
 
+export async function deleteAvanceData(objetivo: string) {
+  try {
+    const result = await prisma.$transaction(async (tx) => {
+      const deleted = await tx.avance.deleteMany({
+        where: { objetive: objetivo },
+      });
+      return deleted.count;
+    });
+
+    if (result === 0) {
+      return {
+        success: true,
+        message: `No se encontraron datos para eliminar en ${objetivo}.`,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Se eliminaron ${result} registros de ${objetivo} exitosamente.`,
+    };
+  } catch (error: any) {
+    console.error("Error al eliminar los datos de avance:", error);
+    return {
+      success: false,
+      error: `Error al eliminar los datos: ${error.message || "Error desconocido"}`,
+      details: error.stack || "No stack trace available",
+    };
+  }
+}
+
 export async function getAvanceData(operation: string, objetivo: string) {
   try {
     const avances = await prisma.avance.findMany({
