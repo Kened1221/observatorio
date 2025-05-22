@@ -213,15 +213,13 @@ CREATE TABLE "Poblacion" (
 
 -- CreateTable
 CREATE TABLE "Avance" (
-    "id" SERIAL NOT NULL,
+    "objetive" TEXT NOT NULL,
     "distritoId" INTEGER NOT NULL,
     "operation" TEXT NOT NULL,
     "percentage" DOUBLE PRECISION NOT NULL,
     "total" DOUBLE PRECISION,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL,
-
-    CONSTRAINT "Avance_pkey" PRIMARY KEY ("id")
+    "updatedAt" TIMESTAMP(3) NOT NULL
 );
 
 -- CreateTable
@@ -966,7 +964,7 @@ CREATE UNIQUE INDEX "EdadIntervalo_intervalo_key" ON "EdadIntervalo"("intervalo"
 CREATE INDEX "Poblacion_anio_idx" ON "Poblacion"("anio");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Avance_distritoId_operation_key" ON "Avance"("distritoId", "operation");
+CREATE UNIQUE INDEX "Avance_objetive_distritoId_operation_key" ON "Avance"("objetive", "distritoId", "operation");
 
 -- CreateIndex
 CREATE INDEX "Vivienda_anio_idx" ON "Vivienda"("anio");

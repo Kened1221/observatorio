@@ -4,6 +4,7 @@
 import { prisma } from "@/config/prisma";
 import { Session } from "next-auth";
 import { Prisma } from "@prisma/client";
+import * as XLSX from "xlsx";
 
 export async function uploadAvanceData(data: any[], objetivo: string) {
   try {
@@ -12,19 +13,31 @@ export async function uploadAvanceData(data: any[], objetivo: string) {
     }
 
     // Normalize and validate input data
-    const distritosNombres = [...new Set(data.map((row) => row.distrito?.toUpperCase()))].filter(Boolean);
+    const distritosNombres = [
+      ...new Set(data.map((row) => row.distrito?.toUpperCase())),
+    ].filter(Boolean);
     if (!distritosNombres.length) {
-      return { success: false, error: "No se encontraron distritos válidos en los datos" };
+      return {
+        success: false,
+        error: "No se encontraron distritos válidos en los datos",
+      };
     }
 
     // Fetch distritos in a single query
     const distritos = await prisma.distrito.findMany({
       where: { nombre: { in: distritosNombres } },
-      select: { id: true, nombre: true, provincia: { select: { nombre: true } } },
+      select: {
+        id: true,
+        nombre: true,
+        provincia: { select: { nombre: true } },
+      },
     });
 
     const validDistritoMap = new Map(
-      distritos.map((d) => [d.nombre.toUpperCase(), { id: d.id, provinciaNombre: d.provincia.nombre }])
+      distritos.map((d) => [
+        d.nombre.toUpperCase(),
+        { id: d.id, provinciaNombre: d.provincia.nombre },
+      ])
     );
 
     // Filter and normalize data
@@ -43,7 +56,11 @@ export async function uploadAvanceData(data: any[], objetivo: string) {
       }));
 
     if (validData.length === 0) {
-      return { success: false, error: "Ningún dato válido para insertar: distritos no encontrados o datos incompletos" };
+      return {
+        success: false,
+        error:
+          "Ningún dato válido para insertar: distritos no encontrados o datos incompletos",
+      };
     }
 
     // Perform transaction
@@ -71,7 +88,10 @@ export async function uploadAvanceData(data: any[], objetivo: string) {
     };
   } catch (error: any) {
     console.error("Error al procesar los datos de avance:", error);
-    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
       return {
         success: false,
         error:
@@ -81,7 +101,9 @@ export async function uploadAvanceData(data: any[], objetivo: string) {
     }
     return {
       success: false,
-      error: `Error al procesar los datos: ${error.message || "Error desconocido"}`,
+      error: `Error al procesar los datos: ${
+        error.message || "Error desconocido"
+      }`,
       details: error.stack || "No stack trace available",
     };
   }
@@ -111,7 +133,9 @@ export async function deleteAvanceData(objetivo: string) {
     console.error("Error al eliminar los datos de avance:", error);
     return {
       success: false,
-      error: `Error al eliminar los datos: ${error.message || "Error desconocido"}`,
+      error: `Error al eliminar los datos: ${
+        error.message || "Error desconocido"
+      }`,
       details: error.stack || "No stack trace available",
     };
   }
@@ -177,9 +201,86 @@ export async function getUserModules(session: Session): Promise<string[]> {
       throw new Error("Usuario no encontrado");
     }
 
-    return user.overriddenModule?.length > 0 ? user.overriddenModule : user.role?.defaultModule ?? [];
+    return user.overriddenModule?.length > 0
+      ? user.overriddenModule
+      : user.role?.defaultModule ?? [];
   } catch (error: any) {
     console.error("Error al obtener módulos del usuario:", error);
     throw new Error("No se pudieron obtener los módulos");
+  }
+}
+
+export async function downloadObjectiveTemplate() {
+  try {
+    const [departamentos, provincias, distritos] = await Promise.all([
+      prisma.departamento.findMany({ orderBy: { nombre: "asc" } }),
+      prisma.provincia.findMany({ orderBy: { nombre: "asc" } }),
+      prisma.distrito.findMany({ orderBy: { nombre: "asc" } }),
+    ]);
+
+    if (
+      departamentos.length === 0 ||
+      provincias.length === 0 ||
+      distritos.length === 0
+    ) {
+      throw new Error(
+        "No se encontraron datos de referencia necesarios (departamentos, provincias o distritos)"
+      );
+    }
+
+    const templateData = [];
+
+    // Añadir fila vacía como primera fila
+    templateData.push({
+      PROVINCIA: "",
+      DISTRITO: "",
+      "AVANCE OP 01": "",
+      TOTAL: "",
+    });
+
+    // Añadir encabezados en la segunda fila
+    templateData.push({
+      PROVINCIA: "PROVINCIA",
+      DISTRITO: "DISTRITO",
+      "AVANCE OP 01": "AVANCE OP 01",
+      TOTAL: "TOTAL",
+    });
+
+    // Agrupar distritos por provincia
+    for (const provincia of provincias) {
+      const distritosProvincia = distritos.filter(
+        (d) => d.provinciaId === provincia.id
+      );
+
+      for (const distrito of distritosProvincia) {
+        templateData.push({
+          PROVINCIA: provincia.nombre,
+          DISTRITO: distrito.nombre,
+          "AVANCE OP 01": "0%",
+          TOTAL: "0%",
+        });
+      }
+    }
+
+    // Crear el libro de Excel
+    const worksheet = XLSX.utils.json_to_sheet(templateData, {
+      skipHeader: true,
+    });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Objetivos");
+
+    // Generar el buffer del Excel
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    return excelBuffer;
+  } catch (error: any) {
+    console.error("Error al generar la plantilla de objetivos:", error);
+    throw new Error(
+      `Error al generar la plantilla: ${error.message || "Error desconocido"}`
+    );
   }
 }

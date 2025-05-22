@@ -3,7 +3,11 @@
 
 import { useState, useEffect } from "react";
 import * as XLSX from "xlsx";
-import { downloadPoblacionData, getAvailableYears, deleteOrResetPoblacionData } from "@/actions/inicio-actions";
+import {
+  downloadPoblacionData,
+  getAvailableYears,
+  deleteOrResetPoblacionData,
+} from "@/actions/inicio-actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -71,11 +75,6 @@ export default function ContainerStart() {
           type: "success",
           text: `Datos del año ${selectedYear} descargados exitosamente`,
         });
-      } else {
-        setMessage({
-          type: "error",
-          text: result.error || "No se pudo descargar los datos",
-        });
       }
     } catch (error: any) {
       console.error("Error al descargar el archivo:", error);
@@ -106,12 +105,17 @@ export default function ContainerStart() {
     setShowDeleteConfirmation(false);
 
     try {
-      const result = await deleteOrResetPoblacionData(parseInt(selectedYear), "delete");
+      const result = await deleteOrResetPoblacionData(
+        parseInt(selectedYear),
+        "delete"
+      );
 
       if (result.success) {
         setMessage({
           type: "success",
-          text: result.message || `Datos del año ${selectedYear} eliminados exitosamente`,
+          text:
+            result.message ||
+            `Datos del año ${selectedYear} eliminados exitosamente`,
         });
         const years = await getAvailableYears();
         setAvailableYears(years);
@@ -193,7 +197,9 @@ export default function ContainerStart() {
         </div>
         {message && (
           <Alert variant={message.type === "error" ? "destructive" : "default"}>
-            <AlertTitle>{message.type === "error" ? "Error" : "Éxito"}</AlertTitle>
+            <AlertTitle>
+              {message.type === "error" ? "Error" : "Éxito"}
+            </AlertTitle>
             <AlertDescription>{message.text}</AlertDescription>
           </Alert>
         )}

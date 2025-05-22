@@ -37,7 +37,7 @@ export default function ObservatorySection() {
               aria-label="Conocer más sobre el observatorio"
             >
               <Link
-                href="#"
+                href="https://observatorioayacucho.pe/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex flex-row items-center"

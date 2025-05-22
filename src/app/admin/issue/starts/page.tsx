@@ -4,13 +4,24 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import DragDropExcelInput from "@/components/ui/drag-drop-excel-input";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
 import ContainerStart from "./container-start";
-import { uploadPoblacionData } from "@/actions/dashboard-actions";
+import {
+  downloadPoblacionTemplate,
+  uploadPoblacionData,
+} from "@/actions/dashboard-actions";
+import DragDropExcelInput from "@/components/ui/drag-drop-excel-input";
+import { toast } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 
 interface Message {
   type: "success" | "error";
@@ -19,6 +30,7 @@ interface Message {
 
 export default function Page() {
   const [uploading, setUploading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
@@ -50,13 +62,31 @@ export default function Page() {
       const worksheet = workbook.Sheets[workbook.SheetNames[0]];
       const jsonData = XLSX.utils.sheet_to_json(worksheet);
 
+      const edadIntervaloMap: Record<string, number> = {
+        "Menores de 1 año": 1,
+        "De 1 a 4 años": 2,
+        "De 5 a 9 años": 3,
+        "De 10 a 14 años": 4,
+        "De 15 a 19 años": 5,
+        "De 20 a 24 años": 6,
+        "De 25 a 29 años": 7,
+        "De 30 a 34 años": 8,
+        "De 35 a 39 años": 9,
+        "De 40 a 44 años": 10,
+        "De 45 a 49 años": 11,
+        "De 50 a 54 años": 12,
+        "De 55 a 59 años": 13,
+        "De 60 a 64 años": 14,
+        "De 65 y más años": 15,
+      };
+
       const processedData = jsonData.map((row: any) => ({
         anio: parseInt(row.anio) || 0,
-        cantidad: parseInt(row.cantidad) || 0,
         ubicacionId: parseInt(row.ubicacionId) || 0,
-        ambitoId: parseInt(row.ambitoId) || 0,
-        edadIntervaloId: parseInt(row.edadIntervalo) || 0,
-        generoId: parseInt(row.generoId) || 0,
+        generoId: row.genero === "masculino" ? 1 : 2,
+        ambitoId: row.ambito === "rural" ? 1 : 2,
+        edadIntervaloId: edadIntervaloMap[row.edadIntervalo],
+        cantidad: parseInt(row.cantidad) || 0,
       }));
 
       const result = await uploadPoblacionData(processedData);
@@ -84,16 +114,54 @@ export default function Page() {
     }
   };
 
+  const fn_excel_template = async () => {
+    setDownloading(true); // Start loading animation
+    try {
+      const excelBuffer = await downloadPoblacionTemplate();
+
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Plantilla_Poblacion.xlsx";
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast.success("Plantilla descargada exitosamente", {
+        position: "top-center",
+      });
+    } catch (error) {
+      console.error("Error al descargar la plantilla:", error);
+
+      toast.error("Error al descargar la plantilla", {
+        position: "top-center",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-8 space-y-6">
+      <Toaster />
       <Card className="shadow-lg max-w-7xl w-full">
-        <CardHeader>
-          <CardTitle className="text-3xl font-semibold">
-            Panel de Inicio
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Sube datos de la población para actualizar la base de datos
-          </p>
+        <CardHeader className="flex flex-row justify-between items-start">
+          <div>
+            <CardTitle className="text-3xl font-semibold">
+              Panel de Inicio
+            </CardTitle>
+            <CardDescription>
+              Sube datos de la población para actualizar la base de datos
+            </CardDescription>
+          </div>
+          <Button onClick={fn_excel_template} disabled={downloading}>
+            {downloading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : null}
+            {downloading ? "Descargando..." : "Descargar Plantilla"}
+          </Button>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="space-y-4">

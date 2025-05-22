@@ -3,6 +3,7 @@
 
 import { prisma } from "@/config/prisma";
 import { Session } from "next-auth";
+import * as XLSX from "xlsx";
 
 export async function uploadPoblacionData(data: any[]) {
   try {
@@ -14,13 +15,18 @@ export async function uploadPoblacionData(data: any[]) {
     // Obtener el año del primer registro
     const anio = data[0].anio;
     if (!Number.isInteger(anio)) {
-      return { success: false, error: "El campo 'anio' no es válido en los datos del Excel" };
+      return {
+        success: false,
+        error: "El campo 'anio' no es válido en los datos del Excel",
+      };
     }
 
     // Validar que las relaciones existan
     const ubicacionIds = [...new Set(data.map((row) => row.ubicacionId))];
     const ambitoIds = [...new Set(data.map((row) => row.ambitoId))];
-    const edadIntervaloIds = [...new Set(data.map((row) => row.edadIntervaloId))];
+    const edadIntervaloIds = [
+      ...new Set(data.map((row) => row.edadIntervaloId)),
+    ];
     const generoIds = [...new Set(data.map((row) => row.generoId))];
 
     const ubicaciones = await prisma.ubicacion.findMany({
@@ -92,11 +98,85 @@ export async function uploadPoblacionData(data: any[]) {
     console.error("Error al procesar los datos de población:", error);
     return {
       success: false,
-      error: `Error al procesar los datos: ${error.message || "Error desconocido"}`,
+      error: `Error al procesar los datos: ${
+        error.message || "Error desconocido"
+      }`,
     };
   }
 }
 
+export async function downloadPoblacionTemplate() {
+  try {
+    const [ubicaciones, generos, ambitos, edadIntervalos] = await Promise.all([
+      prisma.ubicacion.findMany({ orderBy: { id: "asc" } }),
+      prisma.genero.findMany({ orderBy: { id: "asc" } }),
+      prisma.ambito.findMany({ orderBy: { id: "asc" } }),
+      prisma.edadIntervalo.findMany({ orderBy: { id: "asc" } }),
+    ]);
+
+    if (
+      ubicaciones.length === 0 ||
+      generos.length === 0 ||
+      ambitos.length === 0 ||
+      edadIntervalos.length === 0
+    ) {
+      throw new Error(
+        "No se encontraron datos de referencia necesarios (ubicaciones, géneros, ámbitos o grupos de edad)"
+      );
+    }
+
+    const templateData = [];
+
+    templateData.push({
+      anio: "anio",
+      ubicacionId: "ubicacionId",
+      genero: "genero",
+      ambito: "ambito",
+      edadIntervalo: "edadIntervalo",
+      cantidad: "cantidad",
+    });
+
+    const anioEjemplo = new Date().getFullYear();
+
+    for (const ubicacion of ubicaciones) {
+      for (const genero of generos) {
+        for (const ambito of ambitos) {
+          for (const edadIntervalo of edadIntervalos) {
+            const cantidad = 0;
+
+            templateData.push({
+              anio: anioEjemplo,
+              ubicacionId: ubicacion.id,
+              genero: genero.nombre,
+              ambito: ambito.nombre,
+              edadIntervalo: edadIntervalo.intervalo,
+              cantidad,
+            });
+          }
+        }
+      }
+    }
+
+    const worksheet = XLSX.utils.json_to_sheet(templateData, {
+      skipHeader: true,
+    });
+
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Poblacion");
+
+    const excelBuffer = XLSX.write(workbook, {
+      bookType: "xlsx",
+      type: "array",
+    });
+
+    return excelBuffer;
+  } catch (error: any) {
+    console.error("Error al generar la plantilla:", error);
+    throw new Error(
+      `Error al generar la plantilla: ${error.message || "Error desconocido"}`
+    );
+  }
+}
 
 export async function getUserModules(session: Session): Promise<string[]> {
   try {
@@ -113,7 +193,7 @@ export async function getUserModules(session: Session): Promise<string[]> {
     });
 
     if (!user) {
-      throw new Error('Usuario no encontrado');
+      throw new Error("Usuario no encontrado");
     }
 
     if (user.overriddenModule && user.overriddenModule.length > 0) {
@@ -121,7 +201,7 @@ export async function getUserModules(session: Session): Promise<string[]> {
     }
     return user.role?.defaultModule ?? [];
   } catch (error) {
-    console.error('Error al obtener módulos del usuario:', error);
-    throw new Error('No se pudieron obtener los módulos');
+    console.error("Error al obtener módulos del usuario:", error);
+    throw new Error("No se pudieron obtener los módulos");
   }
 }

@@ -4,7 +4,13 @@
 import { useState } from "react";
 import * as XLSX from "xlsx";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import DragDropExcelInput from "@/components/ui/drag-drop-excel-input";
@@ -12,6 +18,7 @@ import { ConfirmDialog } from "@/components/ui/dialog-confirm";
 import {
   uploadAvanceData,
   deleteAvanceData,
+  downloadObjectiveTemplate,
 } from "@/actions/objetivos-actions";
 import {
   Select,
@@ -20,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
 
 interface Message {
   type: "success" | "error" | "delete-success";
@@ -28,6 +36,7 @@ interface Message {
 
 export default function Page() {
   const [uploading, setUploading] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [message, setMessage] = useState<Message | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -206,16 +215,53 @@ export default function Page() {
     }
   };
 
+  const fn_excel_template = async () => {
+    setDownloading(true);
+    try {
+      const excelBuffer = await downloadObjectiveTemplate();
+
+      const blob = new Blob([excelBuffer], {
+        type: "application/octet-stream",
+      });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "Plantilla_Objetivos.xlsx";
+      link.click();
+      URL.revokeObjectURL(url);
+
+      toast.success("Plantilla descargada exitosamente", {
+        position: "top-center",
+      });
+    } catch (error) {
+      console.error("Error al descargar la plantilla:", error);
+
+      toast.error("Error al descargar la plantilla", {
+        position: "top-center",
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center p-8 space-y-6">
       <Card className="shadow-lg max-w-7xl w-full">
-        <CardHeader>
-          <CardTitle className="text-3xl font-semibold">
-            Objetivos prioritarios
-          </CardTitle>
-          <p className="text-sm text-muted-foreground">
-            Sube o elimina datos de avances para actualizar la base de datos
-          </p>
+        <CardHeader className="flex flex-row justify-between items-start">
+          <div>
+            <CardTitle className="text-3xl font-semibold">
+              Objetivos prioritarios
+            </CardTitle>
+            <CardDescription>
+              Sube o elimina datos de avances para actualizar la base de datos
+            </CardDescription>
+          </div>
+          <Button onClick={fn_excel_template} disabled={downloading}>
+            {downloading ? (
+              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+            ) : null}
+            {downloading ? "Descargando..." : "Descargar Plantilla"}
+          </Button>
         </CardHeader>
         {message && (
           <Alert
