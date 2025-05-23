@@ -3,7 +3,8 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import authConfig from "./auth.config";
 import bcrypt from "bcryptjs";
 import { JWT } from "next-auth/jwt";
-import { Session, User } from "next-auth";
+import { Session } from "next-auth";
+import { User } from "next-auth";
 import { AdapterUser } from "@auth/core/adapters";
 import { Account, Profile } from "next-auth";
 import { prisma } from "./config/prisma";
@@ -58,7 +59,6 @@ if (credentialsProvider && "authorize" in credentialsProvider) {
         name: user.name,
         role: user.role?.name ?? "user",
       };
-      console.log("Credentials authorize userData:", userData); // Depuración
       return userData;
     } catch (error) {
       console.error("Error en authorize:", error);
@@ -77,19 +77,18 @@ const callbacks = {
       session.user.name = token.name;
       session.user.sessionData = token.sessionData;
     }
-    console.log("Session callback result:", session); // Depuración
+
     return session;
   },
-
   jwt: async ({ token, user }: { token: JWT; user?: User | AdapterUser }) => {
     if (user) {
       token.id = user.id;
-      token.role = user.role ?? "user";
+      token.role = user.role;
       token.email = user.email;
       token.name = user.name;
       token.sessionData = user.sessionData;
-      console.log("JWT callback token:", token); // Depuración
     }
+
     return token;
   },
   signIn: async (params: {
@@ -100,17 +99,21 @@ const callbacks = {
     credentials?: Record<string, unknown>;
   }) => {
     const { user, account } = params;
+    // Asegurarse de que account no sea undefined
     if (account === undefined || account === null) {
       console.error("Account no definido durante el inicio de sesión");
       return "/auth/error?error=AccessDenied&message=Datos de cuenta incompletos";
     }
+    // Verificar que user.id esté definido
     if (!user.id || !user.email) {
       console.error("No se encontró ID o email durante el inicio de sesión");
       return "/auth/error?error=AccessDenied&message=Datos de usuario incompletos";
     }
 
     try {
+      // Si es un proveedor OAuth (Google)
       if (account?.provider === "google") {
+        // Buscar si existe el usuario con ese email
         const existingUser = await prisma.user.findUnique({
           where: { email: user.email },
           include: {
@@ -121,16 +124,19 @@ const callbacks = {
           },
         });
 
+        // Si no existe el usuario y tu política es rechazar nuevos registros
         if (!existingUser) {
-          console.error("No existing user found for email:", user.email);
           return "/auth/error?error=AccessDenied&message=Email no registrado";
         }
 
-        user.id = existingUser.id;
-        user.role = existingUser.role?.name ?? "user";
-        console.log("Google signIn user:", user); // Depuración
+        // Asignar el rol al usuario
+        if (existingUser.role) {
+          user.role = existingUser.role.name;
+        }
 
+        // Si el usuario existe pero no tiene una cuenta vinculada con Google
         if (!existingUser.accounts.some((acc) => acc.provider === "google")) {
+          // Crear un enlace entre la cuenta existente y Google
           await prisma.account.create({
             data: {
               userId: existingUser.id,
@@ -144,8 +150,10 @@ const callbacks = {
               id_token: account.id_token,
             },
           });
-          console.log("Created new Google account for user:", existingUser.id);
         }
+
+        // Usar el ID del usuario existente
+        user.id = existingUser.id;
       }
 
       return true;
@@ -156,6 +164,7 @@ const callbacks = {
   },
 };
 
+// Exportar con un event handler personalizado para signOut
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt", maxAge: 2 * 24 * 60 * 60 },
