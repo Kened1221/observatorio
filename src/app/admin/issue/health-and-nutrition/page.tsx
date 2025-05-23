@@ -26,13 +26,13 @@ export default function Page() {
       desnutricion: null,
       dengue: null,
     });
-  const [uploading, setUploading] = useState(false);
+  const [uploading, ] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState<{
     isOpen: boolean;
     category: "cobertura_calidad" | "vigilancia_epidemiologica" | null;
     subCategory: string | null;
   }>({ isOpen: false, category: null, subCategory: null });
-  const [uploadedFiles, setUploadedFiles] = useState<
+  const [uploadedFiles, ] = useState<
     {
       id: number;
       fileName: string;

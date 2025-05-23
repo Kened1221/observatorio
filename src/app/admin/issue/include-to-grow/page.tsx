@@ -132,11 +132,6 @@ export default function Page() {
           type: "success",
           text: `Datos del año ${selectedYear} descargados exitosamente`,
         });
-      } else {
-        setMessage({
-          type: "error",
-          text: result.error || "No se pudo descargar los datos",
-        });
       }
     } catch (error: any) {
       console.error("Error al descargar el archivo:", error);

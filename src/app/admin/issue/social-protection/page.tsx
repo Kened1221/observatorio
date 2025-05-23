@@ -33,13 +33,13 @@ export default function Page() {
     wasi_mikuna: null,
     confodes: null,
   });
-  const [uploading, setUploading] = useState(false);
+  const [uploading, ] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState<{
     isOpen: boolean;
     category: "pobreza_vulnerabilidad" | "programas_sociales" | null;
     subCategory: string | null;
   }>({ isOpen: false, category: null, subCategory: null });
-  const [uploadedFiles, setUploadedFiles] = useState<
+  const [uploadedFiles, ] = useState<
     {
       id: number;
       fileName: string;

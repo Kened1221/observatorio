@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
@@ -16,7 +15,7 @@ export default function Page() {
     null
   );
   const [sistemasAguaExcel, setSistemasAguaExcel] = useState<File | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [uploading, ] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState<{
     isOpen: boolean;
     category:
@@ -25,7 +24,7 @@ export default function Page() {
       | "riesgo_sistemas_agua"
       | null;
   }>({ isOpen: false, category: null });
-  const [uploadedFiles, setUploadedFiles] = useState<
+  const [uploadedFiles, ] = useState<
     {
       id: number;
       fileName: string;
