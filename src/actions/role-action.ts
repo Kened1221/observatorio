@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/config/prisma";
+import { prisma } from "@/lib/prisma";
 import { roleModule, Role } from "@prisma/client";
 
 export const fn_get_roles_user = async (userId: string): Promise<{ success: boolean; message?: string; response?: roleModule[] }> => {

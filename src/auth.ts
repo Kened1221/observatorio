@@ -7,7 +7,7 @@ import { Session } from "next-auth";
 import { User } from "next-auth";
 import { AdapterUser } from "@auth/core/adapters";
 import { Account, Profile } from "next-auth";
-import { prisma } from "./config/prisma";
+import { prisma } from "./lib/prisma";
 
 const { providers, ...restConfig } = authConfig;
 const credentialsProvider = providers.find(

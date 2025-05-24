@@ -1,6 +1,6 @@
 "use server";
 
-import { prisma } from "@/config/prisma";
+import { prisma } from "@/lib/prisma";
 import { compare, hash } from "bcryptjs";
 
 export async function googleLinkedAccountVerify({ id }: { id: string }) {

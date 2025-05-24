@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { prisma } from "@/config/prisma";
+import { prisma } from "@/lib/prisma";
+
 
 export interface PoAmProps {
   masculino?: number;

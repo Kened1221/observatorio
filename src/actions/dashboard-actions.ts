@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { prisma } from "@/config/prisma";
+import { prisma } from "@/lib/prisma";
 import { Session } from "next-auth";
 import * as XLSX from "xlsx";
 

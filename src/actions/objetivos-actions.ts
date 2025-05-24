@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use server";
 
-import { prisma } from "@/config/prisma";
 import { Session } from "next-auth";
 import { Prisma } from "@prisma/client";
 import * as XLSX from "xlsx";
+import { prisma } from "@/lib/prisma";
 
 export async function uploadAvanceData(data: any[], objetivo: string) {
   try {

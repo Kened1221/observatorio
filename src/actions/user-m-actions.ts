@@ -4,7 +4,7 @@
 import { UserRecord } from "@/admin/types/user-types";
 import { UserSchema } from "@/components/admin/users/users-activos/modify-data";
 import { UserCreateSchema } from "@/components/admin/users/users-crear-usuario/page";
-import { prisma } from "@/config/prisma";
+import { prisma } from "@/lib/prisma";
 import { Prisma, roleModule } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { revalidatePath } from "next/cache";

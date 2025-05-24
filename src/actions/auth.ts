@@ -2,12 +2,11 @@
 "use server";
 
 import { auth } from "@/auth";
-import { prisma } from "@/config/prisma";
-import { notifySessionClosed } from "@/config/socket";
 import { addMinutes, isAfter } from "date-fns";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { prisma } from "@/lib/prisma";
 
 const sessionUpdateSchema = z.object({
   browser: z.string().nullable().optional(),
@@ -185,12 +184,6 @@ export async function revokeAllUserSessions(userId: string): Promise<{
   console.log(`[revokeAllUserSessions] Iniciando para userId: ${userId}`);
   if (!userId) return { success: false, message: "UserID requerido." };
   try {
-    // Encuentra todas las sesiones activas para notificar ANTES de actualizar
-    const activeSessions = await prisma.session.findMany({
-      where: { userId: userId, status: "active" },
-      select: { browserId: true }, // Solo necesitamos browserId para notificar
-    });
-
     // Actualiza todas las sesiones activas a 'revoked'
     const result = await prisma.session.updateMany({
       where: {
@@ -208,20 +201,6 @@ export async function revokeAllUserSessions(userId: string): Promise<{
     console.log(
       `[revokeAllUserSessions] ${result.count} sesiones marcadas como 'revoked' para userId: ${userId}`
     );
-
-    // Notifica a cada sesión revocada (si tenía browserId)
-    activeSessions.forEach((session) => {
-      if (session.browserId) {
-        notifySessionClosed(userId, session.browserId, {
-          reason: "logout_everywhere", // Razón clara
-          timestamp: new Date(),
-        });
-      }
-    });
-
-    // Opcional: Llama al signOut de Auth.js para invalidar la cookie/token del LADO DEL SERVIDOR
-    // Esto es importante si la acción se llama desde un endpoint donde el usuario aún podría estar "logueado"
-    // await nextAuthSignOut({ redirect: false }); // Evita redirección si no es necesario
 
     return {
       success: true,
@@ -292,17 +271,6 @@ export async function revokeSpecificSession({
       `[revokeSpecificSession] Sesión ${updatedSession.sessionToken} marcada como 'inactive'.`
     );
 
-    // Notificar SOLO al browserId de esa sesión específica (si existe)
-    if (updatedSession.browserId) {
-      notifySessionClosed(userId, updatedSession.browserId, {
-        reason: "remote_logout", // Razón más específica
-        timestamp: new Date(),
-      });
-    } else {
-      console.warn(
-        `[revokeSpecificSession] Sesión ${updatedSession.sessionToken} revocada pero no tenía browserId para notificar.`
-      );
-    }
 
     // NO cierres otras sesiones aquí. Si necesitas esa funcionalidad, llama a revokeAllUserSessions.
 

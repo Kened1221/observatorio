@@ -1,7 +1,8 @@
 
 "use server";
 
-import { prisma } from "@/config/prisma";
+import { prisma } from "@/lib/prisma";
+
 
 export async function getNews() {
   try {

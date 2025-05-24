@@ -1,8 +1,6 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -29,41 +27,21 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
 import { Calendar } from "@/components/ui/calendar";
 import DragDropImgInput from "@/components/ui/drag-drop-img-input";
-import {
-  guardarImg,
-  updateImg,
-  getNews,
-} from "@/actions/notar-actualidad";
+import { guardarImg, updateImg, getNews } from "@/actions/notar-actualidad";
 import ContainerTablePresent from "./container-table-present";
-// Define the form schema using Zod
+import { saveFile } from "@/lib/fileHandler";
+import { toast } from "sonner";
+
 const formSchema = z.object({
   id: z.string().optional(),
   title: z
     .string()
     .min(1, "El título es requerido")
     .max(100, "El título no puede exceder los 100 caracteres"),
-  description: z
-    .string()
-    .min(1, "La descripción es requerida")
-    .max(500, "La descripción no puede exceder los 500 caracteres"),
-  date: z.date({
-    required_error: "La fecha es requerida",
-  }),
-  image: z
-    .instanceof(File)
-    .optional()
-    .nullable(),
+  description: z.string().min(1, "La descripción es requerida"),
+  date: z.date({ required_error: "La fecha es requerida" }),
+  image: z.instanceof(File).optional().nullable(),
 });
-
-// Mock function to simulate file upload
-async function saveFile(file: File): Promise<string> {
-  const uniqueFileName = `${uuidv4()}-${file.name}`;
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(uniqueFileName);
-    }, 1000);
-  });
-}
 
 interface Image {
   id: string;
@@ -94,18 +72,18 @@ export default function Page() {
 
   const loadImages = async () => {
     try {
-      const response = await getNews();
+      const response: { status: number; data: { id: string; description: string; detalles: string; imagenUrl: string; date: Date }[]; message?: string } = await getNews();
       if (response.status === 200) {
-        const fetchedImages = response.data.map((item: any) => ({
+        const fetchedImages: Image[] = response.data.map((item: { id: string; description: string; detalles: string; imagenUrl: string; date: Date }) => ({
           id: item.id,
           url: item.imagenUrl,
           title: item.description,
           description: item.detalles,
-          date: new Date(item.date),
+          date: item.date,
         }));
         setImages(fetchedImages);
       } else {
-        setError(response.message);
+        setError(response.message || "Error desconocido");
       }
     } catch (e) {
       console.error("Error al cargar imágenes", e);
@@ -119,10 +97,12 @@ export default function Page() {
 
   useEffect(() => {
     if (success) {
+      toast.success(success);
       const timer = setTimeout(() => setSuccess(null), 3000);
       return () => clearTimeout(timer);
     }
     if (error) {
+      toast.error(error);
       const timer = setTimeout(() => setError(null), 3000);
       return () => clearTimeout(timer);
     }
@@ -146,7 +126,8 @@ export default function Page() {
     if (!file) {
       throw new Error("No se ha proporcionado ningún archivo");
     }
-    return await saveFile(file);
+    const fileName = await saveFile(file);
+    return fileName;
   }
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
@@ -154,18 +135,24 @@ export default function Page() {
     setSuccess(null);
     setIsSubmitting(true);
 
+    if (!process.env.NEXT_PUBLIC_URL) {
+      setError("Error: La URL del servidor no está configurada.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       let imageUrl: string;
+
       if (isEditing) {
-        // For editing, use existing URL if no new image is provided
         const existingImage = images.find((img) => img.id === data.id);
         if (!existingImage) {
           throw new Error("Registro no encontrado para actualizar");
         }
-        imageUrl = data.image ? `/uploads/${await handleFileUpload(data.image)}` : existingImage.url;
+        imageUrl = data.image ? await handleFileUpload(data.image) : existingImage.url;
         const response = await updateImg(
           data.id!,
-          imageUrl,
+          `${process.env.NEXT_PUBLIC_URL}/api/uploads/${imageUrl}`,
           data.title,
           data.description,
           data.date.toISOString()
@@ -177,16 +164,15 @@ export default function Page() {
           await loadImages();
           handleCloseConfirmationModal();
         } else {
-          setError(response.message);
+          setError(response.message || "Error desconocido");
         }
       } else {
-        // For creating, require an image
         if (!data.image) {
           throw new Error("Se requiere una imagen para crear un registro");
         }
-        imageUrl = `/uploads/${await handleFileUpload(data.image)}`;
+        imageUrl = await handleFileUpload(data.image);
         const response = await guardarImg(
-          imageUrl,
+          `${process.env.NEXT_PUBLIC_URL}/api/uploads/${imageUrl}`,
           data.title,
           data.description,
           data.date.toISOString()
@@ -197,7 +183,7 @@ export default function Page() {
           await loadImages();
           handleCloseConfirmationModal();
         } else {
-          setError(response.message);
+          setError(response.message || "Error desconocido");
         }
       }
     } catch {
@@ -233,14 +219,15 @@ export default function Page() {
               <FormField
                 control={form.control}
                 name="title"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Título</FormLabel>
                     <FormControl>
                       <Input
                         placeholder="Título del registro"
-                        className="text-sm sm:text-base py-1 sm:py-2 w-full"
+                        className={`text-sm sm:text-base py-1 sm:py-2 w-full ${fieldState.error ? "border-red-500" : ""}`}
                         {...field}
+                        aria-label="Título del registro"
                       />
                     </FormControl>
                     <FormMessage />
@@ -250,15 +237,16 @@ export default function Page() {
               <FormField
                 control={form.control}
                 name="description"
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <FormItem>
                     <FormLabel className="text-sm font-medium">Descripción</FormLabel>
                     <FormControl>
                       <Textarea
                         placeholder="Descripción del registro"
                         rows={4}
-                        className="text-sm sm:text-base py-1 sm:py-2 w-full"
+                        className={`text-sm sm:text-base py-1 sm:py-2 w-full ${fieldState.error ? "border-red-500" : ""}`}
                         {...field}
+                        aria-label="Descripción del registro"
                       />
                     </FormControl>
                     <FormMessage />
@@ -276,16 +264,16 @@ export default function Page() {
                         <FormControl>
                           <Button
                             variant="outline"
-                            className={`w-full pl-3 text-left font-normal text-sm sm:text-base ${
-                              !field.value && "text-muted-foreground"
-                            }`}
+                            className={`w-full pl-3 text-left font-normal text-sm sm:text-base ${!field.value && "text-muted-foreground"
+                              }`}
+                            aria-label="Seleccionar fecha"
                           >
                             {field.value ? (
                               format(field.value, "PPP", { locale: es })
                             ) : (
                               <span>Seleccionar fecha</span>
                             )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" aria-hidden="true" />
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
@@ -322,16 +310,15 @@ export default function Page() {
                   </FormItem>
                 )}
               />
-              {error && <p className="text-red-500 text-sm">{error}</p>}
-              {success && <p className="text-primary text-sm">{success}</p>}
-              <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-4">
+              <div className="flex flex-col gap-4">
                 <Button
                   type="submit"
                   className="w-full bg-primary hover:bg-primary/50 text-sm sm:text-base py-1 sm:py-2"
                   disabled={isSubmitting}
+                  aria-label={isEditing ? "Actualizar registro" : "Guardar registro"}
                 >
                   {isSubmitting ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" aria-hidden="true" />
                   ) : null}
                   {isEditing ? "Actualizar Registro" : "Guardar Registro"}
                 </Button>
@@ -342,6 +329,7 @@ export default function Page() {
                     className="w-full text-sm sm:text-base py-1 sm:py-2"
                     onClick={handleCancelEdit}
                     disabled={isSubmitting}
+                    aria-label="Cancelar edición"
                   >
                     Cancelar
                   </Button>

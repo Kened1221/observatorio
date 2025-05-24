@@ -1,7 +1,6 @@
 //src/components/account/Sessions.tsx
 "use client";
 
-import { useSocket } from "@/admin/context/SocketContext"; // Importa el hook del contexto
 import { revokeSpecificSession } from "@/actions/auth"; // Importa la acción corregida
 import { useEffect, useState } from "react";
 import { Smartphone, LogOut } from "lucide-react";
@@ -25,7 +24,6 @@ const Sessions = ({ userId }: { userId: string }) => {
   const [activeSessions, setActiveSessions] = useState<Session[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { browserId, isReady } = useUserData();
-  const { socket, isConnected } = useSocket();
 
   useEffect(() => {
     const fetchSessions = async () => {
@@ -48,32 +46,6 @@ const Sessions = ({ userId }: { userId: string }) => {
     fetchSessions();
   }, [userId, browserId, isReady]);
 
-  // --- Listener para actualizar UI cuando OTRA sesión se cierra ---
-  useEffect(() => {
-    if (socket && isConnected) {
-      const handleOtherSessionClosed = (data: {
-        browserId: string;
-        reason?: string;
-      }) => {
-        // Si el evento NO es para este navegador, actualiza la lista
-        if (data.browserId !== browserId) {
-          console.log(
-            `[Sessions Component] Recibido cierre de otra sesión (${data.browserId}), actualizando lista.`
-          );
-          setActiveSessions((prev) =>
-            prev.filter((session) => session.browserId !== data.browserId)
-          );
-        }
-      };
-
-      socket.on("sessionClosed", handleOtherSessionClosed);
-
-      // Limpieza del listener específico de este componente
-      return () => {
-        socket.off("sessionClosed", handleOtherSessionClosed);
-      };
-    }
-  }, [socket, isConnected, browserId]); // Depende del socket, estado de conexión y browserId local
 
   // --- Handler para cerrar una sesión específica ---
   const handleLogoutDevice = async (sessionTokenToRevoke: string) => {

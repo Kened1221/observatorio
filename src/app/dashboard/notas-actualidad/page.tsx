@@ -25,15 +25,17 @@ export default function Home() {
   const [selectedNews, setSelectedNews] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   useEffect(() => {
     async function fetchNews() {
       try {
         setLoading(true);
         const response = await getNews();
+        console.log(response);
+
         if (response.status === 200 && response.data.length > 0) {
           setNews(response.data);
-          setSelectedNews(response.data[0]); // Set the first news item as default
+          setSelectedNews(response.data[0]);
         } else {
           setError(response.message || "No se encontraron noticias");
         }
@@ -82,11 +84,10 @@ export default function Home() {
                       onClick={() => handleNewsClick(item)}
                     >
                       <Card
-                        className={`cursor-pointer ${
-                          selectedNews?.id === item.id
-                            ? "border-4 border-blue-500"
-                            : ""
-                        }`}
+                        className={`cursor-pointer ${selectedNews?.id === item.id
+                          ? "border-4 border-blue-500"
+                          : ""
+                          }`}
                       >
                         <CardContent className="flex flex-col items-center p-3 h-[300px]">
                           <div className="relative w-full h-40 rounded-lg overflow-hidden">
