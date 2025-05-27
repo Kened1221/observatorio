@@ -7,6 +7,9 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { prisma } from "@/lib/prisma";
+import { Session } from "next-auth";
+import { getUserModules } from "./dashboard-actions";
+
 
 const sessionUpdateSchema = z.object({
   browser: z.string().nullable().optional(),
@@ -479,4 +482,14 @@ export async function updatePasswordWithToken(
   });
 
   return { success: true };
+}
+
+export async function ProtectModule(session: Session, modulo: string): Promise<boolean> {
+  try {
+    const res = await getUserModules(session);
+    return res.includes(modulo);
+  } catch {
+    console.error("Error al verificar el módulo");
+    return true;
+  }
 }

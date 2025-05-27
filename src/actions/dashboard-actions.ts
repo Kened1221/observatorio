@@ -98,9 +98,8 @@ export async function uploadPoblacionData(data: any[]) {
     console.error("Error al procesar los datos de población:", error);
     return {
       success: false,
-      error: `Error al procesar los datos: ${
-        error.message || "Error desconocido"
-      }`,
+      error: `Error al procesar los datos: ${error.message || "Error desconocido"
+        }`,
     };
   }
 }

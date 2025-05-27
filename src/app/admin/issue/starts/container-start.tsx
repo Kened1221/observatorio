@@ -138,16 +138,16 @@ export default function ContainerStart() {
   };
 
   return (
-    <Card className="shadow-lg max-w-7xl w-full">
+    <Card className="shadow-lg w-full max-w-7xl mx-auto">
       <CardHeader>
-        <CardTitle className="text-3xl font-semibold">
+        <CardTitle className="text-2xl sm:text-3xl font-semibold">
           Panel de Control
         </CardTitle>
         <p className="text-sm text-muted-foreground">
           Aquí puedes descargar o eliminar datos de la población
         </p>
       </CardHeader>
-      <CardContent className="space-y-6">
+      <CardContent className="space-y-6 p-4 sm:p-6">
         <div className="space-y-4">
           <Select
             value={selectedYear}
@@ -171,11 +171,11 @@ export default function ContainerStart() {
               )}
             </SelectContent>
           </Select>
-          <div className="flex space-x-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Button
               onClick={handleDownload}
               disabled={!selectedYear || downloading || deleting}
-              className="w-full"
+              className="w-full text-sm sm:text-base py-2 sm:py-3"
             >
               {downloading ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -186,7 +186,7 @@ export default function ContainerStart() {
               onClick={handleOpenDeleteConfirmation}
               disabled={!selectedYear || downloading || deleting}
               variant="destructive"
-              className="w-full"
+              className="w-full text-sm sm:text-base py-2 sm:py-3"
             >
               {deleting ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -209,7 +209,7 @@ export default function ContainerStart() {
           onConfirm={handleDeleteOrReset}
           title="¿Estás seguro de eliminar este año?"
           description={`Los datos de población para el año ${selectedYear} serán eliminados permanentemente de la base de datos.`}
-          styleButton="bg-red-600 hover:bg-red-700 text-white"
+          styleButton="bg-red-600 hover:bg-red-700 text-white text-sm sm:text-base py-2 sm:py-3"
         />
       </CardContent>
     </Card>

@@ -142,7 +142,6 @@ export async function getFilteredMenus(
 ): Promise<SidebarMenuGroup[]> {
   try {
     const modules = await getUserModules(session);
-    console.log("Módulos recibidos en getFilteredMenus:", modules);
 
     const filteredMenus: SidebarMenuGroup[] = sidebarMenus
       .map((group) => {
@@ -168,10 +167,6 @@ export async function getFilteredMenus(
               (key) => moduleToUrlMap[key] === item.url
             ) || ""
           );
-          console.log(
-            `Verificando menú ${item.label} (${item.url}): ${isIncluded ? "Incluido" : "Excluido"
-            }`
-          );
           return isIncluded;
         });
 
@@ -181,11 +176,6 @@ export async function getFilteredMenus(
         };
       })
       .filter((group) => group.menu.length > 0);
-
-    console.log(
-      "Filtered Sidebar Menus:",
-      JSON.stringify(filteredMenus, null, 2)
-    );
     return filteredMenus;
   } catch (error) {
     console.error("Error en getFilteredMenus:", error);
