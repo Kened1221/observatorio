@@ -14,12 +14,12 @@ const images = [
   {
     src: "/mujer/2.jpg",
     alt: "Taller de capacitación",
-    caption: "Talleres de capacitación para prevenir la violencia contra la mujer"
+    caption: "Coordinación con autoridades para políticas públicas efectivas"
   },
   {
     src: "/mujer/3.jpg",
     alt: "Reunión con autoridades",
-    caption: "Coordinación con autoridades para políticas públicas efectivas"
+    caption: "Talleres de capacitación para prevenir la violencia contra la mujer"
   }
 ];
 

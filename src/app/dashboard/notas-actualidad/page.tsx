@@ -84,10 +84,11 @@ export default function Home() {
                       onClick={() => handleNewsClick(item)}
                     >
                       <Card
-                        className={`cursor-pointer ${selectedNews?.id === item.id
-                          ? "border-4 border-blue-500"
-                          : ""
-                          }`}
+                        className={`cursor-pointer ${
+                          selectedNews?.id === item.id
+                            ? "border-4 border-blue-500"
+                            : ""
+                        }`}
                       >
                         <CardContent className="flex flex-col items-center p-3 h-[300px]">
                           <div className="relative w-full h-40 rounded-lg overflow-hidden">
@@ -123,13 +124,11 @@ export default function Home() {
 
             {selectedNews && (
               <div className="flex flex-col lg:flex-row gap-6 mt-4 w-full rounded-2xl px-6 py-8 bg-white shadow-2xl">
-                <div className="relative w-full lg:w-2/3 h-96 lg:h-[500px] rounded-2xl overflow-hidden shadow-xl">
+                <div className="relative w-full lg:w-2/3 h-96 lg:h-auto max-h-[900px] rounded-2xl overflow-hidden shadow-xl">
                   <img
                     src={selectedNews.imagenUrl}
                     alt={selectedNews.description}
                     className="w-full h-full object-cover"
-                    width={500}
-                    height={500}
                   />
                 </div>
                 <div className="flex flex-col lg:w-1/3 p-2 text-justify">
