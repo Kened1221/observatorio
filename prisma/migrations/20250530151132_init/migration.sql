@@ -192,14 +192,6 @@ CREATE TABLE "EdadIntervalo" (
 );
 
 -- CreateTable
-CREATE TABLE "TipoVivienda" (
-    "id" SERIAL NOT NULL,
-    "tipoVivienda" TEXT NOT NULL,
-
-    CONSTRAINT "TipoVivienda_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
 CREATE TABLE "Poblacion" (
     "id" SERIAL NOT NULL,
     "anio" INTEGER NOT NULL,
@@ -221,6 +213,62 @@ CREATE TABLE "Avance" (
     "total" DOUBLE PRECISION,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "NinosNutricion" (
+    "id" SERIAL NOT NULL,
+    "anio" INTEGER NOT NULL,
+    "ubicacionId" INTEGER NOT NULL,
+    "numeroCasos" INTEGER NOT NULL,
+    "evaluados" INTEGER NOT NULL,
+    "porcentaje" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "NinosNutricion_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "NinosAnemia" (
+    "id" SERIAL NOT NULL,
+    "anio" INTEGER NOT NULL,
+    "ubicacionId" INTEGER NOT NULL,
+    "numeroCasos" INTEGER NOT NULL,
+    "evaluados" INTEGER NOT NULL,
+    "porcentaje" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "NinosAnemia_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "NinosDengue" (
+    "id" SERIAL NOT NULL,
+    "anio" INTEGER NOT NULL,
+    "ubicacionId" INTEGER NOT NULL,
+    "numeroCasos" INTEGER NOT NULL,
+    "evaluados" INTEGER NOT NULL,
+    "porcentaje" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "NinosDengue_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "PoblacionCursoVida" (
+    "id" SERIAL NOT NULL,
+    "anio" INTEGER NOT NULL,
+    "ubicacionId" INTEGER NOT NULL,
+    "numeroCasos" INTEGER NOT NULL,
+    "evaluados" INTEGER NOT NULL,
+    "porcentaje" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "PoblacionCursoVida_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "TipoVivienda" (
+    "id" SERIAL NOT NULL,
+    "tipoVivienda" TEXT NOT NULL,
+
+    CONSTRAINT "TipoVivienda_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -554,64 +602,6 @@ CREATE TABLE "SaludPrenatal" (
     "mesId" INTEGER,
 
     CONSTRAINT "SaludPrenatal_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "TipoDesnutricion" (
-    "id" SERIAL NOT NULL,
-    "nombre" VARCHAR(100) NOT NULL,
-
-    CONSTRAINT "TipoDesnutricion_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "IndicadorNutricion" (
-    "id" SERIAL NOT NULL,
-    "nombre" VARCHAR(255) NOT NULL,
-
-    CONSTRAINT "IndicadorNutricion_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "NinosNutricion" (
-    "id" SERIAL NOT NULL,
-    "numeroCasos" INTEGER NOT NULL,
-    "evaluados" INTEGER NOT NULL,
-    "porcentaje" DOUBLE PRECISION NOT NULL,
-    "anio" INTEGER NOT NULL,
-    "ubicacionId" INTEGER NOT NULL,
-    "tipoDesnutricionId" INTEGER NOT NULL,
-    "indicadorNutricionId" INTEGER NOT NULL,
-
-    CONSTRAINT "NinosNutricion_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "TipoAnemia" (
-    "id" SERIAL NOT NULL,
-    "nombre" VARCHAR(100) NOT NULL,
-
-    CONSTRAINT "TipoAnemia_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "IndicadorAnemia" (
-    "id" SERIAL NOT NULL,
-    "nombre" VARCHAR(255) NOT NULL,
-
-    CONSTRAINT "IndicadorAnemia_pkey" PRIMARY KEY ("id")
-);
-
--- CreateTable
-CREATE TABLE "NinosAnemia" (
-    "id" SERIAL NOT NULL,
-    "anio" INTEGER NOT NULL,
-    "ubicacionId" INTEGER NOT NULL,
-    "numeroCasos" INTEGER NOT NULL,
-    "evaluados" INTEGER NOT NULL,
-    "porcentaje" DOUBLE PRECISION NOT NULL,
-
-    CONSTRAINT "NinosAnemia_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -965,6 +955,18 @@ CREATE INDEX "Poblacion_anio_idx" ON "Poblacion"("anio");
 CREATE UNIQUE INDEX "Avance_objetive_distritoId_operation_key" ON "Avance"("objetive", "distritoId", "operation");
 
 -- CreateIndex
+CREATE INDEX "NinosNutricion_anio_idx" ON "NinosNutricion"("anio");
+
+-- CreateIndex
+CREATE INDEX "NinosAnemia_anio_idx" ON "NinosAnemia"("anio");
+
+-- CreateIndex
+CREATE INDEX "NinosDengue_anio_idx" ON "NinosDengue"("anio");
+
+-- CreateIndex
+CREATE INDEX "PoblacionCursoVida_anio_idx" ON "PoblacionCursoVida"("anio");
+
+-- CreateIndex
 CREATE INDEX "Vivienda_anio_idx" ON "Vivienda"("anio");
 
 -- CreateIndex
@@ -1014,12 +1016,6 @@ CREATE INDEX "SaludPrenatal_mes_idx" ON "SaludPrenatal"("mes");
 
 -- CreateIndex
 CREATE INDEX "SaludPrenatal_mesId_idx" ON "SaludPrenatal"("mesId");
-
--- CreateIndex
-CREATE INDEX "NinosNutricion_anio_idx" ON "NinosNutricion"("anio");
-
--- CreateIndex
-CREATE INDEX "NinosAnemia_anio_idx" ON "NinosAnemia"("anio");
 
 -- CreateIndex
 CREATE INDEX "Ninos_anio_idx" ON "Ninos"("anio");
@@ -1128,6 +1124,18 @@ ALTER TABLE "Poblacion" ADD CONSTRAINT "Poblacion_generoId_fkey" FOREIGN KEY ("g
 
 -- AddForeignKey
 ALTER TABLE "Avance" ADD CONSTRAINT "Avance_distritoId_fkey" FOREIGN KEY ("distritoId") REFERENCES "Distrito"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "NinosNutricion" ADD CONSTRAINT "NinosNutricion_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "NinosAnemia" ADD CONSTRAINT "NinosAnemia_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "NinosDengue" ADD CONSTRAINT "NinosDengue_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "PoblacionCursoVida" ADD CONSTRAINT "PoblacionCursoVida_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Vivienda" ADD CONSTRAINT "Vivienda_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
@@ -1322,18 +1330,6 @@ ALTER TABLE "SaludPrenatal" ADD CONSTRAINT "SaludPrenatal_indicadorSaludId_fkey"
 ALTER TABLE "SaludPrenatal" ADD CONSTRAINT "SaludPrenatal_mesId_fkey" FOREIGN KEY ("mesId") REFERENCES "Mes"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "NinosNutricion" ADD CONSTRAINT "NinosNutricion_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "NinosNutricion" ADD CONSTRAINT "NinosNutricion_tipoDesnutricionId_fkey" FOREIGN KEY ("tipoDesnutricionId") REFERENCES "TipoDesnutricion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "NinosNutricion" ADD CONSTRAINT "NinosNutricion_indicadorNutricionId_fkey" FOREIGN KEY ("indicadorNutricionId") REFERENCES "IndicadorNutricion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "NinosAnemia" ADD CONSTRAINT "NinosAnemia_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE "Ninos" ADD CONSTRAINT "Ninos_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -1365,9 +1361,6 @@ ALTER TABLE "Jovenes" ADD CONSTRAINT "Jovenes_mesId_fkey" FOREIGN KEY ("mesId") 
 
 -- AddForeignKey
 ALTER TABLE "GestantesAnemia" ADD CONSTRAINT "GestantesAnemia_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "GestantesAnemia" ADD CONSTRAINT "GestantesAnemia_tipoAnemiaId_fkey" FOREIGN KEY ("tipoAnemiaId") REFERENCES "TipoAnemia"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "GestantesAnemia" ADD CONSTRAINT "GestantesAnemia_indicadorAnemiaGestantesId_fkey" FOREIGN KEY ("indicadorAnemiaGestantesId") REFERENCES "IndicadorAnemiaGestantes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

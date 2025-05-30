@@ -231,6 +231,8 @@ model Ubicacion {
   PersonasDiscapacidad PersonasDiscapacidad[]
   ViolenciaFemenino    ViolenciaFemenino[]
   NinosAnemia          NinosAnemia[]
+  NinosDengue          NinosDengue[]
+  PoblacionCursoVida   PoblacionCursoVida[]
 
   @@unique([departamentoId, provinciaId, distritoId]) // Evita duplicados
 }
@@ -277,14 +279,6 @@ model EdadIntervalo {
   EducacionMatriculas  EducacionMatriculas[]
 }
 
-// Modelo: TipoVivienda
-model TipoVivienda {
-  id                   Int                    @id @default(autoincrement())
-  tipoVivienda         String // Ej: "Censado", "Particular"
-  viviendas            Vivienda[]
-  CaracteristicasHogar CaracteristicasHogar[]
-}
-
 // Modelo: Poblacion
 model Poblacion {
   id              Int @id @default(autoincrement())
@@ -314,6 +308,69 @@ model Avance {
   updatedAt  DateTime @updatedAt
 
   @@unique([objetive, distritoId, operation])
+}
+
+model NinosNutricion {
+  id          Int   @id @default(autoincrement())
+  anio        Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId Int
+  numeroCasos Int // Número de casos (Ej: 0)
+  evaluados   Int // Número de niños evaluados (Ej: 169)
+  porcentaje  Float // Porcentaje (Ej: 0.0)
+
+  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model NinosAnemia {
+  id          Int   @id @default(autoincrement())
+  anio        Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId Int
+  numeroCasos Int // Número de casos (Ej: 0)
+  evaluados   Int // Número de niños evaluados (Ej: 169)
+  porcentaje  Float // Porcentaje (Ej: 0.0)
+
+  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model NinosDengue {
+  id          Int   @id @default(autoincrement())
+  anio        Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId Int
+  numeroCasos Int // Número de casos (Ej: 0)
+  evaluados   Int // Número de niños evaluados (Ej: 169)
+  porcentaje  Float // Porcentaje (Ej: 0.0)
+
+  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+model PoblacionCursoVida {
+  id          Int   @id @default(autoincrement())
+  anio        Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId Int
+  numeroCasos Int // Número de casos (Ej: 0)
+  evaluados   Int // Número de niños evaluados (Ej: 169)
+  porcentaje  Float // Porcentaje (Ej: 0.0)
+
+  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+
+  @@index([anio]) // Índice para consultas por año
+}
+
+//---------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------
+
+// Modelo: TipoVivienda
+model TipoVivienda {
+  id                   Int                    @id @default(autoincrement())
+  tipoVivienda         String // Ej: "Censado", "Particular"
+  viviendas            Vivienda[]
+  CaracteristicasHogar CaracteristicasHogar[]
 }
 
 // Modelo: Vivienda
@@ -714,60 +771,6 @@ model SaludPrenatal {
   @@index([mesId]) // Índice para la relación con Mes
 }
 
-model TipoDesnutricion {
-  id             Int              @id @default(autoincrement())
-  nombre         String           @db.VarChar(100) // Ej: "ANEMIA SEVERA"
-  ninosNutricion NinosNutricion[]
-}
-
-model IndicadorNutricion {
-  id             Int              @id @default(autoincrement())
-  nombre         String           @db.VarChar(255) // Ej: "ANEMIA EN NIÑOS ENTRE 6 A 59 MESES"
-  ninosNutricion NinosNutricion[]
-}
-
-model NinosNutricion {
-  id                   Int   @id @default(autoincrement())
-  numeroCasos          Int // Número de casos (Ej: 0)
-  evaluados            Int // Número de niños evaluados (Ej: 27)
-  porcentaje           Float // Porcentaje (Ej: 0.0)
-  anio                 Int // Año de los datos (Ej: 2024, asumido)
-  ubicacionId          Int
-  tipoDesnutricionId   Int
-  indicadorNutricionId Int
-
-  ubicacion          Ubicacion          @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
-  tipoDesnutricion   TipoDesnutricion   @relation(fields: [tipoDesnutricionId], references: [id], onDelete: Restrict)
-  indicadorNutricion IndicadorNutricion @relation(fields: [indicadorNutricionId], references: [id], onDelete: Restrict)
-
-  @@index([anio]) // Índice para consultas por año
-}
-
-model TipoAnemia {
-  id              Int               @id @default(autoincrement())
-  nombre          String            @db.VarChar(100) // Ej: "ANEMIA SEVERA"
-  GestantesAnemia GestantesAnemia[]
-}
-
-// Modelo: IndicadorAnemia (nuevo modelo para el campo Indicador)
-model IndicadorAnemia {
-  id     Int    @id @default(autoincrement())
-  nombre String @db.VarChar(255) // Ej: "anemia en niños entre 6 a 35 meses que accedieron a los establecimientos de"
-}
-
-model NinosAnemia {
-  id          Int   @id @default(autoincrement())
-  anio        Int // Año de los datos (Ej: 2024, asumido)
-  ubicacionId Int
-  numeroCasos Int // Número de casos (Ej: 0)
-  evaluados   Int // Número de niños evaluados (Ej: 169)
-  porcentaje  Float // Porcentaje (Ej: 0.0)
-
-  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
-
-  @@index([anio]) // Índice para consultas por año
-}
-
 // Modelo: Ninos (nuevo modelo para la tabla)
 model Ninos {
   id                Int     @id @default(autoincrement())
@@ -852,7 +855,6 @@ model GestantesAnemia {
   indicadorAnemiaGestantesId Int
 
   ubicacion                Ubicacion                @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
-  tipoAnemia               TipoAnemia               @relation(fields: [tipoAnemiaId], references: [id], onDelete: Restrict)
   indicadorAnemiaGestantes IndicadorAnemiaGestantes @relation(fields: [indicadorAnemiaGestantesId], references: [id], onDelete: Restrict)
 
   @@index([anio])
