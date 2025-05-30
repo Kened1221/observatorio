@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import ContainerNormas from "./normas/page";
-import ContainerInformes from "./informes/page";
+import ContainerNormas from "./ContainerNormas";
+import ContainerInformes from "./ContainerInformes";
 
 const categorias = [
   { nombre: "Normas", color: "#1d6dc4", component: ContainerNormas },
@@ -24,11 +24,10 @@ export default function Page() {
         {categorias.map((item) => (
           <div
             key={item.nombre}
-            className={`rounded-xl p-2 text-center cursor-pointer transition ${
-              categoria === item.nombre
-                ? "text-white shadow-lg"
-                : "bg-gray-200 text-gray-700"
-            }`}
+            className={`rounded-xl p-2 text-center cursor-pointer transition ${categoria === item.nombre
+              ? "text-white shadow-lg"
+              : "bg-gray-200 text-gray-700"
+              }`}
             style={{
               backgroundColor: categoria === item.nombre ? item.color : undefined,
             }}

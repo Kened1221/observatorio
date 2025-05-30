@@ -202,6 +202,7 @@ export async function getPoblacion(
 
   return result;
 }
+
 export async function downloadPoblacionData(anio: number) {
   const data = await prisma.poblacion.findMany({
     where: { anio: anio },
@@ -220,14 +221,15 @@ export async function downloadPoblacionData(anio: number) {
   });
 
   const formattedData = data.map((p) => ({
-    anio: p.anio,
-    departamento: p.ubicacion.departamento.nombre,
-    provincia: p.ubicacion.provincia.nombre,
-    distrito: p.ubicacion.distrito.nombre,
-    genero: p.genero?.nombre || "N/A",
-    ambito: p.ambito?.nombre || "N/A",
-    edadIntervalo: p.edadIntervalo?.intervalo || "N/A",
-    cantidad: p.cantidad,
+    ANIO: p.anio,
+    UBIGEO_DISTRITAL: p.ubicacion.distrito.ubigeoDistrital || "N/A",
+    DEPARTAMENTO: p.ubicacion.departamento.nombre,
+    PROVINCIA: p.ubicacion.provincia.nombre,
+    DISTRITO: p.ubicacion.distrito.nombre,
+    GENERO: p.genero?.nombre || "N/A",
+    AMBITO: p.ambito?.nombre || "N/A",
+    "INTERVALO EDAD": p.edadIntervalo?.intervalo || "N/A",
+    CANTIDAD: p.cantidad,
   }));
 
   return { success: true, data: formattedData };

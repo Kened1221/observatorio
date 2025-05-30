@@ -12,7 +12,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
 import ContainerStart from "./container-start";
 import {
@@ -81,12 +81,12 @@ export default function Page() {
       };
 
       const processedData = jsonData.map((row: any) => ({
-        anio: parseInt(row.anio) || 0,
-        ubicacionId: parseInt(row.ubicacionId) || 0,
-        generoId: row.genero === "masculino" ? 1 : 2,
-        ambitoId: row.ambito === "rural" ? 1 : 2,
-        edadIntervaloId: edadIntervaloMap[row.edadIntervalo],
-        cantidad: parseInt(row.cantidad) || 0,
+        anio: parseInt(row.ANIO) || 0,
+        ubicacionId: parseInt(row.UBICACIÓN) || 0,
+        generoId: row.GENERO === "masculino" ? 1 : 2,
+        ambitoId: row.AMBITO === "rural" ? 1 : 2,
+        edadIntervaloId: edadIntervaloMap[row["INTERVALO EDAD"]],
+        cantidad: parseInt(row.CANTIDAD) || 0,
       }));
 
       const result = await uploadPoblacionData(processedData);
@@ -96,10 +96,28 @@ export default function Page() {
           type: "success",
           text: result.message || "Datos subidos exitosamente",
         });
+        toast.success(result.message || "Datos subidos exitosamente", {
+          position: "top-center",
+          style: {
+            background: "#22c55e",
+            color: "#ffffff",
+            border: "2px solid #16a34a",
+            fontWeight: "bold",
+          },
+          icon: <CheckCircle2 className="h-5 w-5" />,
+        });
       } else {
         setMessage({
           type: "error",
           text: result.error || "Error al subir los datos",
+        });
+        toast.error(result.error || "Error al subir los datos", {
+          position: "top-center",
+          style: {
+            background: "#ef4444",
+            color: "#ffffff",
+            border: "2px solid #dc2626",
+          },
         });
       }
     } catch (error: any) {
@@ -108,6 +126,14 @@ export default function Page() {
         type: "error",
         text: error.message || "No se pudo procesar el archivo",
       });
+      toast.error(error.message || "No se pudo procesar el archivo", {
+        position: "top-center",
+        style: {
+          background: "#ef4444",
+          color: "#ffffff",
+          border: "2px solid #dc2626",
+        },
+      });
     } finally {
       setUploading(false);
       setFile(null);
@@ -115,7 +141,7 @@ export default function Page() {
   };
 
   const fn_excel_template = async () => {
-    setDownloading(true); // Start loading animation
+    setDownloading(true);
     try {
       const excelBuffer = await downloadPoblacionTemplate();
 
@@ -131,12 +157,24 @@ export default function Page() {
 
       toast.success("Plantilla descargada exitosamente", {
         position: "top-center",
+        style: {
+          background: "#22c55e",
+          color: "#ffffff",
+          border: "2px solid #16a34a",
+          fontWeight: "bold",
+        },
+        icon: <CheckCircle2 className="h-5 w-5" />,
       });
     } catch (error) {
       console.error("Error al descargar la plantilla:", error);
 
       toast.error("Error al descargar la plantilla", {
         position: "top-center",
+        style: {
+          background: "#ef4444",
+          color: "#ffffff",
+          border: "2px solid #dc2626",
+        },
       });
     } finally {
       setDownloading(false);
@@ -183,9 +221,26 @@ export default function Page() {
             </Button>
           </div>
           {message && message.type === "success" && (
-            <Alert variant="default">
-              <AlertTitle>Éxito</AlertTitle>
-              <AlertDescription>{message.text}</AlertDescription>
+            <Alert
+              variant="default"
+              className="bg-green-100 border-green-500 text-green-800"
+            >
+              <CheckCircle2 className="h-5 w-5 mr-2 text-green-600" />
+              <AlertTitle className="text-lg font-semibold">¡Éxito!</AlertTitle>
+              <AlertDescription className="text-base">
+                {message.text}
+              </AlertDescription>
+            </Alert>
+          )}
+          {message && message.type === "error" && (
+            <Alert
+              variant="destructive"
+              className="bg-red-100 border-red-500 text-red-800"
+            >
+              <AlertTitle className="text-lg font-semibold">Error</AlertTitle>
+              <AlertDescription className="text-base">
+                {message.text}
+              </AlertDescription>
             </Alert>
           )}
           <ConfirmDialog

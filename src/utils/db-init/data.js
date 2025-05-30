@@ -31,181 +31,193 @@ async function seedDatabase() {
 
     const provincias = [];
     for (const prov of provinciasData) {
-      const provincia = await prisma.provincia.upsert({
-        where: {
-          nombre_departamentoId: {
+      try {
+        const provincia = await prisma.provincia.upsert({
+          where: {
+            nombre_departamentoId: {
+              nombre: prov.nombre,
+              departamentoId: prov.departamentoId,
+            },
+          },
+          update: {},
+          create: {
             nombre: prov.nombre,
             departamentoId: prov.departamentoId,
           },
-        },
-        update: { departamentoId: prov.departamentoId },
-        create: {
-          nombre: prov.nombre,
-          departamentoId: prov.departamentoId,
-        },
-      });
-      provincias.push(provincia);
+        });
+        provincias.push(provincia);
+      } catch (error) {
+        console.error(`Error al crear provincia ${prov.nombre}:`, error.message);
+        throw error;
+      }
     }
     console.log("Provincias creadas:", provincias.length);
 
     // 3. Crear Distritos
     const distritosData = [
-      // Cangallo (provinciaId = 1)
-      { nombre: "CANGALLO", provinciaId: provincias[0].id },
-      { nombre: "CHUSCHI", provinciaId: provincias[0].id },
-      { nombre: "LOS MOROCHUCOS", provinciaId: provincias[0].id },
-      { nombre: "MARIA PARADO DE BELLIDO", provinciaId: provincias[0].id },
-      { nombre: "PARAS", provinciaId: provincias[0].id },
-      { nombre: "TOTOS", provinciaId: provincias[0].id },
-      // Huamanga (provinciaId = 2)
-      { nombre: "ACOCRO", provinciaId: provincias[1].id },
-      { nombre: "ACOS VINCHOS", provinciaId: provincias[1].id },
-      {
-        nombre: "ANDRES AVELINO CACERES DORREGARAY",
-        provinciaId: provincias[1].id,
-      },
-      { nombre: "AYACUCHO", provinciaId: provincias[1].id },
-      { nombre: "CARMEN ALTO", provinciaId: provincias[1].id },
-      { nombre: "CHIARA", provinciaId: provincias[1].id },
-      { nombre: "JESUS NAZARENO", provinciaId: provincias[1].id },
-      { nombre: "OCROS", provinciaId: provincias[1].id },
-      { nombre: "PACAYCASA", provinciaId: provincias[1].id },
-      { nombre: "QUINUA", provinciaId: provincias[1].id },
-      { nombre: "SAN JOSE DE TICLLAS", provinciaId: provincias[1].id },
-      { nombre: "SAN JUAN BAUTISTA", provinciaId: provincias[1].id },
-      { nombre: "SANTIAGO DE PISCHA", provinciaId: provincias[1].id },
-      { nombre: "SOCOS", provinciaId: provincias[1].id },
-      { nombre: "TAMBILLO", provinciaId: provincias[1].id },
-      { nombre: "VINCHOS", provinciaId: provincias[1].id },
-      // Huanca Sancos (provinciaId = 3)
-      { nombre: "CARAPO", provinciaId: provincias[2].id },
-      { nombre: "SACSAMARCA", provinciaId: provincias[2].id },
-      { nombre: "HUANCA SANCOS", provinciaId: provincias[2].id },
-      { nombre: "SANTIAGO DE LUCANAMARCA", provinciaId: provincias[2].id },
-      // Huanta (provinciaId = 4)
-      { nombre: "AYAHUANCO", provinciaId: provincias[3].id },
-      { nombre: "CANAYRE", provinciaId: provincias[3].id },
-      { nombre: "CHACA", provinciaId: provincias[3].id },
-      { nombre: "HUAMANGUILLA", provinciaId: provincias[3].id },
-      { nombre: "HUANTA", provinciaId: provincias[3].id },
-      { nombre: "IGUAIN", provinciaId: provincias[3].id },
-      { nombre: "LLOCHEGUA", provinciaId: provincias[3].id },
-      { nombre: "LURICOCHA", provinciaId: provincias[3].id },
-      { nombre: "PUCACOLPA", provinciaId: provincias[3].id },
-      { nombre: "PUTIS", provinciaId: provincias[3].id },
-      { nombre: "SANTILLANA", provinciaId: provincias[3].id },
-      { nombre: "SIVIA", provinciaId: provincias[3].id },
-      { nombre: "UCHURACCAY", provinciaId: provincias[3].id },
-      // La Mar (provinciaId = 5)
-      { nombre: "ANCHIHUAY", provinciaId: provincias[4].id },
-      { nombre: "ANCO", provinciaId: provincias[4].id },
-      { nombre: "AYNA", provinciaId: provincias[4].id },
-      { nombre: "CHILCAS", provinciaId: provincias[4].id },
-      { nombre: "CHUNGUI", provinciaId: provincias[4].id },
-      { nombre: "LUIS CARRANZA", provinciaId: provincias[4].id },
-      { nombre: "NINABAMBA", provinciaId: provincias[4].id },
-      { nombre: "ORONCCOY", provinciaId: provincias[4].id },
-      { nombre: "PATIBAMBA", provinciaId: provincias[4].id },
-      { nombre: "RIO MAGDALENA", provinciaId: provincias[4].id },
-      { nombre: "SAMUGARI", provinciaId: provincias[4].id },
-      { nombre: "SAN MIGUEL", provinciaId: provincias[4].id },
-      { nombre: "SANTA ROSA", provinciaId: provincias[4].id },
-      { nombre: "TAMBO", provinciaId: provincias[4].id },
-      { nombre: "UNION PROGRESO", provinciaId: provincias[4].id },
-      // Lucanas (provinciaId = 6)
-      { nombre: "AUCARA", provinciaId: provincias[5].id },
-      { nombre: "CABANA", provinciaId: provincias[5].id },
-      { nombre: "CARMEN SALCEDO", provinciaId: provincias[5].id },
-      { nombre: "CHAVIÑA", provinciaId: provincias[5].id },
-      { nombre: "CHIPAO", provinciaId: provincias[5].id },
-      { nombre: "HUACHUAS", provinciaId: provincias[5].id },
-      { nombre: "LARAMATE", provinciaId: provincias[5].id },
-      { nombre: "LEONCIO PRADO", provinciaId: provincias[5].id },
-      { nombre: "LLAUTA", provinciaId: provincias[5].id },
-      { nombre: "LUCANAS", provinciaId: provincias[5].id },
-      { nombre: "OCAÑA", provinciaId: provincias[5].id },
-      { nombre: "OTOCA", provinciaId: provincias[5].id },
-      { nombre: "SAISA", provinciaId: provincias[5].id },
-      { nombre: "SAN CRISTOBAL", provinciaId: provincias[5].id },
-      { nombre: "SAN JUAN", provinciaId: provincias[5].id },
-      { nombre: "SAN PEDRO", provinciaId: provincias[5].id },
-      { nombre: "SAN PEDRO DE PALCO", provinciaId: provincias[5].id },
-      { nombre: "SANCOS", provinciaId: provincias[5].id },
-      { nombre: "SANTA ANA DE HUAYCAHUACHO", provinciaId: provincias[5].id },
-      { nombre: "SANTA LUCIA", provinciaId: provincias[5].id },
-      { nombre: "PUQUIO", provinciaId: provincias[5].id },
-      // Parinacochas (provinciaId = 7)
-      { nombre: "CHUMPI", provinciaId: provincias[6].id },
-      { nombre: "CORACORA", provinciaId: provincias[6].id },
-      { nombre: "CORONEL CASTAÑEDA", provinciaId: provincias[6].id },
-      { nombre: "PACAPAUSA", provinciaId: provincias[6].id },
-      { nombre: "PULLO", provinciaId: provincias[6].id },
-      { nombre: "PUYUSCA", provinciaId: provincias[6].id },
-      { nombre: "SAN FRANCISCO DE RAVACAYCO", provinciaId: provincias[6].id },
-      { nombre: "UPAHUACHO", provinciaId: provincias[6].id },
-      // Paucar del Sara Sara (provinciaId = 8)
-      { nombre: "COLTA", provinciaId: provincias[7].id },
-      { nombre: "CORCULLA", provinciaId: provincias[7].id },
-      { nombre: "LAMPA", provinciaId: provincias[7].id },
-      { nombre: "MARCABAMBA", provinciaId: provincias[7].id },
-      { nombre: "OYOLO", provinciaId: provincias[7].id },
-      { nombre: "PARARCA", provinciaId: provincias[7].id },
-      { nombre: "PAUSA", provinciaId: provincias[7].id },
-      { nombre: "SAN JAVIER DE ALPABAMBA", provinciaId: provincias[7].id },
-      { nombre: "SAN JOSE DE USHUA", provinciaId: provincias[7].id },
-      { nombre: "SARA SARA", provinciaId: provincias[7].id },
-      // Sucre (provinciaId = 9)
-      { nombre: "BELEN", provinciaId: provincias[8].id },
-      { nombre: "CHALCOS", provinciaId: provincias[8].id },
-      { nombre: "CHILCAYOC", provinciaId: provincias[8].id },
-      { nombre: "HUACAÑA", provinciaId: provincias[8].id },
-      { nombre: "MORCOLLA", provinciaId: provincias[8].id },
-      { nombre: "PAICO", provinciaId: provincias[8].id },
-      { nombre: "QUEROBAMBA", provinciaId: provincias[8].id },
-      { nombre: "SAN PEDRO DE LARCAY", provinciaId: provincias[8].id },
-      { nombre: "SAN SALVADOR DE QUIJE", provinciaId: provincias[8].id },
-      { nombre: "SANTIAGO DE PAUCARAY", provinciaId: provincias[8].id },
-      { nombre: "SORAS", provinciaId: provincias[8].id },
-      // Victor Fajardo (provinciaId = 10)
-      { nombre: "ALCAMENCA", provinciaId: provincias[9].id },
-      { nombre: "APONGO", provinciaId: provincias[9].id },
-      { nombre: "ASQUIPATA", provinciaId: provincias[9].id },
-      { nombre: "CANARIA", provinciaId: provincias[9].id },
-      { nombre: "CAYARA", provinciaId: provincias[9].id },
-      { nombre: "COLCA", provinciaId: provincias[9].id },
-      { nombre: "HUAMANQUIQUIA", provinciaId: provincias[9].id },
-      { nombre: "HUANCAPI", provinciaId: provincias[9].id },
-      { nombre: "HUANCARAYLLA", provinciaId: provincias[9].id },
-      { nombre: "HUAYA", provinciaId: provincias[9].id },
-      { nombre: "SARHUA", provinciaId: provincias[9].id },
-      { nombre: "VILCANCHOS", provinciaId: provincias[9].id },
-      // Vilcas Huaman (provinciaId = 11)
-      { nombre: "ACCOMARCA", provinciaId: provincias[10].id },
-      { nombre: "CARHUANCA", provinciaId: provincias[10].id },
-      { nombre: "CONCEPCION", provinciaId: provincias[10].id },
-      { nombre: "HUAMBALPA", provinciaId: provincias[10].id },
-      { nombre: "INDEPENDENCIA", provinciaId: provincias[10].id },
-      { nombre: "SAURAMA", provinciaId: provincias[10].id },
-      { nombre: "VILCAS HUAMAN", provinciaId: provincias[10].id },
-      { nombre: "VISCHONGO", provinciaId: provincias[10].id },
+      // Cangallo
+      { nombre: "CANGALLO", provinciaId: provincias[0].id, ubigeoDistrital: "050201" },
+      { nombre: "CHUSCHI", provinciaId: provincias[0].id, ubigeoDistrital: "050202" },
+      { nombre: "LOS MOROCHUCOS", provinciaId: provincias[0].id, ubigeoDistrital: "050203" },
+      { nombre: "MARIA PARADO DE BELLIDO", provinciaId: provincias[0].id, ubigeoDistrital: "050204" },
+      { nombre: "PARAS", provinciaId: provincias[0].id, ubigeoDistrital: "050205" },
+      { nombre: "TOTOS", provinciaId: provincias[0].id, ubigeoDistrital: "050206" },
+      // Huamanga
+      { nombre: "ACOCRO", provinciaId: provincias[1].id, ubigeoDistrital: "050102" },
+      { nombre: "ACOS VINCHOS", provinciaId: provincias[1].id, ubigeoDistrital: "050103" },
+      { nombre: "ANDRES AVELINO CACERES DORREGARAY", provinciaId: provincias[1].id, ubigeoDistrital: "050116" },
+      { nombre: "AYACUCHO", provinciaId: provincias[1].id, ubigeoDistrital: "050101" },
+      { nombre: "CARMEN ALTO", provinciaId: provincias[1].id, ubigeoDistrital: "050104" },
+      { nombre: "CHIARA", provinciaId: provincias[1].id, ubigeoDistrital: "050105" },
+      { nombre: "JESUS NAZARENO", provinciaId: provincias[1].id, ubigeoDistrital: "050115" },
+      { nombre: "OCROS", provinciaId: provincias[1].id, ubigeoDistrital: "050106" },
+      { nombre: "PACAYCASA", provinciaId: provincias[1].id, ubigeoDistrital: "050107" },
+      { nombre: "QUINUA", provinciaId: provincias[1].id, ubigeoDistrital: "050108" },
+      { nombre: "SAN JOSE DE TICLLAS", provinciaId: provincias[1].id, ubigeoDistrital: "050109" },
+      { nombre: "SAN JUAN BAUTISTA", provinciaId: provincias[1].id, ubigeoDistrital: "050110" },
+      { nombre: "SANTIAGO DE PISCHA", provinciaId: provincias[1].id, ubigeoDistrital: "050111" },
+      { nombre: "SOCOS", provinciaId: provincias[1].id, ubigeoDistrital: "050112" },
+      { nombre: "TAMBILLO", provinciaId: provincias[1].id, ubigeoDistrital: "050113" },
+      { nombre: "VINCHOS", provinciaId: provincias[1].id, ubigeoDistrital: "050114" },
+      // Huanca Sancos
+      { nombre: "CARAPO", provinciaId: provincias[2].id, ubigeoDistrital: "050302" },
+      { nombre: "SACSAMARCA", provinciaId: provincias[2].id, ubigeoDistrital: "050303" },
+      { nombre: "SANCOS", provinciaId: provincias[2].id, ubigeoDistrital: "050301" },
+      { nombre: "SANTIAGO DE LUCANAMARCA", provinciaId: provincias[2].id, ubigeoDistrital: "050304" },
+      // Huanta
+      { nombre: "AYAHUANCO", provinciaId: provincias[3].id, ubigeoDistrital: "050402" },
+      { nombre: "CANAYRE", provinciaId: provincias[3].id, ubigeoDistrital: "050409" },
+      { nombre: "CHACA", provinciaId: provincias[3].id, ubigeoDistrital: "050412" },
+      { nombre: "HUAMANGUILLA", provinciaId: provincias[3].id, ubigeoDistrital: "050403" },
+      { nombre: "HUANTA", provinciaId: provincias[3].id, ubigeoDistrital: "050401" },
+      { nombre: "IGUAIN", provinciaId: provincias[3].id, ubigeoDistrital: "050404" },
+      { nombre: "LLOCHEGUA", provinciaId: provincias[3].id, ubigeoDistrital: "050408" },
+      { nombre: "LURICOCHA", provinciaId: provincias[3].id, ubigeoDistrital: "050405" },
+      { nombre: "PUCACOLPA", provinciaId: provincias[3].id, ubigeoDistrital: "050411" },
+      { nombre: "PUTIS", provinciaId: provincias[3].id, ubigeoDistrital: "050413" },
+      { nombre: "SANTILLANA", provinciaId: provincias[3].id, ubigeoDistrital: "050406" },
+      { nombre: "SIVIA", provinciaId: provincias[3].id, ubigeoDistrital: "050407" },
+      { nombre: "UCHURACCAY", provinciaId: provincias[3].id, ubigeoDistrital: "050410" },
+      // La Mar
+      { nombre: "ANCHIHUAY", provinciaId: provincias[4].id, ubigeoDistrital: "050510" },
+      { nombre: "ANCO", provinciaId: provincias[4].id, ubigeoDistrital: "050502" },
+      { nombre: "AYNA", provinciaId: provincias[4].id, ubigeoDistrital: "050503" },
+      { nombre: "CHILCAS", provinciaId: provincias[4].id, ubigeoDistrital: "050504" },
+      { nombre: "CHUNGUI", provinciaId: provincias[4].id, ubigeoDistrital: "050505" },
+      { nombre: "LUIS CARRANZA", provinciaId: provincias[4].id, ubigeoDistrital: "050506" },
+      { nombre: "NINABAMBA", provinciaId: provincias[4].id, ubigeoDistrital: "050514" },
+      { nombre: "ORONCCOY", provinciaId: provincias[4].id, ubigeoDistrital: "050511" },
+      { nombre: "PATIBAMBA", provinciaId: provincias[4].id, ubigeoDistrital: "050515" },
+      { nombre: "RIO MAGDALENA", provinciaId: provincias[4].id, ubigeoDistrital: "050513" },
+      { nombre: "SAMUGARI", provinciaId: provincias[4].id, ubigeoDistrital: "050509" },
+      { nombre: "SAN MIGUEL", provinciaId: provincias[4].id, ubigeoDistrital: "050501" },
+      { nombre: "SANTA ROSA", provinciaId: provincias[4].id, ubigeoDistrital: "050507" },
+      { nombre: "TAMBO", provinciaId: provincias[4].id, ubigeoDistrital: "050508" },
+      { nombre: "UNION PROGRESO", provinciaId: provincias[4].id, ubigeoDistrital: "050512" },
+      // Lucanas
+      { nombre: "AUCARA", provinciaId: provincias[5].id, ubigeoDistrital: "050602" },
+      { nombre: "CABANA", provinciaId: provincias[5].id, ubigeoDistrital: "050603" },
+      { nombre: "CARMEN SALCEDO", provinciaId: provincias[5].id, ubigeoDistrital: "050604" },
+      { nombre: "CHAVIÑA", provinciaId: provincias[5].id, ubigeoDistrital: "050605" },
+      { nombre: "CHIPAO", provinciaId: provincias[5].id, ubigeoDistrital: "050606" },
+      { nombre: "HUAC-HUAS", provinciaId: provincias[5].id, ubigeoDistrital: "050607" },
+      { nombre: "LARAMATE", provinciaId: provincias[5].id, ubigeoDistrital: "050608" },
+      { nombre: "LEONCIO PRADO", provinciaId: provincias[5].id, ubigeoDistrital: "050609" },
+      { nombre: "LLAUTA", provinciaId: provincias[5].id, ubigeoDistrital: "050610" },
+      { nombre: "LUCANAS", provinciaId: provincias[5].id, ubigeoDistrital: "050611" },
+      { nombre: "OCAÑA", provinciaId: provincias[5].id, ubigeoDistrital: "050612" },
+      { nombre: "OTOCA", provinciaId: provincias[5].id, ubigeoDistrital: "050613" },
+      { nombre: "PUQUIO", provinciaId: provincias[5].id, ubigeoDistrital: "050601" },
+      { nombre: "SAISA", provinciaId: provincias[5].id, ubigeoDistrital: "050614" },
+      { nombre: "SAN CRISTOBAL", provinciaId: provincias[5].id, ubigeoDistrital: "050615" },
+      { nombre: "SAN JUAN", provinciaId: provincias[5].id, ubigeoDistrital: "050616" },
+      { nombre: "SAN PEDRO", provinciaId: provincias[5].id, ubigeoDistrital: "050617" },
+      { nombre: "SAN PEDRO DE PALCO", provinciaId: provincias[5].id, ubigeoDistrital: "050618" },
+      { nombre: "SANCOS", provinciaId: provincias[5].id, ubigeoDistrital: "050619" },
+      { nombre: "SANTA ANA DE HUAYCAHUACHO", provinciaId: provincias[5].id, ubigeoDistrital: "050620" },
+      { nombre: "SANTA LUCIA", provinciaId: provincias[5].id, ubigeoDistrital: "050621" },
+      // Parinacochas
+      { nombre: "CHUMPI", provinciaId: provincias[6].id, ubigeoDistrital: "050702" },
+      { nombre: "CORACORA", provinciaId: provincias[6].id, ubigeoDistrital: "050701" },
+      { nombre: "CORONEL CASTAÑEDA", provinciaId: provincias[6].id, ubigeoDistrital: "050703" },
+      { nombre: "PACAPAUSA", provinciaId: provincias[6].id, ubigeoDistrital: "050704" },
+      { nombre: "PULLO", provinciaId: provincias[6].id, ubigeoDistrital: "050705" },
+      { nombre: "PUYUSCA", provinciaId: provincias[6].id, ubigeoDistrital: "050706" },
+      { nombre: "SAN FRANCISCO DE RAVACAYCO", provinciaId: provincias[6].id, ubigeoDistrital: "050707" },
+      { nombre: "UPAHUACHO", provinciaId: provincias[6].id, ubigeoDistrital: "050708" },
+      // Paucar del Sara Sara
+      { nombre: "COLTA", provinciaId: provincias[7].id, ubigeoDistrital: "050802" },
+      { nombre: "CORCULLA", provinciaId: provincias[7].id, ubigeoDistrital: "050803" },
+      { nombre: "LAMPA", provinciaId: provincias[7].id, ubigeoDistrital: "050804" },
+      { nombre: "MARCABAMBA", provinciaId: provincias[7].id, ubigeoDistrital: "050805" },
+      { nombre: "OYOLO", provinciaId: provincias[7].id, ubigeoDistrital: "050806" },
+      { nombre: "PARARCA", provinciaId: provincias[7].id, ubigeoDistrital: "050807" },
+      { nombre: "PAUSA", provinciaId: provincias[7].id, ubigeoDistrital: "050801" },
+      { nombre: "SAN JAVIER DE ALPABAMBA", provinciaId: provincias[7].id, ubigeoDistrital: "050808" },
+      { nombre: "SAN JOSE DE USHUA", provinciaId: provincias[7].id, ubigeoDistrital: "050809" },
+      { nombre: "SARA SARA", provinciaId: provincias[7].id, ubigeoDistrital: "050810" },
+      // Sucre
+      { nombre: "BELEN", provinciaId: provincias[8].id, ubigeoDistrital: "050902" },
+      { nombre: "CHALCOS", provinciaId: provincias[8].id, ubigeoDistrital: "050903" },
+      { nombre: "CHILCAYOC", provinciaId: provincias[8].id, ubigeoDistrital: "050904" },
+      { nombre: "HUACAÑA", provinciaId: provincias[8].id, ubigeoDistrital: "050905" },
+      { nombre: "MORCOLLA", provinciaId: provincias[8].id, ubigeoDistrital: "050906" },
+      { nombre: "PAICO", provinciaId: provincias[8].id, ubigeoDistrital: "050907" },
+      { nombre: "QUEROBAMBA", provinciaId: provincias[8].id, ubigeoDistrital: "050901" },
+      { nombre: "SAN PEDRO DE LARCAY", provinciaId: provincias[8].id, ubigeoDistrital: "050908" },
+      { nombre: "SAN SALVADOR DE QUIJE", provinciaId: provincias[8].id, ubigeoDistrital: "050909" },
+      { nombre: "SANTIAGO DE PAUCARAY", provinciaId: provincias[8].id, ubigeoDistrital: "050910" },
+      { nombre: "SORAS", provinciaId: provincias[8].id, ubigeoDistrital: "050911" },
+      // Victor Fajardo
+      { nombre: "ALCAMENCA", provinciaId: provincias[9].id, ubigeoDistrital: "051002" },
+      { nombre: "APONGO", provinciaId: provincias[9].id, ubigeoDistrital: "051003" },
+      { nombre: "ASQUIPATA", provinciaId: provincias[9].id, ubigeoDistrital: "051004" },
+      { nombre: "CANARIA", provinciaId: provincias[9].id, ubigeoDistrital: "051005" },
+      { nombre: "CAYARA", provinciaId: provincias[9].id, ubigeoDistrital: "051006" },
+      { nombre: "COLCA", provinciaId: provincias[9].id, ubigeoDistrital: "051007" },
+      { nombre: "HUAMANQUIQUIA", provinciaId: provincias[9].id, ubigeoDistrital: "051008" },
+      { nombre: "HUANCAPI", provinciaId: provincias[9].id, ubigeoDistrital: "051001" },
+      { nombre: "HUANCARAYLLA", provinciaId: provincias[9].id, ubigeoDistrital: "051009" },
+      { nombre: "HUALLA", provinciaId: provincias[9].id, ubigeoDistrital: "051010" },
+      { nombre: "SARHUA", provinciaId: provincias[9].id, ubigeoDistrital: "051011" },
+      { nombre: "VILCANCHOS", provinciaId: provincias[9].id, ubigeoDistrital: "051012" },
+      // Vilcas Huaman
+      { nombre: "ACCOMARCA", provinciaId: provincias[10].id, ubigeoDistrital: "051102" },
+      { nombre: "CARHUANCA", provinciaId: provincias[10].id, ubigeoDistrital: "051103" },
+      { nombre: "CONCEPCION", provinciaId: provincias[10].id, ubigeoDistrital: "051104" },
+      { nombre: "HUAMBALPA", provinciaId: provincias[10].id, ubigeoDistrital: "051105" },
+      { nombre: "INDEPENDENCIA", provinciaId: provincias[10].id, ubigeoDistrital: "051106" },
+      { nombre: "SAURAMA", provinciaId: provincias[10].id, ubigeoDistrital: "051107" },
+      { nombre: "VILCAS HUAMAN", provinciaId: provincias[10].id, ubigeoDistrital: "051101" },
+      { nombre: "VISCHONGO", provinciaId: provincias[10].id, ubigeoDistrital: "051108" },
     ];
 
     const distritos = [];
     for (const dist of distritosData) {
-      const distrito = await prisma.distrito.upsert({
-        where: {
-          nombre_provinciaId: {
+      try {
+        const distrito = await prisma.distrito.upsert({
+          where: {
+            nombre_provinciaId: {
+              nombre: dist.nombre,
+              provinciaId: dist.provinciaId,
+            },
+          },
+          update: {
             nombre: dist.nombre,
             provinciaId: dist.provinciaId,
+            ubigeoDistrital: dist.ubigeoDistrital,
           },
-        },
-        update: { provinciaId: dist.provinciaId },
-        create: {
-          nombre: dist.nombre,
-          provinciaId: dist.provinciaId,
-        },
-      });
-      distritos.push(distrito);
+          create: {
+            nombre: dist.nombre,
+            provinciaId: dist.provinciaId,
+            ubigeoDistrital: dist.ubigeoDistrital,
+          },
+        });
+        distritos.push(distrito);
+      } catch (error) {
+        console.error(`Error al crear distrito ${dist.nombre}:`, error.message);
+        throw error;
+      }
     }
     console.log("Distritos creados:", distritos.length);
 
@@ -275,67 +287,67 @@ async function seedDatabase() {
 
     // 7. Crear Ubicaciones
     const ubicacionesData = [
-      // Cangallo (provinciaId = 1, distritos 1-6)
+      // Cangallo
       ...Array.from({ length: 6 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[0].id,
         distritoId: distritos[i].id,
       })),
-      // Huamanga (provinciaId = 2, distritos 7-22)
+      // Huamanga
       ...Array.from({ length: 16 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[1].id,
         distritoId: distritos[i + 6].id,
       })),
-      // Huanca Sancos (provinciaId = 3, distritos 23-26)
+      // Huanca Sancos
       ...Array.from({ length: 4 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[2].id,
         distritoId: distritos[i + 22].id,
       })),
-      // Huanta (provinciaId = 4, distritos 27-39)
+      // Huanta
       ...Array.from({ length: 13 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[3].id,
         distritoId: distritos[i + 26].id,
       })),
-      // La Mar (provinciaId = 5, distritos 40-54)
+      // La Mar
       ...Array.from({ length: 15 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[4].id,
         distritoId: distritos[i + 39].id,
       })),
-      // Lucanas (provinciaId = 6, distritos 55-75)
+      // Lucanas
       ...Array.from({ length: 21 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[5].id,
         distritoId: distritos[i + 54].id,
       })),
-      // Parinacochas (provinciaId = 7, distritos 76-83)
+      // Parinacochas
       ...Array.from({ length: 8 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[6].id,
         distritoId: distritos[i + 75].id,
       })),
-      // Paucar del Sara Sara (provinciaId = 8, distritos 84-93)
+      // Paucar del Sara Sara
       ...Array.from({ length: 10 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[7].id,
         distritoId: distritos[i + 83].id,
       })),
-      // Sucre (provinciaId = 9, distritos 94-104)
+      // Sucre
       ...Array.from({ length: 11 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[8].id,
         distritoId: distritos[i + 93].id,
       })),
-      // Victor Fajardo (provinciaId = 10, distritos 105-116)
+      // Victor Fajardo
       ...Array.from({ length: 12 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[9].id,
         distritoId: distritos[i + 104].id,
       })),
-      // Vilcas Huaman (provinciaId = 11, distritos 117-124)
+      // Vilcas Huaman
       ...Array.from({ length: 8 }, (_, i) => ({
         departamentoId: departamento.id,
         provinciaId: provincias[10].id,

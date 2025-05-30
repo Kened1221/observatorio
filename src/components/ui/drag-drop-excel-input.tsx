@@ -37,6 +37,10 @@ export default function DragDropExcelInput({
     if (selectedFile && selectedFile.name.match(/\.(xlsx|xls)$/)) {
       setFile(selectedFile);
       onFileSelect?.(selectedFile);
+      // Limpiar el input para permitir nuevas selecciones
+      if (inputRef.current) {
+        inputRef.current.value = "";
+      }
     } else if (selectedFile) {
       toasterCustom(
         400,
@@ -58,8 +62,8 @@ export default function DragDropExcelInput({
     <div
       ref={wrapperRef}
       className={`relative w-full border-dashed border-2 rounded-lg flex items-center justify-center p-6 cursor-pointer transition-colors ${file
-          ? "border-ring bg-primary/10"
-          : "border-primary hover:border-ring hover:bg-primary/10"
+        ? "border-ring bg-primary/10"
+        : "border-primary hover:border-ring hover:bg-primary/10"
         }`}
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragLeave}

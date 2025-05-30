@@ -62,9 +62,8 @@ export default function Navbar() {
 
   return (
     <nav
-      className={`sticky z-50 w-[80%] mx-auto h-20 md:h-24 bg-red-600/80 backdrop-blur-sm text-white shadow-sm flex items-center transition-all duration-300 ${
-        isScrolled ? "top-0 rounded-none w-full" : isMenuOpen? "top-6 rounded-t-[3rem]" : "top-6 rounded-full"
-      }`}
+      className={`sticky z-50 w-[80%] mx-auto h-20 md:h-24 bg-red-600/80 backdrop-blur-sm text-white shadow-sm flex items-center transition-all duration-300 ${isScrolled ? "top-0 rounded-none w-full" : isMenuOpen ? "top-6 rounded-t-[3rem]" : "top-6 rounded-full"
+        }`}
     >
       <div className="container mx-auto px-4 py-3">
         <div className="flex items-center justify-between gap-4">
@@ -110,7 +109,7 @@ export default function Navbar() {
                 href="/dashboard/cuantos-somos"
                 className="px-3 py-2 text-sm"
               >
-                ¿Cuánto somos?
+                ¿Cuántos somos?
               </Link>
             </div>
             <div
@@ -200,10 +199,9 @@ export default function Navbar() {
             z-50 
             lg:hidden
             transform transition-all duration-500 ease-in-out
-            ${
-              !isMenuOpen && !isAnimating
-                ? "pointer-events-none -translate-y-full opacity-0"
-                : "pointer-events-auto translate-y-0 opacity-100"
+            ${!isMenuOpen && !isAnimating
+              ? "pointer-events-none -translate-y-full opacity-0"
+              : "pointer-events-auto translate-y-0 opacity-100"
             }
           `}
         >
@@ -218,18 +216,16 @@ export default function Navbar() {
               max-h-[calc(100vh-5rem)] 
               overflow-y-auto 
               transition-all duration-500 ease-in-out transform
-              ${
-                isAnimating && !isMenuOpen
-                  ? "scale-95 -translate-x-4"
-                  : "scale-100 translate-x-0"
+              ${isAnimating && !isMenuOpen
+                ? "scale-95 -translate-x-4"
+                : "scale-100 translate-x-0"
               }
             `}
           >
             <Link
               href="/"
-              className={`flex items-center rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${
-                getActiveClass("/") ? "bg-gray-200 text-primary" : ""
-              }`}
+              className={`flex items-center rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${getActiveClass("/") ? "bg-gray-200 text-primary" : ""
+                }`}
               onClick={handleLinkClick}
             >
               <Home className="mr-2 h-4 w-4" />
@@ -237,66 +233,60 @@ export default function Navbar() {
             </Link>
             <Link
               href="/dashboard/cuantos-somos"
-              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${
-                getActiveClass("/dashboard/cuantos-somos")
+              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${getActiveClass("/dashboard/cuantos-somos")
                   ? "bg-gray-200 text-primary"
                   : ""
-              }`}
+                }`}
               onClick={handleLinkClick}
             >
-              ¿Cuánto somos?
+              ¿Cuántos somos?
             </Link>
             <Link
               href="/dashboard/donde-estamos"
-              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${
-                getActiveClass("/dashboard/donde-estamos")
+              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${getActiveClass("/dashboard/donde-estamos")
                   ? "bg-gray-200 text-primary"
                   : ""
-              }`}
+                }`}
               onClick={handleLinkClick}
             >
               ¿Dónde estamos?
             </Link>
             <Link
               href="/dashboard/como-estamos"
-              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${
-                getActiveClass("/dashboard/como-estamos")
+              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${getActiveClass("/dashboard/como-estamos")
                   ? "bg-gray-200 text-primary"
                   : ""
-              }`}
+                }`}
               onClick={handleLinkClick}
             >
               ¿Cómo estamos?
             </Link>
             <Link
               href="/dashboard/normas-informes"
-              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${
-                getActiveClass("/dashboard/normas-informes")
+              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${getActiveClass("/dashboard/normas-informes")
                   ? "bg-gray-200 text-primary"
                   : ""
-              }`}
+                }`}
               onClick={handleLinkClick}
             >
               Normas e informes
             </Link>
             <Link
               href="/dashboard/notas-actualidad"
-              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${
-                getActiveClass("/dashboard/notas-actualidad")
+              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${getActiveClass("/dashboard/notas-actualidad")
                   ? "bg-gray-200 text-primary"
                   : ""
-              }`}
+                }`}
               onClick={handleLinkClick}
             >
               Notas de actualidad
             </Link>
             <Link
               href="/dashboard/participacion-ciudadana"
-              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${
-                getActiveClass("/dashboard/participacion-ciudadana")
+              className={`block rounded-md px-4 py-2 text-sm hover:bg-gray-100 ${getActiveClass("/dashboard/participacion-ciudadana")
                   ? "bg-gray-200 text-primary"
                   : ""
-              }`}
+                }`}
               onClick={handleLinkClick}
             >
               Participación ciudadana

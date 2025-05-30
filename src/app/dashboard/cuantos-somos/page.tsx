@@ -54,7 +54,8 @@ export default function MapPoblacion() {
   const [pAselect, setPAselect] = useState<string>("poblacion");
   const [provincia, setProvincia] = useState<string>("all");
   const [distrito, setDistrito] = useState<string>("all");
-  const [tipo, setTipo] = useState<string>("all");
+  const [genero, setGenero] = useState<string>("all");
+  const [ambito, setAmbito] = useState<string>("all");
   const [rangoEdad, setRangoEdad] = useState<string>("Todos");
   const [anio, setAnio] = useState<number>(new Date().getFullYear());
   const [downloading, setDownloading] = useState(false);
@@ -127,13 +128,19 @@ export default function MapPoblacion() {
         filteredData = filteredData.filter((record) => {
           let matches = true;
           if (provincia !== "all") {
-            matches = matches && record.provincia === provincia;
+            matches = matches && record.PROVINCIA === provincia;
           }
           if (distrito !== "all") {
-            matches = matches && record.distrito === distrito;
+            matches = matches && record.DISTRITO === distrito;
           }
           if (rangoEdad !== "Todos") {
-            matches = matches && record.edadIntervalo === rangoEdad;
+            matches = matches && record["INTERVALO EDAD"] === rangoEdad;
+          }
+          if (genero !== "all") {
+            matches = matches && record.GENERO.toLowerCase() === genero.toLowerCase();
+          }
+          if (ambito !== "all") {
+            matches = matches && record.AMBITO.toLowerCase() === ambito.toLowerCase();
           }
           return matches;
         });
@@ -156,11 +163,9 @@ export default function MapPoblacion() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `Poblacion_${anio}_${
-          provincia === "all" ? "all" : provincia
-        }_${distrito === "all" ? "all" : distrito}_${
-          rangoEdad.replace(/ /g, "_") || "all"
-        }.xlsx`;
+        link.download = `Poblacion_${anio}_${provincia === "all" ? "all" : provincia
+          }_${distrito === "all" ? "all" : distrito}_${rangoEdad.replace(/ /g, "_") || "all"
+          }.xlsx`;
         link.click();
         URL.revokeObjectURL(url);
       } else {
@@ -221,12 +226,12 @@ export default function MapPoblacion() {
         </Select>
       </div>
       <div className="flex flex-col lg:flex-row w-full h-full mx-auto gap-8 p-6 items-center justify-center">
-        <Card className="shadow-lg">
+        <Card className="shadow-lg w-full">
           <CardHeader>
             <CardTitle className="text-2xl font-semibold text-gray-900">
               Datos de Población
             </CardTitle>
-            <div className="flex flex-col sm:flex-row gap-4 mt-4 items-end">
+            <div className="flex flex-col sm:flex-row gap-4 mt-4 items-end flex-wrap">
               <div>
                 <h3 className="text-sm font-medium">Provincia</h3>
                 <Select value={provincia} onValueChange={setProvincia}>
@@ -260,14 +265,28 @@ export default function MapPoblacion() {
                 </Select>
               </div>
               <div>
-                <h3 className="text-sm font-medium">Tipo</h3>
-                <Select value={tipo} onValueChange={setTipo}>
+                <h3 className="text-sm font-medium">Género</h3>
+                <Select value={genero} onValueChange={setGenero}>
                   <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Selecciona tipo" />
+                    <SelectValue placeholder="Selecciona género" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Todos</SelectItem>
-                    <SelectItem value="Ambito">Ambito</SelectItem>
+                    <SelectItem value="masculino">Masculino</SelectItem>
+                    <SelectItem value="femenino">Femenino</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <h3 className="text-sm font-medium">Ámbito</h3>
+                <Select value={ambito} onValueChange={setAmbito}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Selecciona ámbito" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Todos</SelectItem>
+                    <SelectItem value="rural">Rural</SelectItem>
+                    <SelectItem value="urbano">Urbano</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

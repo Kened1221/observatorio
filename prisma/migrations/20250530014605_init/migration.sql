@@ -152,6 +152,7 @@ CREATE TABLE "Distrito" (
     "id" SERIAL NOT NULL,
     "nombre" VARCHAR(100) NOT NULL,
     "provinciaId" INTEGER NOT NULL,
+    "ubigeoDistrital" VARCHAR(10) NOT NULL,
 
     CONSTRAINT "Distrito_pkey" PRIMARY KEY ("id")
 );
@@ -943,7 +944,7 @@ CREATE UNIQUE INDEX "Provincia_nombre_key" ON "Provincia"("nombre");
 CREATE UNIQUE INDEX "Provincia_nombre_departamentoId_key" ON "Provincia"("nombre", "departamentoId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Distrito_nombre_key" ON "Distrito"("nombre");
+CREATE UNIQUE INDEX "Distrito_ubigeoDistrital_key" ON "Distrito"("ubigeoDistrital");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Distrito_nombre_provinciaId_key" ON "Distrito"("nombre", "provinciaId");

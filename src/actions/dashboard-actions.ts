@@ -107,7 +107,10 @@ export async function uploadPoblacionData(data: any[]) {
 export async function downloadPoblacionTemplate() {
   try {
     const [ubicaciones, generos, ambitos, edadIntervalos] = await Promise.all([
-      prisma.ubicacion.findMany({ orderBy: { id: "asc" } }),
+      prisma.ubicacion.findMany({
+        orderBy: { id: "asc" },
+        include: { distrito: true },
+      }),
       prisma.genero.findMany({ orderBy: { id: "asc" } }),
       prisma.ambito.findMany({ orderBy: { id: "asc" } }),
       prisma.edadIntervalo.findMany({ orderBy: { id: "asc" } }),
@@ -127,12 +130,13 @@ export async function downloadPoblacionTemplate() {
     const templateData = [];
 
     templateData.push({
-      anio: "anio",
-      ubicacionId: "ubicacionId",
-      genero: "genero",
-      ambito: "ambito",
-      edadIntervalo: "edadIntervalo",
-      cantidad: "cantidad",
+      anio: "ANIO",
+      ubigeo_distrital: "UBIGEO_DISTRITAL",
+      ubicacionId: "UBICACION",
+      genero: "GENERO",
+      ambito: "AMBITO",
+      edadIntervalo: "INTERVALO EDAD",
+      cantidad: "CANTIDAD",
     });
 
     const anioEjemplo = new Date().getFullYear();
@@ -142,9 +146,9 @@ export async function downloadPoblacionTemplate() {
         for (const ambito of ambitos) {
           for (const edadIntervalo of edadIntervalos) {
             const cantidad = 0;
-
             templateData.push({
               anio: anioEjemplo,
+              ubigeo_distrital: ubicacion.distrito.ubigeoDistrital,
               ubicacionId: ubicacion.id,
               genero: genero.nombre,
               ambito: ambito.nombre,

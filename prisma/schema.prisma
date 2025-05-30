@@ -185,12 +185,13 @@ model Provincia {
 
 // Modelo: Distrito
 model Distrito {
-  id          Int         @id @default(autoincrement())
-  nombre      String      @unique @db.VarChar(100)
-  provinciaId Int
-  provincia   Provincia   @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
-  ubicaciones Ubicacion[]
-  avances     Avance[]    @relation("AvanceToDistrito")
+  id              Int         @id @default(autoincrement())
+  nombre          String      @db.VarChar(100)
+  provinciaId     Int
+  ubigeoDistrital String      @unique @db.VarChar(10)
+  provincia       Provincia   @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
+  ubicaciones     Ubicacion[]
+  avances         Avance[]    @relation("AvanceToDistrito")
 
   @@unique([nombre, provinciaId])
 }
