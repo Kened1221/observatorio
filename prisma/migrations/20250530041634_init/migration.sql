@@ -603,18 +603,15 @@ CREATE TABLE "IndicadorAnemia" (
 );
 
 -- CreateTable
-CREATE TABLE "NinosAnemiaNutricion" (
+CREATE TABLE "NinosAnemia" (
     "id" SERIAL NOT NULL,
+    "anio" INTEGER NOT NULL,
+    "ubicacionId" INTEGER NOT NULL,
     "numeroCasos" INTEGER NOT NULL,
     "evaluados" INTEGER NOT NULL,
     "porcentaje" DOUBLE PRECISION NOT NULL,
-    "brecha" INTEGER NOT NULL,
-    "anio" INTEGER NOT NULL,
-    "ubicacionId" INTEGER NOT NULL,
-    "tipoAnemiaId" INTEGER NOT NULL,
-    "indicadorAnemiaId" INTEGER NOT NULL,
 
-    CONSTRAINT "NinosAnemiaNutricion_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "NinosAnemia_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -1022,7 +1019,7 @@ CREATE INDEX "SaludPrenatal_mesId_idx" ON "SaludPrenatal"("mesId");
 CREATE INDEX "NinosNutricion_anio_idx" ON "NinosNutricion"("anio");
 
 -- CreateIndex
-CREATE INDEX "NinosAnemiaNutricion_anio_idx" ON "NinosAnemiaNutricion"("anio");
+CREATE INDEX "NinosAnemia_anio_idx" ON "NinosAnemia"("anio");
 
 -- CreateIndex
 CREATE INDEX "Ninos_anio_idx" ON "Ninos"("anio");
@@ -1334,13 +1331,7 @@ ALTER TABLE "NinosNutricion" ADD CONSTRAINT "NinosNutricion_tipoDesnutricionId_f
 ALTER TABLE "NinosNutricion" ADD CONSTRAINT "NinosNutricion_indicadorNutricionId_fkey" FOREIGN KEY ("indicadorNutricionId") REFERENCES "IndicadorNutricion"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "NinosAnemiaNutricion" ADD CONSTRAINT "NinosAnemiaNutricion_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "NinosAnemiaNutricion" ADD CONSTRAINT "NinosAnemiaNutricion_tipoAnemiaId_fkey" FOREIGN KEY ("tipoAnemiaId") REFERENCES "TipoAnemia"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "NinosAnemiaNutricion" ADD CONSTRAINT "NinosAnemiaNutricion_indicadorAnemiaId_fkey" FOREIGN KEY ("indicadorAnemiaId") REFERENCES "IndicadorAnemia"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "NinosAnemia" ADD CONSTRAINT "NinosAnemia_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Ninos" ADD CONSTRAINT "Ninos_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;

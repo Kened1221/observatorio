@@ -1,12 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import QualityCoverage from "./quality-coverage";
-import ContainerHealthNutrition from "./container-Health-and-nutrition";
 import { ConfirmDialog } from "@/components/ui/dialog-confirm";
-import EpidemiologicalSurveillance from "./Epidemiological-surveillance";
+import * as XLSX from "xlsx";
+import { uploadAnemiaData } from "@/actions/salud-nutricion-actions";
+import { EpidemiologicalSurveillance } from "./epidemiological-surveillance";
 
 export default function Page() {
   const [coberturaCalidadExcel, setCoberturaCalidadExcel] = useState<{
@@ -26,28 +28,159 @@ export default function Page() {
       desnutricion: null,
       dengue: null,
     });
-  const [uploading, ] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [showConfirmationModal, setShowConfirmationModal] = useState<{
     isOpen: boolean;
     category: "cobertura_calidad" | "vigilancia_epidemiologica" | null;
     subCategory: string | null;
-  }>({ isOpen: false, category: null, subCategory: null });
-  const [uploadedFiles, ] = useState<
-    {
-      id: number;
-      fileName: string;
-      category: "cobertura_calidad" | "vigilancia_epidemiologica";
-      subCategory: string;
-      uploadedAt: string;
-    }[]
-  >([]);
+    data?: any[] | null;
+    error?: string | null;
+  }>({ isOpen: false, category: null, subCategory: null, data: null, error: null });
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: "success" | "error";
+  } | null>(null);
 
   const handleCloseConfirmationModal = () => {
     setShowConfirmationModal({
       isOpen: false,
       category: null,
       subCategory: null,
+      data: null,
+      error: null,
     });
+  };
+
+  const handleConfirmUpload = async () => {
+    if (!showConfirmationModal.subCategory || !showConfirmationModal.category) return;
+
+    const file =
+      showConfirmationModal.category === "cobertura_calidad"
+        ? coberturaCalidadExcel[showConfirmationModal.subCategory]
+        : vigilanciaEpidemiologicaExcel[showConfirmationModal.subCategory];
+
+    if (!file) {
+      setShowConfirmationModal({
+        ...showConfirmationModal,
+        isOpen: false,
+        data: null,
+        error: "No se seleccionó ningún archivo",
+      });
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsArrayBuffer(file);
+      const promise = new Promise((resolve, reject) => {
+        reader.onload = async (e) => {
+          try {
+            const data = new Uint8Array(e.target?.result as ArrayBuffer);
+            const workbook = XLSX.read(data, { type: "array" });
+            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(sheet);
+
+            // Validación específica para anemia
+            if (showConfirmationModal.subCategory === "anemia") {
+              const requiredHeaders = ["ANIO", "UBICACION", "NUMERO DE CASOS", "EVALUADOS", "PORCENTAJE"];
+              const headers = Object.keys(jsonData[0] || {});
+              const missingHeaders = requiredHeaders.filter((h) => !headers.includes(h));
+              if (missingHeaders.length > 0) {
+                setShowConfirmationModal({
+                  ...showConfirmationModal,
+                  isOpen: true,
+                  error: `Faltan columnas requeridas: ${missingHeaders.join(", ")}`,
+                });
+                setUploading(false);
+                return;
+              }
+
+              const invalidRows = jsonData.filter((row: any) => {
+                return (
+                  !Number.isInteger(row.ANIO) ||
+                  !Number.isInteger(row.UBICACION) ||
+                  !Number.isInteger(row["NUMERO DE CASOS"]) ||
+                  !Number.isInteger(row.EVALUADOS) ||
+                  typeof row.PORCENTAJE !== "number"
+                );
+              });
+
+              if (invalidRows.length > 0) {
+                setShowConfirmationModal({
+                  ...showConfirmationModal,
+                  isOpen: true,
+                  error: "Datos inválidos detectados: asegúrese de que ANIO, UBICACION, NUMERO DE CASOS y EVALUADOS sean enteros, y PORCENTAJE sea un número",
+                });
+                setUploading(false);
+                return;
+              }
+
+              // Convertir los datos a un formato serializable
+              const serializableData = jsonData.map((row: any) => ({
+                ANIO: row.ANIO,
+                UBICACION: row.UBICACION,
+                "NUMERO DE CASOS": row["NUMERO DE CASOS"],
+                EVALUADOS: row.EVALUADOS,
+                PORCENTAJE: row.PORCENTAJE,
+              }));
+
+              const response = await uploadAnemiaData(serializableData);
+              if (response.success) {
+                setNotification({
+                  message: response.message || `Se subieron ${serializableData.length} registros para el año ${serializableData[0].ANIO} exitosamente`,
+                  type: "success",
+                });
+                setShowConfirmationModal({
+                  isOpen: false,
+                  category: null,
+                  subCategory: null,
+                  data: null,
+                  error: null,
+                });
+                resolve(response);
+              } else {
+                setShowConfirmationModal({
+                  ...showConfirmationModal,
+                  isOpen: true,
+                  error: response.error || "Error al subir el archivo",
+                });
+                setNotification({
+                  message: response.error || "Error al subir el archivo",
+                  type: "error",
+                });
+                resolve(response);
+              }
+            }
+          } catch (error: any) {
+            setShowConfirmationModal({
+              ...showConfirmationModal,
+              isOpen: true,
+              error: `Error al procesar el archivo: ${error.message || "Error desconocido"}`,
+            });
+            setNotification({
+              message: `Error al procesar el archivo: ${error.message || "Error desconocido"}`,
+              type: "error",
+            });
+            reject(error);
+          } finally {
+            setUploading(false);
+          }
+        };
+      });
+      await promise;
+    } catch (error: any) {
+      setShowConfirmationModal({
+        ...showConfirmationModal,
+        isOpen: true,
+        error: `Error al procesar el archivo: ${error.message || "Error desconocido"}`,
+      });
+      setNotification({
+        message: `Error al procesar el archivo: ${error.message || "Error desconocido"}`,
+        type: "error",
+      });
+      setUploading(false);
+    }
   };
 
   return (
@@ -114,14 +247,24 @@ export default function Page() {
             </CardContent>
           </Card>
         </TabsContent>
+        {notification && (
+          <div
+            className={`p-4 rounded-lg text-white ${notification.type === "success" ? "bg-green-600" : "bg-red-600"
+              }`}
+          >
+            {notification.message}
+          </div>
+        )}
       </Tabs>
-      <ContainerHealthNutrition uploadedFiles={uploadedFiles} />
       <ConfirmDialog
         isOpen={showConfirmationModal.isOpen}
         onClose={handleCloseConfirmationModal}
-        onConfirm={() => {}}
+        onConfirm={handleConfirmUpload}
         title="¿Estás seguro de guardar este archivo?"
-        description="Los datos que intentas guardar reemplazarán los registros existentes para el mismo año en la base de datos."
+        description={
+          showConfirmationModal.error ||
+          "Los datos que intentas guardar reemplazarán los registros existentes para el mismo año en la base de datos."
+        }
         styleButton="bg-blue-600 hover:bg-blue-700 text-white"
       />
     </div>

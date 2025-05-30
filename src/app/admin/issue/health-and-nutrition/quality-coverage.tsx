@@ -72,7 +72,7 @@ export default function QualityCoverage({
           }
           placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) con datos de paquetes de atención integral del niño"
         />
-        <div className="mt-6 flex gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => handleOpenConfirmationModal("paquetes_nino")}
@@ -110,7 +110,7 @@ export default function QualityCoverage({
           }
           placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) con datos de paquetes de atención integral del adolescente"
         />
-        <div className="mt-6 flex gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => handleOpenConfirmationModal("paquetes_adolescente")}
@@ -148,7 +148,7 @@ export default function QualityCoverage({
           }
           placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) con datos de paquetes de atención integral de la gestante"
         />
-        <div className="mt-6 flex gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => handleOpenConfirmationModal("paquetes_gestante")}
@@ -186,7 +186,7 @@ export default function QualityCoverage({
           }
           placeholderText="Arrastra y suelta un archivo Excel (.xlsx, .xls) con datos de paquetes de atención integral del adulto mayor"
         />
-        <div className="mt-6 flex gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
           <Button
             className="w-full bg-blue-600 hover:bg-blue-700 text-white"
             onClick={() => handleOpenConfirmationModal("paquetes_adulto_mayor")}

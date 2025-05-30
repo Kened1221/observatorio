@@ -220,7 +220,6 @@ model Ubicacion {
   ServiciosBasicos     ServiciosBasicos[]
   SaludPrenatal        SaludPrenatal[]
   NinosNutricion       NinosNutricion[]
-  NinosAnemiaNutricion NinosAnemiaNutricion[]
   Ninos                Ninos[]
   Jovenes              Jovenes[]
   GestantesAnemia      GestantesAnemia[]
@@ -231,6 +230,7 @@ model Ubicacion {
   Reniec               Reniec[]
   PersonasDiscapacidad PersonasDiscapacidad[]
   ViolenciaFemenino    ViolenciaFemenino[]
+  NinosAnemia          NinosAnemia[]
 
   @@unique([departamentoId, provinciaId, distritoId]) // Evita duplicados
 }
@@ -744,33 +744,26 @@ model NinosNutricion {
 }
 
 model TipoAnemia {
-  id                   Int                    @id @default(autoincrement())
-  nombre               String                 @db.VarChar(100) // Ej: "ANEMIA SEVERA"
-  ninosAnemiaNutricion NinosAnemiaNutricion[]
-  GestantesAnemia      GestantesAnemia[]
+  id              Int               @id @default(autoincrement())
+  nombre          String            @db.VarChar(100) // Ej: "ANEMIA SEVERA"
+  GestantesAnemia GestantesAnemia[]
 }
 
 // Modelo: IndicadorAnemia (nuevo modelo para el campo Indicador)
 model IndicadorAnemia {
-  id                   Int                    @id @default(autoincrement())
-  nombre               String                 @db.VarChar(255) // Ej: "anemia en niños entre 6 a 35 meses que accedieron a los establecimientos de"
-  ninosAnemiaNutricion NinosAnemiaNutricion[]
+  id     Int    @id @default(autoincrement())
+  nombre String @db.VarChar(255) // Ej: "anemia en niños entre 6 a 35 meses que accedieron a los establecimientos de"
 }
 
-model NinosAnemiaNutricion {
-  id                Int   @id @default(autoincrement())
-  numeroCasos       Int // Número de casos (Ej: 0)
-  evaluados         Int // Número de niños evaluados (Ej: 169)
-  porcentaje        Float // Porcentaje (Ej: 0.0)
-  brecha            Int // Brecha (Ej: 169)
-  anio              Int // Año de los datos (Ej: 2024, asumido)
-  ubicacionId       Int
-  tipoAnemiaId      Int
-  indicadorAnemiaId Int
+model NinosAnemia {
+  id          Int   @id @default(autoincrement())
+  anio        Int // Año de los datos (Ej: 2024, asumido)
+  ubicacionId Int
+  numeroCasos Int // Número de casos (Ej: 0)
+  evaluados   Int // Número de niños evaluados (Ej: 169)
+  porcentaje  Float // Porcentaje (Ej: 0.0)
 
-  ubicacion       Ubicacion       @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
-  tipoAnemia      TipoAnemia      @relation(fields: [tipoAnemiaId], references: [id], onDelete: Restrict)
-  indicadorAnemia IndicadorAnemia @relation(fields: [indicadorAnemiaId], references: [id], onDelete: Restrict)
+  ubicacion Ubicacion @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
 
   @@index([anio]) // Índice para consultas por año
 }
