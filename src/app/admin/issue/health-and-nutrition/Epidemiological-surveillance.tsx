@@ -128,7 +128,7 @@ export function EpidemiologicalSurveillance({
           />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-6">
             <Button
-              className="w-full bg-red-600 hover:bg-red-700 text-white"
+              className="w-full bg-yellow-600 hover:bg-yellow-700 text-white"
               onClick={() => handleOpenConfirmationModal(value)}
               disabled={!vigilanciaEpidemiologicaExcel[value] || uploading}
             >
@@ -146,6 +146,7 @@ export function EpidemiologicalSurveillance({
           </div>
         </TabsContent>
       ))}
+
     </Tabs>
   );
 }
