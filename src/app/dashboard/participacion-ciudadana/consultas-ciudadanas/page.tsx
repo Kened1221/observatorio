@@ -74,9 +74,8 @@ export default function Containerconsultas() {
                 key={index}
                 className="border rounded-tl-xl rounded-br-xl overflow-hidden px-6 py-2 hover:bg-gray-50 transition"
               >
-                <span className="text-lg font-semibold text-[#11024D]">{`${
-                  index + 2
-                }. ${question}`}</span>
+                <span className="text-lg font-semibold text-[#11024D]">{`${index + 2
+                  }. ${question}`}</span>
               </div>
             ))}
           </div>

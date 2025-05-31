@@ -95,9 +95,6 @@ export default function Page() {
         };
     });
 
-    console.log(mapDataArray);
-
-
     const renderChart = () => (
         <ChartContainer
             config={chartConfig}
@@ -162,7 +159,7 @@ export default function Page() {
     );
 
     return (
-        <Card className="border-none shadow-lg">
+        <Card className="border-none shadow-lg w-full h-full max-w-[80%] mx-auto p-20">
             <CardHeader>
                 <CardTitle className="text-2xl font-semibold text-red-900">
                     Promedios de Avances por Objetivo

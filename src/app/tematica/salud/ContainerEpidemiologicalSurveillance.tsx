@@ -213,6 +213,20 @@ export default function ContainerEpidemiologicalSurveillance() {
             <TabsTrigger value="dengue">Dengue</TabsTrigger>
           </TabsList>
 
+          <div className="font-extrabold text-red-500 text-center p-8 max-w-7xl mx-auto">
+            <h1 className="text-4xl">
+              {category === "poblacion_curso_vida" ? (
+                `POBLACIÓN POR CURSO DE VIDA QUE ACCEDEN AL ESTABLECIMIENTO DE SALUD DIRESA AYACUCHO`
+              ) : category === "anemia" ? (
+                `ANEMIA EN NIÑOS DE 6 A 35 MESES QUE ACCEDEN AL ESTABLECIMIENTO DE SALUD DIRESA AYACUCHO`
+              ) : category === "desnutricion" ? (
+                `DESNUTRICION CRONICA EN NIÑOS MENORES DE 5 AÑOS  QUE ACCEDEN A ESTABLECIMIENTOS DE SALUD DIRESA AYACUCHO`
+              ) : (
+                ` DENGUE NIÑOS MENORES QUE ACCEDEN A ESTABLECIMIENTOS DE SALUD DIRESA AYACUCHO ANUAL`
+              )}
+            </h1>
+          </div>
+
           {["poblacion_curso_vida", "anemia", "desnutricion", "dengue"].map((tab) => (
             <TabsContent key={tab} value={tab}>
               <div className="flex flex-col lg:flex-row gap-6 pt-8">
@@ -241,6 +255,6 @@ export default function ContainerEpidemiologicalSurveillance() {
           ))}
         </Tabs>
       </CardContent>
-    </Card>
+    </Card >
   );
 }
