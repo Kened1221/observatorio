@@ -1,3 +1,4 @@
+// Page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -84,13 +85,18 @@ export default function Page() {
         return acc;
     }, {});
 
-    const mapDataArray = Object.values(mapData).map((items) => ({
-        ubicacionId: items[0].ubicacionId,
-        provincia: items[0].provincia,
-        distrito: items[0].distrito,
-        porcentaje:
-            items.reduce((sum, item) => sum + (item.total ?? 0), 0) / items.length,
-    }));
+    const mapDataArray = Object.values(mapData).map((items) => {
+        const averagedTotal = items.reduce((sum, item) => sum + (item.total ?? 0), 0) / items.length;
+        return {
+            ubicacionId: items[0].ubicacionId,
+            provincia: items[0].provincia,
+            distrito: items[0].distrito,
+            porcentaje: averagedTotal,
+        };
+    });
+
+    console.log(mapDataArray);
+
 
     const renderChart = () => (
         <ChartContainer

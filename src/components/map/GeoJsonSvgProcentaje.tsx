@@ -1,3 +1,4 @@
+// GeoJsonSvg.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -6,13 +7,12 @@ import { ArrowLeft } from "lucide-react";
 
 const GEOJSON_URL = "/data/distritos-peru.geojson";
 
-
 interface GeoJSONFeature {
   type: string;
   properties: {
-    DEPARTAMEN: string;
-    PROVINCIA: string;
-    DISTRITO: string;
+    nombdep: string;
+    nombprov: string;
+    nombdist: string;
   };
   geometry: { type: string; coordinates: number[][][] };
 }
@@ -68,31 +68,59 @@ const GeoJsonSvg: React.FC<GeoJsonSvgProps> = ({
   useEffect(() => {
     fetch(GEOJSON_URL)
       .then((response) => response.json())
-      .then((data: GeoJSONData) => setGeoData(data))
+      .then((data: GeoJSONData) => {
+        console.log("GeoJSON Data Loaded:", data); // Debug: Log the GeoJSON data
+        setGeoData(data);
+      })
       .catch((error) => console.error("Error cargando GeoJSON:", error));
   }, []);
 
   if (!geoData) return <p className="text-center text-gray-500">Cargando mapa...</p>;
 
+  // Start with all features with valid geometry
   let filteredFeatures = geoData.features.filter(
     (feature) =>
       feature?.properties &&
       feature?.geometry?.coordinates?.length > 0 &&
-      feature.properties.DEPARTAMEN === "AYACUCHO"
+      Array.isArray(feature.geometry.coordinates[0]) &&
+      feature.geometry.coordinates[0].length > 0
   );
 
+  console.log("Initial features count:", filteredFeatures.length); // Debug: Log initial feature count
+
+  // Get unique departments, provinces, and districts for debugging
+  const uniqueDepartamentos = [...new Set(geoData.features.map(f => f.properties.nombdep?.trim().toUpperCase()))].filter(Boolean);
+  const uniqueProvincias = [...new Set(geoData.features.map(f => f.properties.nombprov?.trim().toUpperCase()))].filter(Boolean);
+  const uniqueDistritos = [...new Set(geoData.features.map(f => f.properties.nombdist?.trim().toUpperCase()))].filter(Boolean);
+  console.log("Unique Departamentos:", uniqueDepartamentos);
+  console.log("Unique Provincias:", uniqueProvincias);
+  console.log("Unique Distritos:", uniqueDistritos);
+
+  // Apply department filter (case-insensitive and trimmed)
+  filteredFeatures = filteredFeatures.filter(
+    (feature) =>
+      feature.properties.nombdep?.trim().toUpperCase() === "AYACUCHO".toUpperCase()
+  );
+  console.log("Features after AYACUCHO filter count:", filteredFeatures.length); // Debug: Log after AYACUCHO filter
+
+  // Further filter by provincia if provided
   if (provincia) {
     filteredFeatures = filteredFeatures.filter(
-      (feature) => feature.properties.PROVINCIA.toUpperCase() === provincia.toUpperCase()
+      (feature) => feature.properties.nombprov?.trim().toUpperCase() === provincia.toUpperCase()
     );
+    console.log(`Features after provincia (${provincia}) filter count:`, filteredFeatures.length); // Debug: Log after provincia filter
+
+    // Further filter by distrito if provided
     if (distrito) {
       filteredFeatures = filteredFeatures.filter(
-        (feature) => feature.properties.DISTRITO.toUpperCase() === distrito.toUpperCase()
+        (feature) => feature.properties.nombdist?.trim().toUpperCase() === distrito.toUpperCase()
       );
+      console.log(`Features after distrito (${distrito}) filter count:`, filteredFeatures.length); // Debug: Log after distrito filter
     }
   }
 
   if (filteredFeatures.length === 0) {
+    console.log("No features found after filtering. Provincia:", provincia, "Distrito:", distrito);
     return <p className="text-center text-gray-500">No se encontraron datos para la selección</p>;
   }
 
@@ -119,10 +147,12 @@ const GeoJsonSvg: React.FC<GeoJsonSvgProps> = ({
     e: React.MouseEvent<SVGPathElement>,
     feature: GeoJSONFeature
   ) => {
-    const distNombre = feature.properties.DISTRITO;
-    const provNombre = feature.properties.PROVINCIA;
+    const distNombre = feature.properties.nombdist || "Desconocido";
+    const provNombre = feature.properties.nombprov || "Desconocida";
     const distritoInfo = data.find(
-      (d) => d.distrito.toUpperCase() === distNombre.toUpperCase() && d.provincia.toUpperCase() === provNombre.toUpperCase()
+      (d) =>
+        d.distrito.toUpperCase() === distNombre.toUpperCase() &&
+        d.provincia.toUpperCase() === provNombre.toUpperCase()
     );
 
     const porcentaje = distritoInfo ? distritoInfo.porcentaje : 0;
@@ -149,9 +179,9 @@ const GeoJsonSvg: React.FC<GeoJsonSvgProps> = ({
 
   const handleMapClick = (feature: GeoJSONFeature) => {
     if (!provincia) {
-      setProvincia(feature.properties.PROVINCIA);
+      setProvincia(feature.properties.nombprov || "");
     } else if (!distrito) {
-      setDistrito(feature.properties.DISTRITO);
+      setDistrito(feature.properties.nombdist || "");
     }
   };
 
@@ -207,17 +237,17 @@ const GeoJsonSvg: React.FC<GeoJsonSvgProps> = ({
 
             const distritoActual = data.find(
               (d) =>
-                d.distrito.toUpperCase() === feature.properties.DISTRITO.toUpperCase() &&
-                d.provincia.toUpperCase() === feature.properties.PROVINCIA.toUpperCase()
+                d.distrito.toUpperCase() === feature.properties.nombdist?.toUpperCase() &&
+                d.provincia.toUpperCase() === feature.properties.nombprov?.toUpperCase()
             );
             const porcentaje = distritoActual ? distritoActual.porcentaje : 0;
             const fillColor = getColor(porcentaje);
 
             const isSelected =
               distrito
-                ? feature.properties.DISTRITO.toUpperCase() === distrito.toUpperCase() &&
-                feature.properties.PROVINCIA.toUpperCase() === provincia.toUpperCase()
-                : feature.properties.PROVINCIA.toUpperCase() === provincia.toUpperCase();
+                ? feature.properties.nombdist?.toUpperCase() === distrito.toUpperCase() &&
+                feature.properties.nombprov?.toUpperCase() === provincia.toUpperCase()
+                : feature.properties.nombprov?.toUpperCase() === provincia.toUpperCase();
 
             return (
               <path
