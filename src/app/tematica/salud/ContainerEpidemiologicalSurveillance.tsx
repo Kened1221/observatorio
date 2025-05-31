@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import GeoJsonSvg from "@/components/map/GeoJsonSvgVigilanciaEpidemiologica";
+import GeoJsonSvg from "@/components/map/GeoJsonSvgEpidemiologica";
 import { getEpidemiologicalData } from "@/actions/salud-nutricion-actions";
 import {
   ChartContainer,

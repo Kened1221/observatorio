@@ -139,7 +139,7 @@ export async function downloadPoblacionTemplate() {
       cantidad: "CANTIDAD",
     });
 
-    const anioEjemplo = new Date().getFullYear();
+    const currentYear = new Date().getFullYear();
 
     for (const ubicacion of ubicaciones) {
       for (const genero of generos) {
@@ -147,7 +147,7 @@ export async function downloadPoblacionTemplate() {
           for (const edadIntervalo of edadIntervalos) {
             const cantidad = 0;
             templateData.push({
-              anio: anioEjemplo,
+              anio: currentYear,
               ubigeo_distrital: ubicacion.distrito.ubigeoDistrital,
               ubicacionId: ubicacion.id,
               genero: genero.nombre,

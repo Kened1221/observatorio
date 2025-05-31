@@ -191,7 +191,6 @@ model Distrito {
   ubigeoDistrital String      @unique @db.VarChar(10)
   provincia       Provincia   @relation(fields: [provinciaId], references: [id], onDelete: Cascade)
   ubicaciones     Ubicacion[]
-  avances         Avance[]    @relation("AvanceToDistrito")
 
   @@unique([nombre, provinciaId])
 }
@@ -233,6 +232,7 @@ model Ubicacion {
   NinosAnemia          NinosAnemia[]
   NinosDengue          NinosDengue[]
   PoblacionCursoVida   PoblacionCursoVida[]
+  Avance               Avance[]
 
   @@unique([departamentoId, provinciaId, distritoId]) // Evita duplicados
 }
@@ -298,22 +298,37 @@ model Poblacion {
 }
 
 model Avance {
-  objetive   String
-  distritoId Int
-  distrito   Distrito @relation("AvanceToDistrito", fields: [distritoId], references: [id], onDelete: Cascade)
-  operation  String
-  percentage Float
-  total      Float?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          Int    @id @default(autoincrement())
+  anio        Int // Año de los datos
+  objetive    String
+  ubicacionId Int
+  total       Float? // Total calculado
 
-  @@unique([objetive, distritoId, operation])
+  ubicacion Ubicacion       @relation(fields: [ubicacionId], references: [id], onDelete: Cascade)
+  detalles  AvanceDetalle[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([anio, ubicacionId, objetive])
+}
+
+model AvanceDetalle {
+  id         Int    @id @default(autoincrement())
+  avanceId   Int
+  operacion  String
+  porcentaje Float
+
+  avance Avance @relation(fields: [avanceId], references: [id], onDelete: Cascade)
+
+  @@unique([avanceId, operacion])
 }
 
 model NinosNutricion {
-  id          Int   @id @default(autoincrement())
+  id          Int @id @default(autoincrement())
   anio        Int // Año de los datos (Ej: 2024, asumido)
   ubicacionId Int
+
   numeroCasos Int // Número de casos (Ej: 0)
   evaluados   Int // Número de niños evaluados (Ej: 169)
   porcentaje  Float // Porcentaje (Ej: 0.0)

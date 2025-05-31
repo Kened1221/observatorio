@@ -20,7 +20,7 @@ import {
 import {
   getAvanceData,
   getAvanceOperations,
-} from "@/actions/objetivos-actions";
+} from "@/actions/incluir-crecer-actions";
 import GeoJsonSvg from "@/components/map/GeoJsonSvgObj";
 
 interface AvanceData {
@@ -144,11 +144,10 @@ export default function ObjetivosPage({ params }: ObjetivosPageProps) {
               <button
                 key={op}
                 onClick={() => setAvance(op)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  avance === op
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${avance === op
                     ? "bg-orange-500 text-white shadow-md"
                     : "bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:bg-gray-300 dark:hover:bg-gray-600"
-                }`}
+                  }`}
                 role="radio"
                 aria-checked={avance === op}
                 aria-label={`Seleccionar ${op}`}
@@ -244,8 +243,8 @@ export default function ObjetivosPage({ params }: ObjetivosPageProps) {
                             entry.percentage <= 50
                               ? "hsl(0, 100%, 50%)"
                               : entry.percentage <= 80
-                              ? "hsl(60, 100%, 50%)"
-                              : "hsl(120, 100%, 50%)"
+                                ? "hsl(60, 100%, 50%)"
+                                : "hsl(120, 100%, 50%)"
                           }
                         />
                       ))}

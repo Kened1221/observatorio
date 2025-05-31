@@ -206,13 +206,25 @@ CREATE TABLE "Poblacion" (
 
 -- CreateTable
 CREATE TABLE "Avance" (
+    "id" SERIAL NOT NULL,
+    "anio" INTEGER NOT NULL,
     "objetive" TEXT NOT NULL,
-    "distritoId" INTEGER NOT NULL,
-    "operation" TEXT NOT NULL,
-    "percentage" DOUBLE PRECISION NOT NULL,
+    "ubicacionId" INTEGER NOT NULL,
     "total" DOUBLE PRECISION,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    "updatedAt" TIMESTAMP(3) NOT NULL
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+
+    CONSTRAINT "Avance_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "AvanceDetalle" (
+    "id" SERIAL NOT NULL,
+    "avanceId" INTEGER NOT NULL,
+    "operacion" TEXT NOT NULL,
+    "porcentaje" DOUBLE PRECISION NOT NULL,
+
+    CONSTRAINT "AvanceDetalle_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -952,7 +964,10 @@ CREATE UNIQUE INDEX "EdadIntervalo_intervalo_key" ON "EdadIntervalo"("intervalo"
 CREATE INDEX "Poblacion_anio_idx" ON "Poblacion"("anio");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Avance_objetive_distritoId_operation_key" ON "Avance"("objetive", "distritoId", "operation");
+CREATE UNIQUE INDEX "Avance_anio_ubicacionId_objetive_key" ON "Avance"("anio", "ubicacionId", "objetive");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "AvanceDetalle_avanceId_operacion_key" ON "AvanceDetalle"("avanceId", "operacion");
 
 -- CreateIndex
 CREATE INDEX "NinosNutricion_anio_idx" ON "NinosNutricion"("anio");
@@ -1123,7 +1138,10 @@ ALTER TABLE "Poblacion" ADD CONSTRAINT "Poblacion_edadIntervaloId_fkey" FOREIGN 
 ALTER TABLE "Poblacion" ADD CONSTRAINT "Poblacion_generoId_fkey" FOREIGN KEY ("generoId") REFERENCES "Genero"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Avance" ADD CONSTRAINT "Avance_distritoId_fkey" FOREIGN KEY ("distritoId") REFERENCES "Distrito"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Avance" ADD CONSTRAINT "Avance_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "AvanceDetalle" ADD CONSTRAINT "AvanceDetalle_avanceId_fkey" FOREIGN KEY ("avanceId") REFERENCES "Avance"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "NinosNutricion" ADD CONSTRAINT "NinosNutricion_ubicacionId_fkey" FOREIGN KEY ("ubicacionId") REFERENCES "Ubicacion"("id") ON DELETE CASCADE ON UPDATE CASCADE;
